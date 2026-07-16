@@ -1,0 +1,284 @@
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 1. NHÓM NGƯỜI DÙNG & TÀI KHOẢN (IDENTITY)
+// ==========================================
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique @db.VarChar(100)
+  passwordHash  String?        @map("password_hash") @db.VarChar(255) // Nullable vì Google/FB không có pass
+  role          Role           @default(USER)
+  isVerified    Boolean        @default(false) @map("is_verified")
+  verifiedAt    DateTime?      @map("verified_at")
+  
+  // Auth bên thứ 3 (Google, Facebook)
+  provider      AuthProvider   @default(LOCAL)
+  providerId    String?        @map("provider_id") @db.VarChar(255) 
+
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  // Quan hệ 1-1 (Tách bảng để tối ưu hiệu suất)
+  profile       UserProfile?
+  setting       UserSetting?
+  skill         UserSkill?
+  subscription  UserSubscription?
+  
+  // Quan hệ 1-Nhiều
+  flashcards    Flashcard[]
+  chatSessions  ChatSession[]
+  transactions  Transaction[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  userId        Int            @id @map("user_id") 
+  username      String         @db.VarChar(50)
+  avatarUrl     String?        @map("avatar_url") @db.Text
+  bio           String?        @db.Text 
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model UserSetting {
+  userId        Int            @id @map("user_id")
+  theme         ThemeMode      @default(LIGHT)
+  receiveEmails Boolean        @default(true) @map("receive_emails")
+  
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model UserSkill {
+  userId          Int            @id @map("user_id")
+  currentLevel    EnglishLevel   @default(A1) @map("current_level") 
+  vocabularyScore Int            @default(0) @map("vocabulary_score")
+  grammarScore    Int            @default(0) @map("grammar_score")
+  speakingScore   Int            @default(0) @map("speaking_score")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_skills")
+}
+
+model UserSubscription {
+  userId         Int          @id @map("user_id")
+  planType       PlanType     @default(FREE) @map("plan_type")
+  startDate      DateTime     @default(now()) @map("start_date")
+  endDate        DateTime?    @map("end_date") // Ngày hết hạn VIP
+  isValid        Boolean      @default(true) @map("is_valid")
+
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_subscriptions")
+}
+
+// ==========================================
+// 2. NHÓM HỌC TẬP & TỪ VỰNG (CONTENT & SM-2)
+// ==========================================
+
+model VocabularyTopic {
+  id           Int              @id @default(autoincrement())
+  name         String           @unique @db.VarChar(100)
+  description  String?          @db.Text
+  category     CategoryType     @default(GENERAL)
+  level        EnglishLevel     @default(B1)
+  isPremium    Boolean          @default(false) @map("is_premium")
+  wordCount    Int              @default(0) @map("word_count")
+  thumbnailUrl String?          @map("thumbnail_url") @db.Text
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  vocabularies SystemVocabulary[]
+
+  @@map("vocabulary_topics")
+}
+
+model SystemVocabulary {
+  id                 Int               @id @default(autoincrement())
+  topicId            Int?              @map("topic_id")
+  word               String            @db.VarChar(100)
+  type               String            @db.VarChar(20)
+  phonetic           String            @db.VarChar(100)
+  definitionText     String            @map("definition_text") @db.Text
+  vietnameseMeaning  String            @map("vietnamese_meaning") @db.Text
+  exampleJson        Json              @map("example_json") // JSON chứa các câu ví dụ
+  category           CategoryType      @default(GENERAL)
+  level              EnglishLevel      @default(B1)
+
+  topic              VocabularyTopic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  flashcards         Flashcard[]
+
+  @@map("system_vocabulary")
+}
+
+model Flashcard {
+  id                 Int               @id @default(autoincrement())
+  userId             Int               @map("user_id")
+  systemVocabularyId Int?              @map("system_vocabulary_id") // Bắt nguồn từ hệ thống hoặc tự tạo
+  
+  // Custom Content do AI/User tự tạo
+  customWord         String?           @map("custom_word") @db.VarChar(100)
+  customDefinition   String?           @map("custom_definition") @db.Text
+  customPhonetic     String?           @map("custom_phonetic") @db.VarChar(100)
+  customExamples     Json?             @map("custom_examples") 
+
+  createdAt          DateTime          @default(now()) @map("created_at")
+
+  // Quan hệ
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  systemVocabulary   SystemVocabulary? @relation(fields: [systemVocabularyId], references: [id], onDelete: SetNull)
+  progress           StudyProgress?    // Trạng thái học tập SM-2
+  reviewLogs         ReviewLog[]       // Lịch sử ôn tập
+
+  @@map("flashcards")
+}
+
+model StudyProgress {
+  flashcardId        Int               @id @map("flashcard_id")
+  boxLevel           Int               @default(1) @map("box_level")
+  easinessFactor     Float             @default(2.5) @map("easiness_factor")
+  repetitions        Int               @default(0)
+  interval           Int               @default(0)
+  nextReviewDate     DateTime          @default(now()) @map("next_review_date")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+
+  flashcard          Flashcard         @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@map("study_progresses")
+}
+
+model ReviewLog {
+  id              Int          @id @default(autoincrement())
+  flashcardId     Int          @map("flashcard_id")
+  gameType        GameType     @map("game_type")
+  qualityRating   Int          @map("quality_rating") // Từ 0 -> 5 cho thuật toán SM-2
+  isCorrect       Boolean      @map("is_correct")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  flashcard       Flashcard    @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@map("review_logs")
+}
+
+// ==========================================
+// 3. NHÓM AI COACHING & LUYỆN NÓI
+// ==========================================
+
+model ChatSession {
+  id             Int          @id @default(autoincrement())
+  userId         Int          @map("user_id")
+  topic          String       @db.VarChar(255) 
+  category       CategoryType @default(GENERAL)
+  targetLevel    EnglishLevel @map("target_level")
+  aiFeedback     Json?        @map("ai_feedback") // Phân tích cuối buổi
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages       ChatMessage[]
+
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id             Int          @id @default(autoincrement())
+  sessionId      Int          @map("session_id")
+  senderRole     SenderRole   @map("sender_role") 
+  content        String       @db.Text
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  session        ChatSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+// ==========================================
+// 4. NHÓM THANH TOÁN (SEPAY)
+// ==========================================
+
+model Transaction {
+  id              Int               @id @default(autoincrement())
+  userId          Int               @map("user_id")
+  
+  sepayTranId     String            @unique @map("sepay_tran_id") @db.VarChar(100)
+  amount          Decimal           @db.Decimal(10, 2)
+  code            String            @unique @db.VarChar(50) // VD: LINGOAI123
+  gateway         String            @db.VarChar(50) 
+  transactionDate DateTime          @map("transaction_date") 
+  status          TransactionStatus @default(PENDING)
+  
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+// ==========================================
+// 5. CÁC KIỂU DỮ LIỆU ENUM
+// ==========================================
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+}
+
+enum ThemeMode {
+  LIGHT
+  DARK
+}
+
+enum EnglishLevel {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+
+enum CategoryType {
+  GENERAL
+  TOEIC
+  IELTS
+}
+
+enum GameType {
+  MATCHING      
+  FILL_BLANK    
+  SPEAKING_GAME 
+}
+
+enum SenderRole {
+  USER
+  MODEL // Dành cho AI Gemini
+}
+
+enum PlanType {
+  FREE
+  PREMIUM
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
