@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js';
+import * as statService from './stat.service.js';
 import * as aiService from './ai.service.js';
 
 export const getTopics = async (userId) => {
@@ -384,6 +385,15 @@ export const reviewFlashcard = async (userId, flashcardId, quality) => {
       isCorrect: quality >= 3
     }
   });
+
+  // Cập nhật điểm kinh nghiệm và streak (+5 EXP cho mỗi từ vựng được học)
+  // Chỉ cộng EXP nếu trả lời đúng hoặc không quá tệ
+  if (quality >= 3) {
+    await statService.updateActivityAndExp(userId, 5);
+  } else {
+    // Dù trả lời sai vẫn tính streak nhưng chỉ +1 EXP động viên
+    await statService.updateActivityAndExp(userId, 1);
+  }
 
   return updatedProgress;
 };

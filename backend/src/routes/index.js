@@ -4,6 +4,7 @@ import userRoutes from './user.routes.js';
 import vocabularyRoutes from './vocabulary.routes.js';
 import flashcardRoutes from './flashcard.routes.js';
 import chatRoutes from './chat.routes.js';
+import statRoutes from './stat.routes.js';
 
 const router = express.Router();
 
@@ -12,5 +13,6 @@ router.use('/users', userRoutes);
 router.use('/vocabulary', vocabularyRoutes);
 router.use('/flashcards', flashcardRoutes);
 router.use('/chat', chatRoutes);
+router.use('/stats', statRoutes);
 
 export default router;

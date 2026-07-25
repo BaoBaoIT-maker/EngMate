@@ -1,4 +1,5 @@
 import * as chatService from '../services/chat.service.js';
+import * as statService from '../services/stat.service.js';
 import { sendSuccess } from '../utils/response.js';
 
 export const createSession = async (req, res, next) => {
@@ -37,6 +38,9 @@ export const streamMessage = async (req, res, next) => {
 
     // Lưu tin nhắn của user
     await chatService.saveUserMessage(sessionId, content);
+
+    // +5 XP cho mỗi lần luyện nói (mỗi tin nhắn gửi)
+    await statService.updateActivityAndExp(req.user.id, 5);
 
     // Setup headers cho SSE
     res.setHeader('Content-Type', 'text/event-stream');

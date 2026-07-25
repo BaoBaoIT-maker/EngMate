@@ -70,6 +70,12 @@ model UserSkill {
   vocabularyScore Int            @default(0) @map("vocabulary_score")
   grammarScore    Int            @default(0) @map("grammar_score")
   speakingScore   Int            @default(0) @map("speaking_score")
+  
+  streakDays      Int            @default(0) @map("streak_days")
+  maxStreak       Int            @default(0) @map("max_streak")
+  totalExp        Int            @default(0) @map("total_exp")
+  lastActiveDate  DateTime?      @map("last_active_date")
+
   updatedAt       DateTime       @updatedAt @map("updated_at")
 
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
