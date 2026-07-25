@@ -74,7 +74,9 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
           </div>
           <div style={{ overflow: 'hidden' }}>
             <div style={{ fontSize: '0.8rem', fontWeight: 700, color: t.text, whiteSpace: 'nowrap' }}>{user?.profile?.username || 'User'}</div>
-            <div style={{ fontSize: '0.68rem', color: t.textMuted }}>IELTS · Level 7</div>
+            <div style={{ fontSize: '0.68rem', color: t.textMuted }}>
+              {user?.learningPaths?.[0] ? `${user.learningPaths[0].category} · Lên ${user.learningPaths[0].targetScore}` : 'Chưa chọn lộ trình'}
+            </div>
           </div>
         </div>
       )}

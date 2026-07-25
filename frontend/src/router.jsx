@@ -10,6 +10,8 @@ import DashboardOverview from './pages/dashboard/DashboardOverview';
 import FlashcardsPage from './pages/dashboard/FlashcardsPage';
 import FlashcardsSessionPage from './pages/dashboard/FlashcardsSessionPage';
 import GamesPage from './pages/dashboard/GamesPage';
+import MatchingGame from './pages/dashboard/MatchingGame';
+import FillBlankGame from './pages/dashboard/FillBlankGame';
 import SpeakingCoachPage from './pages/dashboard/SpeakingCoachPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -72,6 +74,14 @@ const router = createBrowserRouter([
       {
         path: 'games',
         element: <GamesPage />,
+      },
+      {
+        path: 'games/matching',
+        element: <MatchingGame />,
+      },
+      {
+        path: 'games/fill-blank',
+        element: <FillBlankGame />,
       },
       {
         path: 'speaking',
