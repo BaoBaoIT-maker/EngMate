@@ -1,11 +1,14 @@
 import React from 'react';
 import AppRouter from './router';
+import AuthInitializer from './components/AuthInitializer';
 
 function App() {
   return (
-    <div className="min-h-screen">
-      <AppRouter />
-    </div>
+    <AuthInitializer>
+      <div className="min-h-screen">
+        <AppRouter />
+      </div>
+    </AuthInitializer>
   );
 }
 

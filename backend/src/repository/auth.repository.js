@@ -16,6 +16,10 @@ export const findUserById = (id) => prisma.user.findUnique({
     setting: true,
     skill: true,
     subscription: true,
+    learningPaths: {
+      where: { isActive: true },
+      orderBy: { createdAt: 'asc' },
+    },
   },
 });
 
@@ -81,3 +85,24 @@ export const updatePassword = (id, passwordHash) => prisma.user.update({
   where: { id },
   data: { passwordHash },
 });
+
+// ---- Learning Paths ----
+
+export const findLearningPathsByUserId = (userId) =>
+  prisma.userLearningPath.findMany({
+    where: { userId, isActive: true },
+    orderBy: { createdAt: 'asc' },
+  });
+
+export const upsertLearningPath = (userId, category, data) =>
+  prisma.userLearningPath.upsert({
+    where: { userId_category: { userId, category } },
+    update: { ...data, updatedAt: new Date() },
+    create: { userId, category, ...data },
+  });
+
+export const deleteLearningPath = (userId, category) =>
+  prisma.userLearningPath.updateMany({
+    where: { userId, category },
+    data: { isActive: false },
+  });

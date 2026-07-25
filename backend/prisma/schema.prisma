@@ -26,15 +26,16 @@ model User {
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
   // Quan hệ 1-1 (Tách bảng để tối ưu hiệu suất)
-  profile       UserProfile?
-  setting       UserSetting?
-  skill         UserSkill?
-  subscription  UserSubscription?
+  profile         UserProfile?
+  setting         UserSetting?
+  skill           UserSkill?
+  subscription    UserSubscription?
   
   // Quan hệ 1-Nhiều
-  flashcards    Flashcard[]
-  chatSessions  ChatSession[]
-  transactions  Transaction[]
+  flashcards      Flashcard[]
+  chatSessions    ChatSession[]
+  transactions    Transaction[]
+  learningPaths   UserLearningPath[]
 
   @@map("users")
 }
@@ -52,11 +53,13 @@ model UserProfile {
 }
 
 model UserSetting {
-  userId        Int            @id @map("user_id")
-  theme         ThemeMode      @default(LIGHT)
-  receiveEmails Boolean        @default(true) @map("receive_emails")
-  
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          Int            @id @map("user_id")
+  theme           ThemeMode      @default(LIGHT)
+  receiveEmails   Boolean        @default(true)  @map("receive_emails")
+  dailyWordGoal   Int            @default(15)    @map("daily_word_goal")  // Số từ mục tiêu mỗi ngày
+  onboardingDone  Boolean        @default(false) @map("onboarding_done") // Flag onboarding đã hoàn thành chưa
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
 }
@@ -84,6 +87,24 @@ model UserSubscription {
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_subscriptions")
+}
+
+// Lộ trình học cho từng khóa (TOEIC / IELTS / GENERAL)
+// 1 user có thể học nhiều khóa cùng lúc, mỗi khóa có trình độ và mục tiêu riêng
+model UserLearningPath {
+  id            Int          @id @default(autoincrement())
+  userId        Int          @map("user_id")
+  category      CategoryType                          // TOEIC | IELTS | GENERAL
+  currentLevel  EnglishLevel @default(A1) @map("current_level")
+  targetScore   Int?         @map("target_score")    // VD: 800 (TOEIC), 7 (IELTS), null nếu General
+  isActive      Boolean      @default(true) @map("is_active")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])  // 1 user chỉ có 1 record per category
+  @@map("user_learning_paths")
 }
 
 // ==========================================
@@ -131,6 +152,7 @@ model Flashcard {
   
   // Custom Content do AI/User tự tạo
   customWord         String?           @map("custom_word") @db.VarChar(100)
+  customMeaning      String?           @map("custom_meaning") @db.VarChar(255)
   customDefinition   String?           @map("custom_definition") @db.Text
   customPhonetic     String?           @map("custom_phonetic") @db.VarChar(100)
   customExamples     Json?             @map("custom_examples") 

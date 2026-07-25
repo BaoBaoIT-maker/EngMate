@@ -17,7 +17,11 @@ EngMate là nền tảng học tiếng Anh thích ứng (Adaptive Learning). D�
 ### Frontend
 
 - React.js với Vite
-- Hiện tại chưa triển khai chi tiết, sẽ làm sau
+- Tailwind CSS & Vanilla CSS (giao diện Premium/Glassmorphism)
+- Đã triển khai Auth Flow (đăng nhập, đăng ký, quên mật khẩu, OTP) với layout thiết kế chuẩn
+- Đã triển khai Dashboard Layout (Sidebar, BottomNav) và các trang chức năng (Overview, Flashcards, Games, AI Coach, Settings) theo Figma.
+- Quản lý state bằng Zustand (theme, auth).
+- Routing bằng React Router.
 
 ### Tích hợp ngoài
 
@@ -295,7 +299,9 @@ Lưu ý:
   - Đặt lại mật khẩu thành công yêu cầu người dùng đăng nhập lại.
   - Tài khoản Social Login không hỗ trợ đổi mật khẩu hay quên mật khẩu (báo lỗi HTTP 400).
 - Profile/settings: đã có route và Redis cache
-- Frontend: để sau
+- Quản lý state bằng Zustand (theme, auth).
+  - Routing bằng React Router.
+- Frontend: Đã xong phần giao diện Auth và Dashboard (Figma export). Đang làm Onboarding flow.
 
 ## 13. Ghi chú để đọc lại sau này
 
@@ -305,3 +311,62 @@ Nếu mất đoạn chat, chỉ cần đọc file này và nhớ:
 - backend đã có auth + user + Redis cache
 - schema Prisma đã phân tách rõ theo domain
 - mọi phần mới nên bám vào cấu trúc hiện có thay vì dựng lại từ đầu
+
+## 14. Cập nhật mới nhất (2026-07-20)
+
+### Database (Migration: `add_learning_path_and_onboarding`)
+
+Đã thêm và chỉnh sửa schema Prisma:
+
+- **`UserSetting`**: thêm 2 cột mới:
+  - `dailyWordGoal` (Int, default 15) — số từ mục tiêu mỗi ngày
+  - `onboardingDone` (Boolean, default false) — flag để biết user đã qua onboarding chưa
+- **`UserLearningPath`** (bảng mới): lưu lộ trình học của từng khóa. Cấu trúc:
+  - `userId`, `category` (TOEIC/IELTS/GENERAL), `currentLevel` (EnglishLevel), `targetScore` (Int?), `isActive`
+  - Ràng buộc `@@unique([userId, category])`: 1 user chỉ có 1 record per khóa
+  - Quan hệ `User → UserLearningPath[]` (1-Nhiều)
+- **`User`**: thêm quan hệ `learningPaths UserLearningPath[]`
+- **`findUserById`**: đã include `learningPaths` (chỉ lấy `isActive: true`)
+
+### Backend API mới (user routes)
+
+Các route mới dưới `/api/users`:
+
+| Method | Path | Mô tả |
+|--------|------|--------|
+| GET | `/me/learning-paths` | Lấy danh sách lộ trình học đang active |
+| PUT | `/me/learning-paths` | Upsert 1 hoặc nhiều lộ trình (body: `{ paths: [...] }`) |
+| DELETE | `/me/learning-paths/:category` | Xoá mềm 1 lộ trình theo category |
+| POST | `/me/onboarding` | Hoàn tất onboarding: lưu paths + daily goal + set `onboardingDone=true` |
+| PATCH | `/me/settings` | Đã mở rộng hỗ trợ `dailyWordGoal` và `onboardingDone` |
+
+### Frontend
+
+- **`services/api.js`**: đã kích hoạt request interceptor tự động gắn Bearer token từ Zustand persist (localStorage key `engmate-auth`)
+- **`OnboardingPage.jsx`**: trang wizard 4 bước dành cho người dùng mới:
+  1. Chọn khóa học (TOEIC / IELTS / GENERAL, chọn nhiều cùng lúc)
+  2. Chọn trình độ hiện tại (A1–C2) cho từng khóa
+  3. Chọn điểm/band mục tiêu cho từng khóa (TOEIC: 450–990, IELTS: 4.5–8.0)
+  4. Chọn mục tiêu từ hàng ngày (10/15/20/30/50)
+  - Gọi `POST /api/users/me/onboarding` khi hoàn tất
+  - Có nút "Bỏ qua" để skip sang dashboard
+- **`ProtectedRoute.jsx`**: đã thêm logic auto-redirect `/onboarding` nếu `user.setting.onboardingDone === false`
+  - Prop `requireOnboarding={false}` để tránh vòng lặp redirect trên chính route `/onboarding`
+- **`router.jsx`**: thêm route `/onboarding` (protected, no onboarding check)
+- **`SettingsPage.jsx`**: đã thêm nút **Đăng xuất** ở cuối trang
+
+### Cơ chế gói cước (đã chốt)
+
+- **Free**: 15 từ/ngày, 3 lượt AI Coach/ngày, chỉ game cơ bản
+- **Premium**: không giới hạn từ, AI Coach không giới hạn, full games, mock test, báo cáo AI
+- Nút "Nâng cấp" trong Navbar Landing đã xóa. Hiển thị Upgrade chỉ khi user Free chạm vào tính năng Premium (Paywall modal — chưa implement)
+
+### Tiếp theo cần làm
+
+1. **Backend**: Flashcard API + SM-2 algorithm (học từ vựng thực sự)
+2. **Backend**: ReviewLog + Mini-game scoring
+3. **Backend**: AI Speaking Chat (Gemini SSE streaming)
+4. **Frontend**: Kết nối Flashcards/Games/AI Coach với API thật (hiện đang dùng mock data)
+5. **Frontend**: Paywall modal khi Free user chạm Premium feature
+6. **Frontend**: Trang Profile (đổi avatar, username, xem thống kê thật)
+

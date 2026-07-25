@@ -5,15 +5,11 @@ const useAuthStore = create(
   persist(
     (set) => ({
       user: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
 
       setAuth: (payload) =>
         set({
-          user: payload.user,
-          accessToken: payload.accessToken,
-          refreshToken: payload.refreshToken,
+          user: payload.user || payload,
           isAuthenticated: true,
         }),
 
@@ -22,8 +18,6 @@ const useAuthStore = create(
       logout: () =>
         set({
           user: null,
-          accessToken: null,
-          refreshToken: null,
           isAuthenticated: false,
         }),
     }),
@@ -31,8 +25,6 @@ const useAuthStore = create(
       name: 'engmate-auth', // key trong localStorage
       partialize: (state) => ({
         user: state.user,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
     }

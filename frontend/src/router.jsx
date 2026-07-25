@@ -1,12 +1,24 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyOtpPage from './pages/VerifyOtpPage';
+import DashboardLayout from './layouts/DashboardLayout';
+import DashboardOverview from './pages/dashboard/DashboardOverview';
+import FlashcardsPage from './pages/dashboard/FlashcardsPage';
+import FlashcardsSessionPage from './pages/dashboard/FlashcardsSessionPage';
+import GamesPage from './pages/dashboard/GamesPage';
+import SpeakingCoachPage from './pages/dashboard/SpeakingCoachPage';
+import SettingsPage from './pages/dashboard/SettingsPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import OnboardingPage from './pages/OnboardingPage';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
+    element: <LandingPage />,
   },
   {
     path: '/login',
@@ -15,6 +27,61 @@ const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
+  },
+  {
+    path: '/verify-otp',
+    element: <VerifyOtpPage />,
+  },
+  {
+    path: '/onboarding',
+    element: (
+      // requireOnboarding=false để tránh vòng lặp redirect
+      <ProtectedRoute requireOnboarding={false}>
+        <OnboardingPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/dashboard',
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <DashboardOverview />,
+      },
+      {
+        path: 'flashcards',
+        element: <FlashcardsPage />,
+      },
+      {
+        path: 'flashcards/session',
+        element: <FlashcardsSessionPage />,
+      },
+      {
+        path: 'games',
+        element: <GamesPage />,
+      },
+      {
+        path: 'speaking',
+        element: <SpeakingCoachPage />,
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />,
+      }
+    ]
   }
 ]);
 

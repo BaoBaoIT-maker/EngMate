@@ -13,6 +13,7 @@ import {
   createUserSkill,
   upsertUserSkill,
   updatePassword,
+  upsertLearningPath,
 } from '../repository/auth.repository.js';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
@@ -36,6 +37,7 @@ const sanitizeUser = (user) => {
     setting: user.setting || null,
     skill: user.skill || null,
     subscription: user.subscription || null,
+    learningPaths: user.learningPaths || [],
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -101,6 +103,8 @@ const createDefaultRelations = async (userId, defaults = {}) => {
   await upsertUserSetting(userId, {
     theme: 'LIGHT',
     receiveEmails: true,
+    dailyWordGoal: 15,
+    onboardingDone: false,
   });
 
   await upsertUserSkill(userId, {
@@ -123,6 +127,8 @@ const createVerifiedAccountRelations = async (userId, username, avatarUrl = null
     userId,
     theme: 'LIGHT',
     receiveEmails: true,
+    dailyWordGoal: 15,
+    onboardingDone: false,
   });
 
   await createUserSkill({
@@ -209,40 +215,34 @@ const syncSocialUser = async ({ provider, providerId, email, username, avatarUrl
   return buildAuthPayload(await findUserById(user.id));
 };
 
-const verifyGoogleToken = async (idToken) => {
-  const response = await axios.get('https://oauth2.googleapis.com/tokeninfo', {
-    params: {
-      id_token: idToken,
-    },
-  });
-
-  const tokenInfo = response.data;
-  const googleClientId = process.env.GOOGLE_CLIENT_ID;
-
-  if (!googleClientId || tokenInfo.aud !== googleClientId) {
-    const error = new Error('Invalid Google token audience');
-    error.statusCode = 401;
-    throw error;
+const verifyGoogleToken = async (token) => {
+  try {
+    let url = `https://www.googleapis.com/oauth2/v3/userinfo`;
+    let headers = { Authorization: `Bearer ${token}` };
+    if (token.split('.').length === 3) {
+      url = `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`;
+      headers = {};
+    }
+    const res = await axios.get(url, { headers });
+    const payload = res.data;
+    
+    if (!payload.email) {
+      const error = new Error('Google account does not expose an email');
+      error.statusCode = 400;
+      throw error;
+    }
+    
+    return {
+      providerId: payload.sub,
+      email: payload.email,
+      username: payload.name || payload.email.split('@')[0],
+      avatarUrl: payload.picture,
+    };
+  } catch (error) {
+    const err = new Error('Invalid Google token');
+    err.statusCode = 401;
+    throw err;
   }
-
-  if (tokenInfo.email_verified !== 'true') {
-    const error = new Error('Google email is not verified');
-    error.statusCode = 401;
-    throw error;
-  }
-
-  if (!tokenInfo.email) {
-    const error = new Error('Google account does not expose an email');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  return {
-    providerId: tokenInfo.sub,
-    email: tokenInfo.email,
-    username: tokenInfo.name,
-    avatarUrl: tokenInfo.picture,
-  };
 };
 
 const verifyFacebookToken = async (accessToken) => {
@@ -331,6 +331,11 @@ export const verifyEmailOtp = async ({ email, otp }) => {
   const pendingOtp = await cacheGetJson(otpKey(normalizedEmail));
 
   if (!pendingOtp) {
+    const user = await findUserByEmail(normalizedEmail);
+    if (user && user.isVerified) {
+      const userWithRelations = await findUserById(user.id);
+      return buildAuthPayload(userWithRelations);
+    }
     const error = new Error('OTP is expired or missing');
     error.statusCode = 400;
     throw error;

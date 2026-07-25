@@ -18,6 +18,12 @@ export const login = (data) =>
 export const register = (data) =>
   api.post('/auth/register', data);
 
+export const googleLogin = (data) =>
+  api.post('/auth/google', data);
+
+export const facebookLogin = (data) =>
+  api.post('/auth/facebook', data);
+
 export const verifyOtp = (data) =>
   api.post('/auth/verify-otp', data);
 
