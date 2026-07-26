@@ -88,6 +88,7 @@ export const saveLearningPaths = async (req, res) => {
     const result = await userService.saveLearningPaths(req.user.id, paths);
     return sendSuccess(res, result, 'Learning paths saved');
   } catch (error) {
+    console.error('saveLearningPaths Error:', error);
     return sendError(res, error.message, error.statusCode || 500);
   }
 };

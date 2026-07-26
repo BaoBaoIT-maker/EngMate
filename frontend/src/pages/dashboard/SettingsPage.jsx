@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Header from '../../components/dashboard/Header';
 import useThemeStore from '../../store/useThemeStore';
 import useAuthStore from '../../store/useAuthStore';
+import api from '../../services/api';
 
 const card = (t, extra) => ({
   background: t.card,
@@ -20,7 +21,46 @@ export default function SettingsPage() {
 
   const [notif, setNotif] = useState(true);
   const [sound, setSound] = useState(true);
-  const [goal, setGoal] = useState(20);
+  const [goal, setGoal] = useState(user?.setting?.dailyWordGoal || 20);
+  
+  const getLevelOptions = (cat) => {
+    if (cat === 'IELTS') return Array.from({ length: 19 }, (_, i) => (i * 0.5).toFixed(1));
+    if (cat === 'TOEIC') {
+      const arr = Array.from({ length: 20 }, (_, i) => (i * 50).toString());
+      arr.push('990');
+      return arr;
+    }
+    return ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+  };
+
+  const initialPath = user?.learningPaths?.[0] || { category: 'GENERAL', currentLevel: 'A1', targetScore: 'B1' };
+  const [pathForm, setPathForm] = useState(initialPath);
+  const [isSavingPath, setIsSavingPath] = useState(false);
+
+  const savedPathForCategory = user?.learningPaths?.find(p => p.category === pathForm.category);
+  const referencePath = savedPathForCategory || {
+    category: pathForm.category,
+    currentLevel: pathForm.category === 'IELTS' ? '0.0' : pathForm.category === 'TOEIC' ? '0' : 'A1',
+    targetScore: pathForm.category === 'IELTS' ? '0.0' : pathForm.category === 'TOEIC' ? '0' : 'A1'
+  };
+
+  const hasChanges = 
+    pathForm.category !== referencePath.category || 
+    pathForm.currentLevel !== referencePath.currentLevel || 
+    pathForm.targetScore !== referencePath.targetScore;
+
+  const handleSavePath = async () => {
+    if (!hasChanges) return;
+    setIsSavingPath(true);
+    try {
+      await api.put('/users/me/learning-paths', { paths: [pathForm] });
+      const res = await api.get('/users/me');
+      useAuthStore.getState().setUser(res.data);
+    } catch (err) {
+      console.error('Save path error', err);
+    }
+    setIsSavingPath(false);
+  };
 
   const Toggle = ({ on, setOn }) => (
     <div onClick={() => setOn(!on)} style={{ width: 44, height: 24, borderRadius: 100, background: on ? t.gold : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)'), cursor: 'pointer', position: 'relative', transition: 'background 0.25s', flexShrink: 0 }}>
@@ -52,13 +92,100 @@ export default function SettingsPage() {
           <div>
             <div style={{ fontWeight: 800, color: t.text, fontSize: '1.05rem' }}>{user?.profile?.username || 'User'}</div>
             <div style={{ fontSize: '0.78rem', color: t.textMuted }}>{user?.email || 'user@example.com'}</div>
-            <div style={{ marginTop: 6, display: 'flex', gap: '0.375rem' }}>
+            <div style={{ marginTop: 6, display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: t.goldBg, color: t.gold }}>Premium ✦</span>
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>Level 7</span>
+              {user?.learningPaths?.map((path, idx) => (
+                <span key={idx} style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>
+                  {path.category} · Lên {path.targetScore || path.currentLevel}
+                </span>
+              ))}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Learning Path */}
+      <div style={{ ...card(t), padding: '1rem 1.25rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.875rem' }}>
+          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Lộ trình học</div>
+          {isSavingPath && <span style={{ fontSize: '0.75rem', color: t.gold }}>Đang lưu...</span>}
+        </div>
+        
+        <Row label="Khoá học" desc="Mục tiêu chính của bạn" right={
+          <select 
+            value={pathForm.category}
+            onChange={e => {
+              const newCat = e.target.value;
+              const existingPath = user?.learningPaths?.find(p => p.category === newCat);
+              if (existingPath) {
+                setPathForm({ ...existingPath });
+              } else {
+                const defaultLevel = newCat === 'IELTS' ? '0.0' : newCat === 'TOEIC' ? '0' : 'A1';
+                setPathForm({ ...pathForm, category: newCat, currentLevel: defaultLevel, targetScore: defaultLevel });
+              }
+            }}
+            style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: `1px solid ${t.cardBorder}`, background: t.bg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
+          >
+            <option value="GENERAL">Tiếng Anh Giao Tiếp</option>
+            <option value="TOEIC">Luyện thi TOEIC</option>
+            <option value="IELTS">Luyện thi IELTS</option>
+          </select>
+        } />
+        
+        <Row label="Trình độ hiện tại" desc="Level tiếng Anh hiện tại" right={
+          <select 
+            value={pathForm.currentLevel}
+            onChange={e => setPathForm({ ...pathForm, currentLevel: e.target.value })}
+            style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: `1px solid ${t.cardBorder}`, background: t.bg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
+          >
+            {getLevelOptions(pathForm.category).map(l => (
+              <option key={l} value={l}>{l}</option>
+            ))}
+          </select>
+        } />
+        
+        <Row label="Mục tiêu" desc="Số điểm/Trình độ mong muốn" right={
+          <select 
+            value={pathForm.targetScore || ''}
+            onChange={e => setPathForm({ ...pathForm, targetScore: e.target.value })}
+            style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: `1px solid ${t.cardBorder}`, background: t.bg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
+          >
+            {getLevelOptions(pathForm.category).map(l => (
+              <option key={l} value={l}>{l}</option>
+            ))}
+          </select>
+        } />
+
+        {/* Save button logic */}
+        {hasChanges && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', paddingTop: '1rem', borderTop: `1px solid ${t.cardBorder}`, animation: 'fadeIn 0.3s ease' }}>
+            <button 
+              onClick={handleSavePath}
+              disabled={isSavingPath}
+              style={{ 
+                padding: '0.625rem 1.5rem', 
+                borderRadius: 10, 
+                border: 'none', 
+                background: isSavingPath ? t.textMuted : t.goldBg, 
+                color: isSavingPath ? '#fff' : t.gold, 
+                fontWeight: 700, 
+                fontSize: '0.85rem', 
+                cursor: isSavingPath ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              {isSavingPath ? 'Đang lưu...' : 'Lưu thay đổi'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
       {/* Preferences */}
       <div style={{ ...card(t), padding: '1rem 1.25rem', marginBottom: '1rem' }}>
@@ -77,18 +204,7 @@ export default function SettingsPage() {
         } />
       </div>
 
-      {/* Stats */}
-      <div style={{ ...card(t), padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.875rem' }}>Thống kê tổng</div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[['1.284', 'Từ đã thuộc'], ['23', 'Ngày streak'], ['92%', 'Độ chính xác']].map(([v, l]) => (
-            <div key={l} style={{ textAlign: 'center', padding: '0.75rem', borderRadius: 12, background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: t.gold }}>{v}</div>
-              <div style={{ fontSize: '0.68rem', color: t.textMuted, fontWeight: 500 }}>{l}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+
 
       {/* Logout */}
       <button 

@@ -24,7 +24,9 @@ const sanitizeUser = (user) => {
     profile: user.profile || null,
     setting: user.setting || null,
     skill: user.skill || null,
-    subscription: user.subscription || null,
+    subscription: user.subscription
+      ? { ...user.subscription, plan: user.subscription.plan || null }
+      : null,
     learningPaths: user.learningPaths || [],
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -116,19 +118,14 @@ export const saveLearningPaths = async (userId, paths) => {
       throw error;
     }
 
-    if (currentLevel && !VALID_LEVELS.includes(currentLevel)) {
-      const error = new Error(`Invalid level: ${currentLevel}. Must be one of ${VALID_LEVELS.join(', ')}`);
-      error.statusCode = 400;
-      throw error;
-    }
-
+    // currentLevel now accepts any string (e.g. 500, 6.5, B2)
     const data = {
-      currentLevel: currentLevel || 'A1',
+      currentLevel: currentLevel ? String(currentLevel) : 'A1',
       isActive: true,
     };
 
     if (targetScore !== undefined) {
-      data.targetScore = targetScore === null ? null : parseInt(targetScore, 10);
+      data.targetScore = targetScore === null ? null : String(targetScore);
     }
 
     await upsertLearningPath(userId, category, data);

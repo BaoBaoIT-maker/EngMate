@@ -33,13 +33,23 @@ export const streamMessage = async (req, res, next) => {
   try {
     const { sessionId, content } = req.body;
     
-    // Validate quyền (có thể đưa logic này vào middleware hoặc service)
-    await chatService.getSessionMessages(req.user.id, sessionId); // Hàm này tự văng lỗi nếu user ko có quyền
+    // Validate quyền và limit
+    await chatService.getSessionMessages(req.user.id, sessionId);
+
+    const limitCheck = await chatService.checkAndUpdateAiLimit(req.user.id);
+    if (!limitCheck.allowed) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'LIMIT_EXCEEDED', 
+        current: limitCheck.current, 
+        limit: limitCheck.limit 
+      });
+    }
 
     // Lưu tin nhắn của user
     await chatService.saveUserMessage(sessionId, content);
 
-    // +5 XP cho mỗi lần luyện nói (mỗi tin nhắn gửi)
+    // +5 XP cho mỗi lần luyện nói
     await statService.updateActivityAndExp(req.user.id, 5);
 
     // Setup headers cho SSE

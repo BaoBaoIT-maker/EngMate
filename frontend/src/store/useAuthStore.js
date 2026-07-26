@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import api from '../services/api';
 
 const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isAuthenticated: false,
 
@@ -20,6 +21,21 @@ const useAuthStore = create(
           user: null,
           isAuthenticated: false,
         }),
+
+      // Fetch thông tin user mới nhất từ server và cập nhật store
+      fetchMe: async () => {
+        try {
+          // api interceptor trả về response.data luôn
+          // nên 'res' ở đây = { success, message, data: user }
+          const res = await api.get('/users/me');
+          const freshUser = res?.data || res;
+          set({ user: freshUser, isAuthenticated: true });
+          return freshUser;
+        } catch (err) {
+          console.error('fetchMe failed', err);
+          return get().user;
+        }
+      },
     }),
     {
       name: 'engmate-auth', // key trong localStorage

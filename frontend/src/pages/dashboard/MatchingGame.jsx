@@ -81,16 +81,7 @@ export default function MatchingGame() {
 
   const handleMatch = (enId, viId) => {
     if (enId === viId) {
-      // Match correct — dùng functional update để tránh stale closure
-      setMatchedIds(prev => {
-        const next = new Set(prev).add(enId);
-        // Check win: dùng enCards.length vì đây là đúng lúc cập nhật
-        if (next.size === enCards.length) {
-          // Delay nhỏ để animation biến mất hiển thị trước
-          setTimeout(() => handleFinishGame(next), 300);
-        }
-        return next;
-      });
+      setMatchedIds(prev => new Set(prev).add(enId));
       setSelectedEn(null);
       setSelectedVi(null);
     } else {
@@ -105,6 +96,11 @@ export default function MatchingGame() {
       }, 500);
     }
   };
+  useEffect(() => {
+    if (enCards.length > 0 && matchedIds.size === enCards.length && !isFinished) {
+      setTimeout(() => handleFinishGame(matchedIds), 300);
+    }
+  }, [matchedIds.size, enCards.length, isFinished]);
 
   const handleFinishGame = async (finalMatchedIds) => {
     setIsFinished(true);

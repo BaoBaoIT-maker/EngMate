@@ -15,7 +15,7 @@ export const findUserById = (id) => prisma.user.findUnique({
     profile: true,
     setting: true,
     skill: true,
-    subscription: true,
+    subscription: { include: { plan: true } },
     learningPaths: {
       where: { isActive: true },
       orderBy: { createdAt: 'asc' },
@@ -91,7 +91,7 @@ export const updatePassword = (id, passwordHash) => prisma.user.update({
 export const findLearningPathsByUserId = (userId) =>
   prisma.userLearningPath.findMany({
     where: { userId, isActive: true },
-    orderBy: { createdAt: 'asc' },
+    orderBy: { updatedAt: 'desc' },
   });
 
 export const upsertLearningPath = (userId, category, data) =>

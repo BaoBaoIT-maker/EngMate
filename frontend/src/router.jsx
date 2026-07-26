@@ -16,6 +16,7 @@ import SpeakingCoachPage from './pages/dashboard/SpeakingCoachPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import OnboardingPage from './pages/OnboardingPage';
+import PremiumPaywall from './pages/dashboard/PremiumPaywall';
 
 const router = createBrowserRouter([
   {
@@ -90,7 +91,11 @@ const router = createBrowserRouter([
       {
         path: 'settings',
         element: <SettingsPage />,
-      }
+      },
+      {
+        path: 'premium',
+        element: <PremiumPaywall />,
+      },
     ]
   }
 ]);

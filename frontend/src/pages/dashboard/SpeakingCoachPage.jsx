@@ -150,25 +150,32 @@ export default function SpeakingCoachPage() {
     setMicState('thinking');
 
     try {
-      // 1. Fetch tới SSE endpoint
       const response = await fetch(`${api.defaults.baseURL}/chat/message`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Ensure auth passes if api.defaults fails
+        },
         body: JSON.stringify({ sessionId: currentSessionId, content: textToSend }),
-        credentials: 'omit', // api.defaults.withCredentials might handle it, but fetch needs include if cross-origin. Let's use 'include'
+        credentials: 'omit' // Assuming token is in header, omit credentials to avoid CORS issues if not configured perfectly
       });
 
-      // Override cho fetch
-      const fetchOpts = { ...response, credentials: 'include' };
+      if (response.status === 403) {
+        const errorData = await response.json();
+        if (errorData.message === 'LIMIT_EXCEEDED') {
+          setMicState('idle');
+          setMessages(m => m.filter(msg => msg.id !== tempUserMsg.id)); // Rollback user msg
+          // Navigate to premium page
+          navigate('/dashboard/premium');
+          return;
+        }
+      }
 
-      const realResponse = await fetch(`${api.defaults.baseURL}/chat/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: currentSessionId, content: textToSend }),
-        credentials: 'include' 
-      });
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
 
-      const reader = realResponse.body.getReader();
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let aiFullResponse = '';
       const tempAiId = Date.now() + 1;

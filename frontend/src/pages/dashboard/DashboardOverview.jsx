@@ -237,7 +237,7 @@ export default function DashboardOverview() {
       <Header title={`Chào buổi sáng, ${user?.profile?.username || 'User'} 👋`} subtitle="Tiếp tục chuỗi ngày học của bạn nhé!" />
 
       {/* Top row */}
-      <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-[auto_auto_1fr] gap-4 mb-4">
         {/* Streak */}
         <div className="streak-badge" style={{ ...card(t), padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', border: `1px solid rgba(234,179,8,0.3)` }}>
           <span className="anim-flame" style={{ fontSize: '2.5rem', lineHeight: 1 }}>🔥</span>
@@ -248,6 +248,15 @@ export default function DashboardOverview() {
           <div style={{ marginLeft: '0.5rem', paddingLeft: '1rem', borderLeft: `1px solid ${t.cardBorder}` }}>
             <div style={{ fontSize: '0.72rem', color: t.textMuted, marginBottom: 4 }}>Kỷ lục</div>
             <div style={{ fontSize: '1.1rem', fontWeight: 800, color: t.text }}>{streak.max} 🏆</div>
+          </div>
+        </div>
+
+        {/* XP Card */}
+        <div className="xp-badge" style={{ ...card(t), padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', border: `1px solid rgba(139,92,246,0.3)` }}>
+          <span className="anim-star" style={{ fontSize: '2.5rem', lineHeight: 1 }}>🌟</span>
+          <div>
+            <div style={{ fontSize: '2.25rem', fontWeight: 800, color: '#8B5CF6', letterSpacing: '-0.04em', lineHeight: 1 }}>{stats.totalExp || 0}</div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 600, color: t.textMuted, marginTop: 2 }}>XP đạt được</div>
           </div>
         </div>
 

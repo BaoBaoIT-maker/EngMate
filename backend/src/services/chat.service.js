@@ -4,6 +4,48 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const defaultModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
+export const checkAndUpdateAiLimit = async (userId) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { skill: true, subscription: { include: { plan: true } } }
+  });
+
+  const isPremium = user.subscription && user.subscription.isValid && (!user.subscription.endDate || user.subscription.endDate > new Date());
+  
+  // Mặc định cho người dùng chưa có plan: 3 lượt (tương đương Gói Miễn Phí)
+  let limit = 3;
+  if (isPremium && user.subscription.plan?.features?.aiLimit) {
+    limit = user.subscription.plan.features.aiLimit;
+  }
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  let skill = user.skill;
+  if (!skill) {
+    skill = await prisma.userSkill.create({ data: { userId } });
+  }
+
+  if (!skill.lastAiChatDate || skill.lastAiChatDate < today) {
+    skill = await prisma.userSkill.update({
+      where: { userId },
+      data: { aiChatCountToday: 1, lastAiChatDate: now }
+    });
+    return { allowed: true, current: 1, limit };
+  }
+
+  if (skill.aiChatCountToday >= limit) {
+    return { allowed: false, current: skill.aiChatCountToday, limit };
+  }
+
+  skill = await prisma.userSkill.update({
+    where: { userId },
+    data: { aiChatCountToday: skill.aiChatCountToday + 1, lastAiChatDate: now }
+  });
+
+  return { allowed: true, current: skill.aiChatCountToday, limit };
+};
+
 export const createSession = async (userId, data) => {
   const { topic, targetLevel = 'B1', category = 'GENERAL' } = data;
   

@@ -17,15 +17,20 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const isPremium = user?.subscription?.isValid &&
+    user?.subscription?.plan?.code !== 'FREE' &&
+    (!user.subscription.endDate || new Date(user.subscription.endDate) > new Date());
+
   return (
     <div style={{
-      width: W, minHeight: '100vh', flexShrink: 0,
+      width: W, height: '100vh', flexShrink: 0,
+      position: 'fixed', left: 0, top: 0, bottom: 0,
       background: t.sidebar,
       backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
       borderRight: `1px solid ${t.sidebarBorder}`,
       display: 'flex', flexDirection: 'column', padding: '1.25rem 0.75rem',
       transition: 'width 0.28s cubic-bezier(0.4,0,0.2,1)',
-      overflow: 'hidden', zIndex: 50,
+      overflowY: 'auto', overflowX: 'hidden', zIndex: 50,
       boxShadow: isDark ? `2px 0 24px ${t.shadow}` : `2px 0 16px ${t.shadow}`,
     }}>
       {/* Logo + collapse toggle */}
@@ -66,22 +71,39 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
         })}
       </nav>
 
-      {/* User avatar */}
-      {!collapsed && (
-        <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: 12, background: t.goldBg, border: `1px solid ${t.cardBorder}`, display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#EAB308,#B45309)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 800, color: '#fff', flexShrink: 0 }}>
-            {user?.profile?.username?.[0]?.toUpperCase() || 'U'}
-          </div>
-          <div style={{ overflow: 'hidden' }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: t.text, whiteSpace: 'nowrap' }}>{user?.profile?.username || 'User'}</div>
-            <div style={{ fontSize: '0.68rem', color: t.textMuted }}>
-              {user?.learningPaths?.[0] ? `${user.learningPaths[0].category} · Lên ${user.learningPaths[0].targetScore}` : 'Chưa chọn lộ trình'}
-            </div>
+      {/* Upgrade Banner for Free Users */}
+      {user && !isPremium && (
+        <div style={{ padding: collapsed ? '0.5rem 0' : '0.5rem 0 0' }}>
+          <div
+            onClick={() => navigate('/dashboard/premium')}
+            style={{
+              background: 'linear-gradient(135deg, #EAB308, #B45309)',
+              borderRadius: 14,
+              padding: collapsed ? '0.75rem 0' : '1rem 0.75rem',
+              color: '#fff',
+              textAlign: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 6px 20px rgba(234, 179, 8, 0.35)',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+            }}
+            onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(234,179,8,0.45)'; }}
+            onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(234,179,8,0.35)'; }}
+          >
+            {collapsed ? (
+              <span style={{ fontSize: '1.2rem' }}>✦</span>
+            ) : (
+              <>
+                <div style={{ fontSize: '1.1rem', marginBottom: '0.2rem' }}>✦</div>
+                <div style={{ fontWeight: 800, fontSize: '0.9rem', letterSpacing: '-0.01em' }}>Nâng cấp Premium</div>
+                <div style={{ fontSize: '0.72rem', opacity: 0.85, marginTop: '0.2rem' }}>Mở khóa toàn bộ tính năng</div>
+              </>
+            )}
           </div>
         </div>
       )}
+
       {collapsed && (
-        <button onClick={() => setCollapsed(false)} style={{ background: t.goldBg, border: 'none', borderRadius: 10, width: 38, height: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+        <button onClick={() => setCollapsed(false)} style={{ background: t.goldBg, border: 'none', borderRadius: 10, width: 38, height: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0.5rem auto 0' }}>
           <svg width="14" height="14" fill="none" stroke={t.gold} strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       )}
@@ -89,9 +111,13 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
   );
 }
 
-function BottomNav({ t }) {
+function BottomNav({ t, user }) {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const isPremium = user?.subscription?.isValid &&
+    user?.subscription?.plan?.code !== 'FREE' &&
+    (!user?.subscription?.endDate || new Date(user.subscription.endDate) > new Date());
 
   return (
     <div style={{
@@ -109,6 +135,14 @@ function BottomNav({ t }) {
           </div>
         );
       })}
+      {!isPremium && (
+        <div className="bottom-nav-item" onClick={() => navigate('/dashboard/premium')} style={{ color: '#EAB308' }}>
+          <span style={{ display: 'flex' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EAB308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
+          <span>VIP</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -133,13 +167,13 @@ export default function DashboardLayout() {
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} t={t} isDark={isDark} user={user} />
       )}
 
-      <main style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '1.25rem 1rem 80px' : '2rem 2.5rem', display: 'flex', justifyContent: 'center' }}>
+      <main style={{ flex: 1, marginLeft: isMobile ? 0 : (collapsed ? 64 : 232), minHeight: '100vh', padding: isMobile ? '1.25rem 1rem 80px' : '2rem 2.5rem', display: 'flex', justifyContent: 'center', transition: 'margin-left 0.28s cubic-bezier(0.4,0,0.2,1)' }}>
         <div style={{ width: '100%' }}>
           <Outlet />
         </div>
       </main>
 
-      {isMobile && <BottomNav t={t} />}
+      {isMobile && <BottomNav t={t} user={user} />}
     </div>
   );
 }

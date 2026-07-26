@@ -136,6 +136,7 @@ export const getOverviewStats = async (userId) => {
       current: userSkill.streakDays,
       max: userSkill.maxStreak
     },
+    totalExp: userSkill.totalExp,
     dailyGoal: {
       target: dailyTarget,
       completed: wordsReviewedToday
