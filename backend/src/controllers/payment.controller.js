@@ -34,9 +34,15 @@ export const createPayment = async (req, res, next) => {
   }
 };
 
+import fs from 'fs';
+import path from 'path';
+
 export const handleSePayWebhook = async (req, res) => {
   try {
     // ─── Log toàn bộ request để debug ───────────────────────────────
+    const logData = `[${new Date().toISOString()}] HEADERS: ${JSON.stringify(req.headers)}\nBODY: ${JSON.stringify(req.body)}\n\n`;
+    fs.appendFileSync(path.join(process.cwd(), 'webhook.log'), logData);
+
     console.log('[Webhook] ⬇️  Received headers:', JSON.stringify(req.headers));
     console.log('[Webhook] ⬇️  Received body:', JSON.stringify(req.body));
 

@@ -1,3 +1,4 @@
+import prisma from '../config/prisma.js';
 import {
   findUserById,
   updateUserProfile,
@@ -9,9 +10,6 @@ import {
 import { cacheDelete, cacheGetJson, cacheSetJson } from '../config/redis.js';
 
 const userCacheKey = (userId) => `engmate:user:me:${userId}`;
-
-const VALID_CATEGORIES = ['TOEIC', 'IELTS', 'GENERAL'];
-const VALID_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
 const sanitizeUser = (user) => {
   if (!user) return null;
@@ -109,26 +107,32 @@ export const saveLearningPaths = async (userId, paths) => {
     throw error;
   }
 
-  for (const path of paths) {
-    const { category, currentLevel, targetScore } = path;
+  // Validate categories dynamically from DB
+  const activeCategories = await prisma.category.findMany({
+    where: { isActive: true },
+    select: { code: true },
+  });
+  const validCodes = activeCategories.map(c => c.code);
 
-    if (!VALID_CATEGORIES.includes(category)) {
-      const error = new Error(`Invalid category: ${category}. Must be one of ${VALID_CATEGORIES.join(', ')}`);
+  for (const path of paths) {
+    const { category, categoryCode: rawCode, currentLevel, targetScore } = path;
+    const code = rawCode || category; // support both old and new field name
+
+    if (!validCodes.includes(code)) {
+      const error = new Error(`Invalid category: ${code}. Must be one of ${validCodes.join(', ')}`);
       error.statusCode = 400;
       throw error;
     }
 
-    // currentLevel now accepts any string (e.g. 500, 6.5, B2)
     const data = {
       currentLevel: currentLevel ? String(currentLevel) : 'A1',
       isActive: true,
     };
-
     if (targetScore !== undefined) {
       data.targetScore = targetScore === null ? null : String(targetScore);
     }
 
-    await upsertLearningPath(userId, category, data);
+    await upsertLearningPath(userId, code, data);
   }
 
   await cacheDelete(userCacheKey(userId));
@@ -138,14 +142,15 @@ export const saveLearningPaths = async (userId, paths) => {
 /**
  * Xoá mềm (deactivate) 1 lộ trình học của user theo category
  */
-export const removeLearningPath = async (userId, category) => {
-  if (!VALID_CATEGORIES.includes(category)) {
-    const error = new Error(`Invalid category: ${category}`);
+export const removeLearningPath = async (userId, categoryCode) => {
+  const activeCategories = await prisma.category.findMany({ where: { isActive: true }, select: { code: true } });
+  const validCodes = activeCategories.map(c => c.code);
+  if (!validCodes.includes(categoryCode)) {
+    const error = new Error(`Invalid category: ${categoryCode}`);
     error.statusCode = 400;
     throw error;
   }
-
-  await deleteLearningPath(userId, category);
+  await deleteLearningPath(userId, categoryCode);
   await cacheDelete(userCacheKey(userId));
   return findLearningPathsByUserId(userId);
 };

@@ -19,9 +19,26 @@ export default function SettingsPage() {
   const t = getTheme();
   const user = useAuthStore(s => s.user);
 
-  const [notif, setNotif] = useState(true);
-  const [sound, setSound] = useState(true);
+  const [notif, setNotif] = useState(user?.setting?.receiveEmails ?? true);
   const [goal, setGoal] = useState(user?.setting?.dailyWordGoal || 20);
+  const [isSavingPref, setIsSavingPref] = useState(false);
+
+  const initialNotif = user?.setting?.receiveEmails ?? true;
+  const initialGoal = user?.setting?.dailyWordGoal || 20;
+  const hasPrefChanges = notif !== initialNotif || goal !== initialGoal;
+
+  const handleSavePref = async () => {
+    if (!hasPrefChanges) return;
+    setIsSavingPref(true);
+    try {
+      await api.patch('/users/me/settings', { receiveEmails: notif, dailyWordGoal: parseInt(goal) || 20 });
+      const res = await api.get('/users/me');
+      useAuthStore.getState().setUser(res.data);
+    } catch (err) {
+      console.error('Save settings error', err);
+    }
+    setIsSavingPref(false);
+  };
   
   const getLevelOptions = (cat) => {
     if (cat === 'IELTS') return Array.from({ length: 19 }, (_, i) => (i * 0.5).toFixed(1));
@@ -93,7 +110,15 @@ export default function SettingsPage() {
             <div style={{ fontWeight: 800, color: t.text, fontSize: '1.05rem' }}>{user?.profile?.username || 'User'}</div>
             <div style={{ fontSize: '0.78rem', color: t.textMuted }}>{user?.email || 'user@example.com'}</div>
             <div style={{ marginTop: 6, display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: t.goldBg, color: t.gold }}>Premium ✦</span>
+              {user?.subscription?.isValid && user?.subscription?.plan?.code !== 'FREE' ? (
+                <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: t.goldBg, color: t.gold }}>
+                  {user.subscription.plan.name} ✦
+                </span>
+              ) : (
+                <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6', color: t.textMuted }}>
+                  Miễn phí
+                </span>
+              )}
               {user?.learningPaths?.map((path, idx) => (
                 <span key={idx} style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>
                   {path.category} · Lên {path.targetScore || path.currentLevel}
@@ -191,17 +216,46 @@ export default function SettingsPage() {
       <div style={{ ...card(t), padding: '1rem 1.25rem', marginBottom: '1rem' }}>
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.25rem' }}>Tuỳ chọn</div>
         <Row label="Chế độ tối" desc="Giao diện tối cho mắt" right={<Toggle on={isDark} setOn={toggleDark} />} />
-        <Row label="Thông báo nhắc nhở" desc="Nhắc học vào 8:00 sáng mỗi ngày" right={<Toggle on={notif} setOn={setNotif} />} />
-        <Row label="Âm thanh" desc="Phát âm từ khi học flashcard" right={<Toggle on={sound} setOn={setSound} />} />
+        <Row label="Thông báo nhắc nhở" desc="Nhận email nhắc nhở học từ hệ thống" right={<Toggle on={notif} setOn={setNotif} />} />
+        
         <Row label="Mục tiêu hàng ngày" desc={`${goal} từ / ngày`} right={
-          <div style={{ display: 'flex', gap: '0.375rem' }}>
+          <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
             {[10, 20, 30, 50].map(v => (
               <button key={v} onClick={() => setGoal(v)} style={{ padding: '0.3rem 0.625rem', borderRadius: 8, border: `1.5px solid ${goal === v ? t.gold : t.cardBorder}`, background: goal === v ? t.goldBg : 'transparent', color: goal === v ? t.gold : t.textMuted, fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'inherit' }}>
                 {v}
               </button>
             ))}
+            <input 
+              type="number"
+              value={goal}
+              onChange={e => setGoal(e.target.value ? parseInt(e.target.value) : '')}
+              placeholder="Khác..."
+              style={{ width: 60, padding: '0.3rem 0.5rem', borderRadius: 8, border: `1.5px solid ${![10, 20, 30, 50].includes(goal) ? t.gold : t.cardBorder}`, background: t.bg, color: t.text, fontWeight: 700, fontSize: '0.75rem', outline: 'none', textAlign: 'center', fontFamily: 'inherit' }}
+            />
           </div>
         } />
+
+        {hasPrefChanges && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', paddingTop: '1rem', borderTop: `1px solid ${t.cardBorder}`, animation: 'fadeIn 0.3s ease' }}>
+            <button 
+              onClick={handleSavePref}
+              disabled={isSavingPref}
+              style={{ 
+                padding: '0.625rem 1.5rem', 
+                borderRadius: 10, 
+                border: 'none', 
+                background: isSavingPref ? t.textMuted : t.goldBg, 
+                color: isSavingPref ? '#fff' : t.gold, 
+                fontWeight: 700, 
+                fontSize: '0.85rem', 
+                cursor: isSavingPref ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              {isSavingPref ? 'Đang lưu...' : 'Lưu thay đổi'}
+            </button>
+          </div>
+        )}
       </div>
 
 

@@ -2,12 +2,12 @@ import prisma from '../config/prisma.js';
 
 export const findAllTopics = () =>
   prisma.vocabularyTopic.findMany({
-    orderBy: [{ category: 'asc' }, { level: 'asc' }],
+    orderBy: [{ categoryCode: 'asc' }, { level: 'asc' }],
     select: {
       id: true,
       name: true,
       description: true,
-      category: true,
+      categoryCode: true,
       level: true,
       isPremium: true,
       wordCount: true,

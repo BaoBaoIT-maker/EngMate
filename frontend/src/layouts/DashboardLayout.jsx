@@ -71,8 +71,8 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
         })}
       </nav>
 
-      {/* Upgrade Banner for Free Users */}
-      {user && !isPremium && (
+      {/* Upgrade Banner for All Users */}
+      {user && (
         <div style={{ padding: collapsed ? '0.5rem 0' : '0.5rem 0 0' }}>
           <div
             onClick={() => navigate('/dashboard/premium')}
@@ -94,8 +94,8 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
             ) : (
               <>
                 <div style={{ fontSize: '1.1rem', marginBottom: '0.2rem' }}>✦</div>
-                <div style={{ fontWeight: 800, fontSize: '0.9rem', letterSpacing: '-0.01em' }}>Nâng cấp Premium</div>
-                <div style={{ fontSize: '0.72rem', opacity: 0.85, marginTop: '0.2rem' }}>Mở khóa toàn bộ tính năng</div>
+                <div style={{ fontWeight: 800, fontSize: '0.9rem', letterSpacing: '-0.01em' }}>Nâng cấp gói</div>
+                <div style={{ fontSize: '0.72rem', opacity: 0.85, marginTop: '0.2rem' }}>Quản lý gói cước của bạn</div>
               </>
             )}
           </div>
@@ -135,20 +135,18 @@ function BottomNav({ t, user }) {
           </div>
         );
       })}
-      {!isPremium && (
-        <div className="bottom-nav-item" onClick={() => navigate('/dashboard/premium')} style={{ color: '#EAB308' }}>
-          <span style={{ display: 'flex' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EAB308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </span>
-          <span>VIP</span>
-        </div>
-      )}
+      <div className="bottom-nav-item" onClick={() => navigate('/dashboard/premium')} style={{ color: isPremium ? t.gold : '#EAB308' }}>
+        <span style={{ display: 'flex' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </span>
+        <span>Gói cước</span>
+      </div>
     </div>
   );
 }
 
 export default function DashboardLayout() {
-  const { isDark, getTheme } = useThemeStore();
+  const { isDark, toggleDark, getTheme } = useThemeStore();
   const t = getTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -167,7 +165,15 @@ export default function DashboardLayout() {
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} t={t} isDark={isDark} user={user} />
       )}
 
-      <main style={{ flex: 1, marginLeft: isMobile ? 0 : (collapsed ? 64 : 232), minHeight: '100vh', padding: isMobile ? '1.25rem 1rem 80px' : '2rem 2.5rem', display: 'flex', justifyContent: 'center', transition: 'margin-left 0.28s cubic-bezier(0.4,0,0.2,1)' }}>
+      <main style={{ flex: 1, marginLeft: isMobile ? 0 : (collapsed ? 64 : 232), minHeight: '100vh', padding: isMobile ? '4rem 1rem 80px' : '2rem 2.5rem', display: 'flex', justifyContent: 'center', transition: 'margin-left 0.28s cubic-bezier(0.4,0,0.2,1)', position: 'relative' }}>
+        {/* Global Theme Toggle Button */}
+        <div style={{ position: 'absolute', top: isMobile ? '1rem' : '1.5rem', right: isMobile ? '1rem' : '2.5rem', zIndex: 50 }}>
+          <button onClick={toggleDark} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.875rem', borderRadius: 10, border: `1px solid ${t.cardBorder}`, background: t.card, cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: 600, color: t.textSub, transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            {isDark ? Icon.sun(t.gold) : Icon.moon(t.textSub)}
+            {!isMobile && (isDark ? 'Sáng' : 'Tối')}
+          </button>
+        </div>
+
         <div style={{ width: '100%' }}>
           <Outlet />
         </div>

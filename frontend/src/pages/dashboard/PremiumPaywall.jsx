@@ -11,18 +11,18 @@ function ConfirmChangeModal({ t, currentPlanName, endDate, newPlanName, onConfir
     <div style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div style={{ background: t.card, border: `1px solid ${t.cardBorder}`, borderRadius: 24, padding: '2rem', maxWidth: 420, width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.3)', animation: 'popIn 0.2s ease-out' }}>
         <div style={{ fontSize: '2.5rem', textAlign: 'center', marginBottom: '1rem' }}>⚠️</div>
-        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, textAlign: 'center', marginBottom: '0.75rem', color: t.text }}>Bạn đang có gói đang hoạt động</h3>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, textAlign: 'center', marginBottom: '0.75rem', color: t.text }}>Xác nhận chuyển gói</h3>
         <p style={{ color: t.textMuted, fontSize: '0.95rem', lineHeight: 1.6, textAlign: 'center', marginBottom: '1.5rem' }}>
-          Bạn đang dùng <strong style={{ color: t.gold }}>{currentPlanName}</strong> (còn hạn đến <strong style={{ color: t.text }}>{fmtDate}</strong>).
+          Bạn đang có gói <strong style={{ color: t.gold }}>{currentPlanName}</strong> (còn hạn đến <strong style={{ color: t.text }}>{fmtDate}</strong>).
           <br /><br />
-          Nếu mua <strong style={{ color: t.text }}>{newPlanName}</strong>, gói mới sẽ bắt đầu <strong>ngay hôm nay</strong>. Thời gian còn lại của gói cũ <strong style={{ color: '#ef4444' }}>sẽ không được hoàn lại</strong>.
+          Nếu mua <strong style={{ color: t.text }}>{newPlanName}</strong>, gói mới sẽ bắt đầu <strong>ngay hôm nay</strong>. Mọi ưu đãi và thời gian còn lại của gói cũ <strong style={{ color: '#ef4444' }}>sẽ bị hủy và không được cộng dồn</strong>.
         </p>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button onClick={onCancel} style={{ flex: 1, padding: '0.9rem', borderRadius: 12, background: t.hover, color: t.textMuted, border: `1px solid ${t.cardBorder}`, cursor: 'pointer', fontWeight: 700, fontSize: '0.95rem' }}>
             Hủy bỏ
           </button>
           <button onClick={onConfirm} style={{ flex: 1, padding: '0.9rem', borderRadius: 12, background: 'linear-gradient(135deg, #EAB308, #B45309)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '0.95rem' }}>
-            Xác nhận mua
+            Đồng ý mua
           </button>
         </div>
       </div>
@@ -30,43 +30,66 @@ function ConfirmChangeModal({ t, currentPlanName, endDate, newPlanName, onConfir
   );
 }
 
-// ─── Card Gói cước ──────────────────────────────────────────────────────────
-function PlanCard({ plan, isSelected, isOwned, isDark, t, onClick }) {
-  const isLastPlan = false; // controlled by parent
+// ─── Modal Thanh toán thành công ──────────────────────────────────────────
+function SuccessModal({ t, onClose }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+      <div style={{ background: t.card, border: `1px solid ${t.cardBorder}`, borderRadius: 24, padding: '2.5rem 2rem', maxWidth: 360, width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.3)', animation: 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+        <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(34, 197, 94, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#22C55E', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '2rem' }}>
+            ✓
+          </div>
+        </div>
+        <h3 style={{ fontSize: '1.4rem', fontWeight: 800, textAlign: 'center', marginBottom: '0.5rem', color: t.text }}>Thanh toán thành công!</h3>
+        <p style={{ color: t.textMuted, fontSize: '0.95rem', lineHeight: 1.5, textAlign: 'center', marginBottom: '2rem' }}>
+          Gói cước của bạn đã được kích hoạt. Hãy tận hưởng các đặc quyền Premium ngay bây giờ.
+        </p>
+        <button onClick={onClose} style={{ width: '100%', padding: '1rem', borderRadius: 14, background: 'linear-gradient(135deg, #EAB308, #B45309)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '1rem', boxShadow: '0 4px 14px rgba(234,179,8,0.3)' }}>
+          Đóng
+        </button>
+      </div>
+    </div>
+  );
+}
 
+// ─── Card Gói cước ──────────────────────────────────────────────────────────
+function PlanCard({ plan, isSelected, isOwned, isDisabled, isDark, t, onClick }) {
   const cardStyle = {
-    background: isOwned
-      ? (isDark ? 'rgba(234,179,8,0.06)' : '#FEFCE8')
-      : isSelected
-        ? (isDark ? 'rgba(245,158,11,0.12)' : '#FEF3C7')
-        : t.card,
-    border: `2px solid ${isOwned ? '#EAB308' : isSelected ? t.gold : t.cardBorder}`,
+    background: isOwned 
+      ? (isDark ? 'rgba(255,255,255,0.03)' : '#f3f4f6') 
+      : isDisabled 
+        ? (isDark ? 'rgba(255,255,255,0.02)' : '#f9fafb')
+        : isSelected
+          ? (isDark ? 'rgba(245,158,11,0.12)' : '#FEF3C7')
+          : t.card,
+    border: `2px solid ${isOwned ? t.cardBorder : isSelected ? t.gold : t.cardBorder}`,
     borderRadius: 20,
     padding: '1.5rem',
-    cursor: isOwned ? 'default' : 'pointer',
+    cursor: (isOwned || isDisabled) ? 'not-allowed' : 'pointer',
     transition: 'all 0.2s',
     position: 'relative',
-    opacity: isOwned ? 0.85 : 1,
+    opacity: (isOwned || isDisabled) ? 0.6 : 1,
+    filter: (isOwned || isDisabled) ? 'grayscale(1)' : 'none',
   };
 
   return (
-    <div onClick={isOwned ? undefined : onClick} style={cardStyle}>
+    <div onClick={(isOwned || isDisabled) ? undefined : onClick} style={cardStyle}>
       {/* Badge Đang dùng */}
       {isOwned && (
-        <div style={{ position: 'absolute', top: -12, left: 16, background: 'linear-gradient(90deg, #EAB308, #B45309)', color: '#fff', fontSize: '0.72rem', fontWeight: 800, padding: '0.25rem 0.75rem', borderRadius: 99, letterSpacing: '0.03em' }}>
+        <div style={{ position: 'absolute', top: -12, left: 16, background: t.textSub, color: t.bg, fontSize: '0.72rem', fontWeight: 800, padding: '0.25rem 0.75rem', borderRadius: 99, letterSpacing: '0.03em' }}>
           ✓ ĐANG SỬ DỤNG
         </div>
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
         <div style={{ fontSize: '1.1rem', fontWeight: 700, color: t.text }}>{plan.name}</div>
-        {isOwned && (
-          <div style={{ fontSize: '1.2rem' }}>🔒</div>
+        {(isOwned || isDisabled) && (
+          <div style={{ fontSize: '1.2rem', opacity: 0.5 }}>🔒</div>
         )}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', marginBottom: '0.35rem' }}>
-        <span style={{ fontSize: '2.25rem', fontWeight: 800, color: isOwned ? t.gold : t.text }}>
+        <span style={{ fontSize: '2.25rem', fontWeight: 800, color: (isOwned || isDisabled) ? t.textSub : t.text }}>
           {plan.price.toLocaleString('vi-VN')}
         </span>
         <span style={{ fontSize: '1rem', color: t.textMuted }}>VNĐ</span>
@@ -77,13 +100,18 @@ function PlanCard({ plan, isSelected, isOwned, isDark, t, onClick }) {
           ? `${Math.round(plan.durationDays / 365)} năm`
           : `${plan.durationDays} ngày`}
         {plan.features?.aiLimit && (
-          <span style={{ marginLeft: '0.5rem', color: t.gold }}>· {plan.features.aiLimit} AI lượt/ngày</span>
+          <span style={{ marginLeft: '0.5rem', color: (isOwned || isDisabled) ? t.textMuted : t.gold }}>· {plan.features.aiLimit} AI lượt/ngày</span>
         )}
       </div>
 
       {isOwned && (
         <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: t.textMuted, fontStyle: 'italic' }}>
           Bạn đã sở hữu gói này
+        </div>
+      )}
+      {isDisabled && !isOwned && (
+        <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: t.textMuted, fontStyle: 'italic' }}>
+          Đã bao gồm trong gói hiện tại
         </div>
       )}
     </div>
@@ -94,7 +122,6 @@ function PlanCard({ plan, isSelected, isOwned, isDark, t, onClick }) {
 export default function PremiumPaywall() {
   const { isDark, getTheme } = useThemeStore();
   const t = getTheme();
-  const navigate = useNavigate();
   const user = useAuthStore(s => s.user);
   const fetchMe = useAuthStore(s => s.fetchMe);
 
@@ -104,6 +131,7 @@ export default function PremiumPaywall() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('idle'); // idle | loading_qr | waiting_payment | success
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [pendingPlanId, setPendingPlanId] = useState(null);
 
   // Thông tin gói hiện tại của user
@@ -112,6 +140,8 @@ export default function PremiumPaywall() {
   const isActivePremium = currentSub?.isValid &&
     currentPlan?.code !== 'FREE' &&
     (!currentSub.endDate || new Date(currentSub.endDate) > new Date());
+  
+  const currentDuration = isActivePremium ? (currentPlan?.durationDays || 0) : 0;
 
   // Fetch danh sách gói
   useEffect(() => {
@@ -119,11 +149,12 @@ export default function PremiumPaywall() {
       const paidPlans = (res.data?.data || res.data).filter(p => p.price > 0);
       setPlans(paidPlans);
       if (paidPlans.length > 0) {
-        const defaultPlan = paidPlans.find(p => p.id !== currentPlan?.id) || paidPlans[0];
-        setSelectedPlan(defaultPlan.id);
+        // Tìm gói đầu tiên không bị disable
+        const availablePlan = paidPlans.find(p => p.durationDays > currentDuration) || paidPlans[0];
+        setSelectedPlan(availablePlan.id);
       }
     }).catch(err => console.error('Failed to load plans', err));
-  }, []);
+  }, [currentDuration]);
 
   // Polling thanh toán
   useEffect(() => {
@@ -133,18 +164,18 @@ export default function PremiumPaywall() {
         try {
           const latestUser = await fetchMe();
           const latestSub = latestUser?.subscription;
-          const latestIsPremium = latestSub?.isValid &&
-            latestSub?.plan?.code !== 'FREE' &&
-            (!latestSub.endDate || new Date(latestSub.endDate) > new Date());
-          if (latestIsPremium) {
+          // Nếu gói mới đã kích hoạt (hoặc gói cũ gia hạn thành công)
+          // Ta check bằng cách xem id gói đã khớp, và ngày kết thúc đã dài ra hoặc valid
+          if (latestSub?.isValid && latestSub?.plan?.id === selectedPlan) {
             setStatus('success');
+            setShowSuccessModal(true);
             clearInterval(interval);
           }
         } catch (e) { console.error(e); }
       }, 3000);
     }
     return () => clearInterval(interval);
-  }, [status, fetchMe]);
+  }, [status, fetchMe, selectedPlan]);
 
   const doSubscribe = useCallback(async (planId) => {
     setLoading(true);
@@ -166,7 +197,9 @@ export default function PremiumPaywall() {
   }, []);
 
   const handlePlanClick = (plan) => {
-    if (plan.id === currentPlan?.id) return; // Gói đang dùng → không làm gì
+    // Không cho chọn gói đang dùng HOẶC gói có thời hạn nhỏ hơn gói đang dùng
+    if (plan.id === currentPlan?.id && isActivePremium) return;
+    if (isActivePremium && plan.durationDays <= currentDuration) return;
     setSelectedPlan(plan.id);
   };
 
@@ -175,7 +208,7 @@ export default function PremiumPaywall() {
     const plan = plans.find(p => p.id === selectedPlan);
     if (!plan) return;
 
-    // Nếu đang có gói premium khác → cảnh báo
+    // Nếu đang có gói premium khác (dù ngắn hạn hơn) → vẫn hiện cảnh báo mất ưu đãi cũ
     if (isActivePremium && currentPlan?.id !== selectedPlan) {
       setPendingPlanId(selectedPlan);
       setShowConfirmModal(true);
@@ -185,23 +218,6 @@ export default function PremiumPaywall() {
   };
 
   const gridCols = plans.length >= 3 ? 'repeat(auto-fit, minmax(200px, 1fr))' : '1fr';
-
-  // ─── Success screen ───
-  if (status === 'success') {
-    return (
-      <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: t.text, animation: 'fadeIn 0.5s' }}>
-        <div style={{ fontSize: '5rem', marginBottom: '1rem' }}>🎉</div>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: t.gold, marginBottom: '0.75rem' }}>Thanh Toán Thành Công!</h1>
-        <p style={{ fontSize: '1.1rem', color: t.textMuted, marginBottom: '2rem', textAlign: 'center' }}>
-          Chào mừng bạn đến với đặc quyền <strong style={{ color: t.gold }}>EngMate Premium</strong>.
-        </p>
-        <button onClick={() => navigate('/dashboard')} style={{ background: 'linear-gradient(135deg, #EAB308, #B45309)', color: '#fff', border: 'none', padding: '1rem 2.5rem', borderRadius: 99, fontWeight: 700, cursor: 'pointer', fontSize: '1.1rem' }}>
-          Trở về Trang chủ
-        </button>
-        <style>{`@keyframes fadeIn { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }`}</style>
-      </div>
-    );
-  }
 
   return (
     <div style={{ maxWidth: 1040, margin: '0 auto', color: t.text, animation: 'fadeIn 0.5s ease-out' }}>
@@ -218,6 +234,18 @@ export default function PremiumPaywall() {
         />
       )}
 
+      {/* Modal Thanh toán thành công (Popup nhỏ) */}
+      {showSuccessModal && (
+        <SuccessModal 
+          t={t} 
+          onClose={() => {
+            setShowSuccessModal(false);
+            setStatus('idle');
+            setQrData(null);
+          }} 
+        />
+      )}
+
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: t.goldBg, padding: '0.45rem 1rem', borderRadius: 99, color: t.gold, fontWeight: 700, marginBottom: '1.25rem', border: `1px solid ${t.cardBorder}`, fontSize: '0.9rem' }}>
@@ -230,8 +258,8 @@ export default function PremiumPaywall() {
           Tận hưởng toàn quyền truy cập AI Coach, tính năng chữa chuỗi học và phân tích lộ trình không giới hạn.
         </p>
         {isActivePremium && (
-          <div style={{ marginTop: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: isDark ? 'rgba(234,179,8,0.1)' : '#FEFCE8', border: '1px solid #EAB308', borderRadius: 99, padding: '0.4rem 1rem', color: t.gold, fontSize: '0.88rem', fontWeight: 700 }}>
-            ✓ Bạn đang dùng {currentPlan?.name} — còn hạn đến {new Date(currentSub.endDate).toLocaleDateString('vi-VN')}
+          <div style={{ marginTop: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6', border: `1px solid ${t.cardBorder}`, borderRadius: 99, padding: '0.5rem 1rem', color: t.text, fontSize: '0.88rem', fontWeight: 600 }}>
+            <span style={{ color: '#22C55E' }}>✓</span> Bạn đang sử dụng <strong>{currentPlan?.name}</strong> (còn hạn đến {new Date(currentSub.endDate).toLocaleDateString('vi-VN')})
           </div>
         )}
       </div>
@@ -251,20 +279,27 @@ export default function PremiumPaywall() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
           {/* Danh sách gói — Grid khi nhiều gói */}
-          {status === 'idle' && (
+          {(status === 'idle' || status === 'success') && (
             <>
               <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: '1rem' }}>
-                {plans.map(plan => (
-                  <PlanCard
-                    key={plan.id}
-                    plan={plan}
-                    isSelected={selectedPlan === plan.id}
-                    isOwned={currentPlan?.id === plan.id && isActivePremium}
-                    isDark={isDark}
-                    t={t}
-                    onClick={() => handlePlanClick(plan)}
-                  />
-                ))}
+                {plans.map(plan => {
+                  const isOwned = currentPlan?.id === plan.id && isActivePremium;
+                  // Vô hiệu hóa gói này nếu user đang có gói dài hạn hơn hoặc bằng (vd đang dùng gói năm thì khóa gói tháng)
+                  const isDisabled = isActivePremium && plan.durationDays <= currentDuration && !isOwned;
+                  
+                  return (
+                    <PlanCard
+                      key={plan.id}
+                      plan={plan}
+                      isSelected={selectedPlan === plan.id}
+                      isOwned={isOwned}
+                      isDisabled={isDisabled}
+                      isDark={isDark}
+                      t={t}
+                      onClick={() => handlePlanClick(plan)}
+                    />
+                  );
+                })}
               </div>
 
               <button
@@ -280,7 +315,7 @@ export default function PremiumPaywall() {
                   opacity: loading ? 0.8 : 1,
                 }}
               >
-                {loading ? 'Đang tạo mã QR...' : isActivePremium ? 'Đổi / Gia hạn gói ✦' : 'Nâng cấp ngay ✦'}
+                {loading ? 'Đang tạo mã QR...' : 'Nâng cấp ngay ✦'}
               </button>
             </>
           )}
@@ -336,7 +371,10 @@ export default function PremiumPaywall() {
       <style>{`
         @keyframes fadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
         @keyframes pulse { 0%,100% { opacity:0.5 } 50% { opacity:1 } }
-        @keyframes popIn { from { opacity:0; transform:scale(0.93) } to { opacity:1; transform:scale(1) } }
+        @keyframes popIn { 
+          0% { opacity: 0; transform: scale(0.9); } 
+          100% { opacity: 1; transform: scale(1); } 
+        }
       `}</style>
     </div>
   );

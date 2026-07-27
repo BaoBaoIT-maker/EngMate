@@ -94,15 +94,15 @@ export const findLearningPathsByUserId = (userId) =>
     orderBy: { updatedAt: 'desc' },
   });
 
-export const upsertLearningPath = (userId, category, data) =>
+export const upsertLearningPath = (userId, categoryCode, data) =>
   prisma.userLearningPath.upsert({
-    where: { userId_category: { userId, category } },
+    where: { userId_categoryCode: { userId, categoryCode } },
     update: { ...data, updatedAt: new Date() },
-    create: { userId, category, ...data },
+    create: { userId, categoryCode, ...data },
   });
 
-export const deleteLearningPath = (userId, category) =>
+export const deleteLearningPath = (userId, categoryCode) =>
   prisma.userLearningPath.updateMany({
-    where: { userId, category },
+    where: { userId, categoryCode },
     data: { isActive: false },
   });

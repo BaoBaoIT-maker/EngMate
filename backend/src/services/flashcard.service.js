@@ -3,21 +3,17 @@ import * as statService from './stat.service.js';
 import * as aiService from './ai.service.js';
 
 export const getTopics = async (userId) => {
-  // Tìm các khóa học mà người dùng đang học
   const activePaths = await prisma.userLearningPath.findMany({
     where: { userId, isActive: true },
-    select: { category: true, currentLevel: true }
+    select: { categoryCode: true, currentLevel: true }
   });
 
-  if (activePaths.length === 0) {
-    return [];
-  }
+  if (activePaths.length === 0) return [];
 
-  const categories = activePaths.map(p => p.category);
+  const categoryCodes = activePaths.map(p => p.categoryCode);
 
-  // Lấy các topics thuộc các khóa học này
   const topics = await prisma.vocabularyTopic.findMany({
-    where: { category: { in: categories } },
+    where: { categoryCode: { in: categoryCodes } },
     orderBy: { createdAt: 'desc' }
   });
 
@@ -32,7 +28,7 @@ const formatSystemCard = (fc) => ({
   definitionText: fc.systemVocabulary.definitionText,
   vietnameseMeaning: fc.systemVocabulary.vietnameseMeaning,
   exampleJson: fc.systemVocabulary.exampleJson,
-  category: fc.systemVocabulary.category,
+  category: fc.systemVocabulary.categoryCode,
   level: fc.systemVocabulary.level,
   progress: fc.progress
 });
@@ -95,7 +91,7 @@ export const getFlashcardSession = async (userId, query) => {
     const dueSystemCards = await prisma.flashcard.findMany({
       where: {
         userId,
-        systemVocabulary: { category: course },
+      systemVocabulary: { categoryCode: course },
         progress: { nextReviewDate: { lte: now } }
       },
       include: { systemVocabulary: true, progress: true },
@@ -126,7 +122,7 @@ export const getFlashcardSession = async (userId, query) => {
       definitionText: fc.systemVocabulary.definitionText,
       vietnameseMeaning: fc.systemVocabulary.vietnameseMeaning,
       exampleJson: fc.systemVocabulary.exampleJson,
-      category: fc.systemVocabulary.category,
+      category: fc.systemVocabulary.categoryCode,
       level: fc.systemVocabulary.level,
       progress: fc.progress
     }));
@@ -293,7 +289,7 @@ export const getLearnedWords = async (userId, query) => {
   if (type === 'course') {
     const [systemCards, customCards] = await Promise.all([
       prisma.flashcard.findMany({
-        where: { userId, systemVocabulary: { category: course } },
+        where: { userId, systemVocabulary: { categoryCode: course } },
         include: { systemVocabulary: true, progress: true },
         orderBy: { createdAt: 'desc' }
       }),

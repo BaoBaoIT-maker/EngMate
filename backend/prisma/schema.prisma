@@ -13,14 +13,17 @@ generator client {
 model User {
   id            Int            @id @default(autoincrement())
   email         String         @unique @db.VarChar(100)
-  passwordHash  String?        @map("password_hash") @db.VarChar(255) // Nullable vì Google/FB không có pass
+  passwordHash  String?        @map("password_hash") @db.VarChar(255)
   role          Role           @default(USER)
   isVerified    Boolean        @default(false) @map("is_verified")
   verifiedAt    DateTime?      @map("verified_at")
-  
+
   // Auth bên thứ 3 (Google, Facebook)
   provider      AuthProvider   @default(LOCAL)
-  providerId    String?        @map("provider_id") @db.VarChar(255) 
+  providerId    String?        @map("provider_id") @db.VarChar(255)
+
+  isBanned      Boolean        @default(false) @map("is_banned")
+  bannedAt      DateTime?      @map("banned_at")
 
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
@@ -30,7 +33,7 @@ model User {
   setting         UserSetting?
   skill           UserSkill?
   subscription    UserSubscription?
-  
+
   // Quan hệ 1-Nhiều
   flashcards      Flashcard[]
   chatSessions    ChatSession[]
@@ -41,10 +44,10 @@ model User {
 }
 
 model UserProfile {
-  userId        Int            @id @map("user_id") 
+  userId        Int            @id @map("user_id")
   username      String         @db.VarChar(50)
   avatarUrl     String?        @map("avatar_url") @db.Text
-  bio           String?        @db.Text 
+  bio           String?        @db.Text
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -56,8 +59,8 @@ model UserSetting {
   userId          Int            @id @map("user_id")
   theme           ThemeMode      @default(LIGHT)
   receiveEmails   Boolean        @default(true)  @map("receive_emails")
-  dailyWordGoal   Int            @default(15)    @map("daily_word_goal")  // Số từ mục tiêu mỗi ngày
-  onboardingDone  Boolean        @default(false) @map("onboarding_done") // Flag onboarding đã hoàn thành chưa
+  dailyWordGoal   Int            @default(15)    @map("daily_word_goal")
+  onboardingDone  Boolean        @default(false) @map("onboarding_done")
 
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -66,11 +69,11 @@ model UserSetting {
 
 model UserSkill {
   userId          Int            @id @map("user_id")
-  currentLevel    EnglishLevel   @default(A1) @map("current_level") 
+  currentLevel    EnglishLevel   @default(A1) @map("current_level")
   vocabularyScore Int            @default(0) @map("vocabulary_score")
   grammarScore    Int            @default(0) @map("grammar_score")
   speakingScore   Int            @default(0) @map("speaking_score")
-  
+
   streakDays      Int            @default(0) @map("streak_days")
   maxStreak       Int            @default(0) @map("max_streak")
   totalExp        Int            @default(0) @map("total_exp")
@@ -105,7 +108,7 @@ model UserSubscription {
   userId         Int          @id @map("user_id")
   planId         Int          @map("plan_id")
   startDate      DateTime     @default(now()) @map("start_date")
-  endDate        DateTime?    @map("end_date") // Ngày hết hạn VIP
+  endDate        DateTime?    @map("end_date")
   isValid        Boolean      @default(true) @map("is_valid")
 
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -114,12 +117,13 @@ model UserSubscription {
   @@map("user_subscriptions")
 }
 
-// Lộ trình học cho từng khóa (TOEIC / IELTS / GENERAL)
 // 1 user có thể học nhiều khóa cùng lúc, mỗi khóa có trình độ và mục tiêu riêng
 model UserLearningPath {
   id            Int          @id @default(autoincrement())
   userId        Int          @map("user_id")
-  category      CategoryType
+  // Lưu code của Category (VD: "GENERAL", "TOEIC", "IELTS")
+  // Dùng String thay vì FK để tránh JOIN và linh hoạt khi thêm category mới
+  categoryCode  String       @map("category_code") @db.VarChar(50)
   currentLevel  String       @default("A1") @map("current_level") @db.VarChar(50)
   targetScore   String?      @map("target_score") @db.VarChar(50)
   isActive      Boolean      @default(true) @map("is_active")
@@ -128,19 +132,36 @@ model UserLearningPath {
 
   user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, category])  // 1 user chỉ có 1 record per category
+  @@unique([userId, categoryCode])
   @@map("user_learning_paths")
 }
 
 // ==========================================
-// 2. NHÓM HỌC TẬP & TỪ VỰNG (CONTENT & SM-2)
+// 2. NHÓM DANH MỤC KHÓA HỌC (DYNAMIC)
+// ==========================================
+
+// Bảng Category động — Admin có thể thêm/sửa/ẩn mà không cần migration
+model Category {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique @db.VarChar(50)  // "GENERAL", "TOEIC", "IELTS", ...
+  name        String   @db.VarChar(100)          // "Giao tiếp chung", "Luyện thi TOEIC", ...
+  description String?  @db.Text
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("categories")
+}
+
+// ==========================================
+// 3. NHÓM HỌC TẬP & TỪ VỰNG (CONTENT & SM-2)
 // ==========================================
 
 model VocabularyTopic {
   id           Int              @id @default(autoincrement())
   name         String           @unique @db.VarChar(100)
   description  String?          @db.Text
-  category     CategoryType     @default(GENERAL)
+  categoryCode String           @default("GENERAL") @map("category_code") @db.VarChar(50)
   level        EnglishLevel     @default(B1)
   isPremium    Boolean          @default(false) @map("is_premium")
   wordCount    Int              @default(0) @map("word_count")
@@ -160,8 +181,8 @@ model SystemVocabulary {
   phonetic           String            @db.VarChar(100)
   definitionText     String            @map("definition_text") @db.Text
   vietnameseMeaning  String            @map("vietnamese_meaning") @db.Text
-  exampleJson        Json              @map("example_json") // JSON chứa các câu ví dụ
-  category           CategoryType      @default(GENERAL)
+  exampleJson        Json              @map("example_json")
+  categoryCode       String            @default("GENERAL") @map("category_code") @db.VarChar(50)
   level              EnglishLevel      @default(B1)
 
   topic              VocabularyTopic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
@@ -173,22 +194,20 @@ model SystemVocabulary {
 model Flashcard {
   id                 Int               @id @default(autoincrement())
   userId             Int               @map("user_id")
-  systemVocabularyId Int?              @map("system_vocabulary_id") // Bắt nguồn từ hệ thống hoặc tự tạo
-  
-  // Custom Content do AI/User tự tạo
+  systemVocabularyId Int?              @map("system_vocabulary_id")
+
   customWord         String?           @map("custom_word") @db.VarChar(100)
   customMeaning      String?           @map("custom_meaning") @db.VarChar(255)
   customDefinition   String?           @map("custom_definition") @db.Text
   customPhonetic     String?           @map("custom_phonetic") @db.VarChar(100)
-  customExamples     Json?             @map("custom_examples") 
+  customExamples     Json?             @map("custom_examples")
 
   createdAt          DateTime          @default(now()) @map("created_at")
 
-  // Quan hệ
   user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   systemVocabulary   SystemVocabulary? @relation(fields: [systemVocabularyId], references: [id], onDelete: SetNull)
-  progress           StudyProgress?    // Trạng thái học tập SM-2
-  reviewLogs         ReviewLog[]       // Lịch sử ôn tập
+  progress           StudyProgress?
+  reviewLogs         ReviewLog[]
 
   @@map("flashcards")
 }
@@ -210,8 +229,9 @@ model StudyProgress {
 model ReviewLog {
   id              Int          @id @default(autoincrement())
   flashcardId     Int          @map("flashcard_id")
-  gameType        GameType     @map("game_type")
-  qualityRating   Int          @map("quality_rating") // Từ 0 -> 5 cho thuật toán SM-2
+  // String thay cho GameType enum — linh hoạt khi thêm game mới
+  gameType        String       @map("game_type") @db.VarChar(50)
+  qualityRating   Int          @map("quality_rating")
   isCorrect       Boolean      @map("is_correct")
   createdAt       DateTime     @default(now()) @map("created_at")
 
@@ -221,16 +241,16 @@ model ReviewLog {
 }
 
 // ==========================================
-// 3. NHÓM AI COACHING & LUYỆN NÓI
+// 4. NHÓM AI COACHING & LUYỆN NÓI
 // ==========================================
 
 model ChatSession {
   id             Int          @id @default(autoincrement())
   userId         Int          @map("user_id")
-  topic          String       @db.VarChar(255) 
-  category       CategoryType @default(GENERAL)
+  topic          String       @db.VarChar(255)
+  categoryCode   String       @default("GENERAL") @map("category_code") @db.VarChar(50)
   targetLevel    EnglishLevel @map("target_level")
-  aiFeedback     Json?        @map("ai_feedback") // Phân tích cuối buổi
+  aiFeedback     Json?        @map("ai_feedback")
   createdAt      DateTime     @default(now()) @map("created_at")
 
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -242,7 +262,7 @@ model ChatSession {
 model ChatMessage {
   id             Int          @id @default(autoincrement())
   sessionId      Int          @map("session_id")
-  senderRole     SenderRole   @map("sender_role") 
+  senderRole     SenderRole   @map("sender_role")
   content        String       @db.Text
   createdAt      DateTime     @default(now()) @map("created_at")
 
@@ -252,20 +272,20 @@ model ChatMessage {
 }
 
 // ==========================================
-// 4. NHÓM THANH TOÁN (SEPAY)
+// 5. NHÓM THANH TOÁN (SEPAY)
 // ==========================================
 
 model Transaction {
   id              Int               @id @default(autoincrement())
   userId          Int               @map("user_id")
-  
+
   sepayTranId     String            @unique @map("sepay_tran_id") @db.VarChar(100)
   amount          Decimal           @db.Decimal(10, 2)
-  code            String            @unique @db.VarChar(50) // VD: LINGOAI123
-  gateway         String            @db.VarChar(50) 
-  transactionDate DateTime          @map("transaction_date") 
+  code            String            @unique @db.VarChar(50)
+  gateway         String            @db.VarChar(50)
+  transactionDate DateTime          @map("transaction_date")
   status          TransactionStatus @default(PENDING)
-  
+
   createdAt       DateTime          @default(now()) @map("created_at")
 
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -274,7 +294,23 @@ model Transaction {
 }
 
 // ==========================================
-// 5. CÁC KIỂU DỮ LIỆU ENUM
+// 6. NHÓM GAME CONFIG (DYNAMIC)
+// ==========================================
+
+// Bảng GameConfig động — Admin bật/tắt game, thêm game mới chỉ cần thêm record
+model GameConfig {
+  id        Int      @id @default(autoincrement())
+  // String thay cho GameType enum — không cần migration khi thêm game
+  gameType  String   @unique @map("game_type") @db.VarChar(50)
+  isEnabled Boolean  @default(true) @map("is_enabled")
+  label     String   @db.VarChar(100)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("game_configs")
+}
+
+// ==========================================
+// 7. CÁC KIỂU DỮ LIỆU ENUM (CHỈ GIỮ CÁI THỰC SỰ ỔN ĐỊNH)
 // ==========================================
 
 enum Role {
@@ -293,6 +329,7 @@ enum ThemeMode {
   DARK
 }
 
+// Giữ lại EnglishLevel vì đây là chuẩn CEFR quốc tế — rất ổn định
 enum EnglishLevel {
   A1
   A2
@@ -302,21 +339,9 @@ enum EnglishLevel {
   C2
 }
 
-enum CategoryType {
-  GENERAL
-  TOEIC
-  IELTS
-}
-
-enum GameType {
-  MATCHING      
-  FILL_BLANK    
-  SPEAKING_GAME 
-}
-
 enum SenderRole {
   USER
-  MODEL // Dành cho AI Gemini
+  MODEL
 }
 
 enum TransactionStatus {
