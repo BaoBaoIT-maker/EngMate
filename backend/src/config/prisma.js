@@ -1,33 +1,24 @@
-import prismaClientPkg from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
-const { PrismaClient } = prismaClientPkg;
-
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
+if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is required');
 }
 
-const parsedUrl = new URL(databaseUrl);
+const parsedUrl = new URL(process.env.DATABASE_URL);
 
-const isTiDB = parsedUrl.hostname.includes('tidbcloud.com');
-const needsSSL =
-  isTiDB ||
-  parsedUrl.searchParams.get('sslaccept') === 'strict' ||
-  parsedUrl.searchParams.get('ssl') === 'true';
-
-const adapterConfig = {
+const adapter = new PrismaMariaDb({
   host: parsedUrl.hostname,
   port: parsedUrl.port ? parseInt(parsedUrl.port, 10) : 3306,
   user: decodeURIComponent(parsedUrl.username),
   password: decodeURIComponent(parsedUrl.password),
   database: parsedUrl.pathname.replace(/^\//, ''),
-  // SSL bắt buộc cho TiDB Cloud Serverless
-  ...(needsSSL && { ssl: true }),
-};
-
-const adapter = new PrismaMariaDb(adapterConfig);
+  // TiDB Cloud bắt buộc SSL, dùng object config để mariadb driver nhận đúng
+  ssl: {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: false, // false để chấp nhận TiDB self-signed cert
+  },
+});
 
 const prisma = globalThis.prisma || new PrismaClient({ adapter });
 
@@ -35,4 +26,4 @@ if (process.env.NODE_ENV !== 'production') {
   globalThis.prisma = prisma;
 }
 
-export default prisma;
+export default prisma;
