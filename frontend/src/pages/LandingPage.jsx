@@ -108,7 +108,7 @@ export default function LandingPage() {
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '2rem' }}>
+        <div className="landing-nav-links" style={{ display: 'flex', gap: '2rem' }}>
           {[['Khóa học', '#courses'], ['Tính năng', '#features'], ['Bảng giá', '#pricing']].map(([label, href]) => (
             <a key={label} href={href} className="nav-link">{label}</a>
           ))}
@@ -128,7 +128,7 @@ export default function LandingPage() {
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 60% 40%, rgba(240,180,41,0.08) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 20% 80%, rgba(139,92,246,0.06) 0%, transparent 50%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '8%', right: '-5%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(240,180,41,0.12) 0%, transparent 65%)', pointerEvents: 'none' }} />
 
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '5rem 2rem 4rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center', width: '100%' }}>
+        <div className="landing-hero-grid" style={{ maxWidth: 1200, margin: '0 auto', padding: '5rem 2rem 4rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center', width: '100%' }}>
           <div style={{ animation: 'slide-up 0.6s ease forwards' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 1rem', borderRadius: 100, background: GOLD_LIGHT, border: `1px solid rgba(240,180,41,0.35)`, marginBottom: '1.5rem' }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, display: 'inline-block' }} />
@@ -166,7 +166,7 @@ export default function LandingPage() {
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(28,20,7,0.06)' }}>
+            <div className="landing-hero-stats" style={{ display: 'flex', gap: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(28,20,7,0.06)' }}>
               {[['50K+', 'Học viên'], ['4,9 ★', 'Đánh giá App'], ['92%', 'Tỉ lệ đậu kỳ thi']].map(([val, label]) => (
                 <div key={label}>
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1C1407', letterSpacing: '-0.025em' }}>{val}</div>
@@ -263,7 +263,7 @@ export default function LandingPage() {
               Đầu tư cho tương lai của bạn
             </h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center' }}>
+          <div className="landing-pricing-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center' }}>
             {plans.map(p => (
               <PricingCard key={p.name} plan={p} onCta={() => navigate('/register')} />
             ))}
@@ -307,7 +307,7 @@ export default function LandingPage() {
             <span style={{ fontWeight: 800, color: '#fff', fontSize: '1rem', letterSpacing: '-0.02em' }}>Eng<span style={{ color: GOLD }}>Mate</span></span>
           </div>
           <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.82rem' }}>© 2026 EngMate Inc. All rights reserved.</p>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div className="landing-footer-links" style={{ display: 'flex', gap: '1.5rem' }}>
             {['Bảo mật', 'Điều khoản', 'Liên hệ'].map(l => (
               <a key={l} href="#" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.82rem', textDecoration: 'none', transition: 'color 0.2s' }}
                 onMouseEnter={e => (e.currentTarget.style.color = GOLD)}
