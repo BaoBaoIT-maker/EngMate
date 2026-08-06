@@ -251,16 +251,17 @@ export default function SpeakingCoachPage() {
 
   return (
     <div className="screen-enter w-full max-w-5xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 4rem)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
         <Header title="AI Speaking Coach" subtitle={sessions.find(s => s.id === currentSessionId)?.topic || "Luyện nói · Nhận phản hồi tức thì"} />
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
           {sessions.length > 0 && (
             <select 
               value={currentSessionId || ''} 
               onChange={(e) => setCurrentSessionId(parseInt(e.target.value))}
               style={{
                 background: t.card, color: t.text, border: `1px solid ${t.cardBorder}`,
-                padding: '0.6rem 1rem', borderRadius: 8, outline: 'none'
+                padding: '0.6rem 1rem', borderRadius: 8, outline: 'none',
+                maxWidth: '45vw', textOverflow: 'ellipsis'
               }}
             >
               {sessions.map(s => <option key={s.id} value={s.id}>{s.topic}</option>)}
