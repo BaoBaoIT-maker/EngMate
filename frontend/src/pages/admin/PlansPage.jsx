@@ -8,12 +8,19 @@ import * as adminService from '../../services/adminService';
 
 const PLAN_COLORS = { FREE: '#8c8c8c', PREMIUM_1M: '#1677ff', PREMIUM_1Y: '#faad14' };
 
+const AVAILABLE_FEATURES = [
+  { key: 'aiLimit', label: 'AI Coach Limit (per day)', type: 'number', default: 20 },
+  { key: 'learningPaths', label: 'Unlimited Learning Paths', type: 'boolean', default: true },
+  { key: 'streakFreeze', label: 'Streak Freezes (per week)', type: 'number', default: 1 },
+  { key: 'analytics', label: 'Advanced Analytics', type: 'boolean', default: true },
+];
+
 export default function PlansPage() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
-  const [features, setFeatures] = useState([]);
+  const [features, setFeatures] = useState([]); // Array of { key, value }
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
 
@@ -29,18 +36,19 @@ export default function PlansPage() {
 
   const openCreate = () => {
     setEditingPlan(null);
-    setFeatures([{ id: Date.now(), value: '' }]);
+    setFeatures([]);
     form.resetFields();
     setDrawerOpen(true);
   };
 
   const openEdit = (plan) => {
     setEditingPlan(plan);
-    const rawFeatures = typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features || [];
-    const featureList = Array.isArray(rawFeatures)
-      ? rawFeatures.map((f, i) => ({ id: i, value: typeof f === 'string' ? f : f.value || JSON.stringify(f) }))
-      : Object.entries(rawFeatures).map(([k, v], i) => ({ id: i, value: `${k}: ${v}` }));
+    const rawFeatures = typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features || {};
+    
+    // Convert object to array of { key, value }
+    const featureList = Object.entries(rawFeatures).map(([k, v]) => ({ key: k, value: v }));
     setFeatures(featureList);
+    
     form.setFieldsValue({ name: plan.name, code: plan.code, price: Number(plan.price), duration: plan.durationDays || plan.duration, isActive: plan.isActive });
     setDrawerOpen(true);
   };
@@ -53,15 +61,24 @@ export default function PlansPage() {
     } catch (e) { message.error('Failed to update plan'); }
   };
 
-  const addFeature = () => setFeatures(prev => [...prev, { id: Date.now(), value: '' }]);
-  const removeFeature = (id) => setFeatures(prev => prev.filter(f => f.id !== id));
-  const updateFeature = (id, value) => setFeatures(prev => prev.map(f => f.id === id ? { ...f, value } : f));
+  const addFeature = () => setFeatures(prev => [...prev, { key: '', value: '' }]);
+  const removeFeature = (index) => setFeatures(prev => prev.filter((_, i) => i !== index));
+  const updateFeatureKey = (index, newKey) => {
+    const meta = AVAILABLE_FEATURES.find(f => f.key === newKey);
+    setFeatures(prev => prev.map((f, i) => i === index ? { key: newKey, value: meta ? meta.default : '' } : f));
+  };
+  const updateFeatureValue = (index, newValue) => setFeatures(prev => prev.map((f, i) => i === index ? { ...f, value: newValue } : f));
 
   const handleSave = async () => {
     const vals = await form.validateFields();
     setSaving(true);
     try {
-      const featuresPayload = features.filter(f => f.value.trim()).map(f => f.value);
+      // Build features object
+      const featuresPayload = {};
+      features.forEach(f => {
+        if (f.key) featuresPayload[f.key] = f.value;
+      });
+
       const payload = { ...vals, features: featuresPayload, durationDays: vals.duration };
       if (editingPlan) {
         await adminService.updatePlan(editingPlan.id, payload);
@@ -95,8 +112,8 @@ export default function PlansPage() {
         {plans.map((plan) => {
           const color = PLAN_COLORS[plan.code] || '#6C63FF';
           const isHighlight = plan.code === 'PREMIUM_1Y';
-          const rawFeatures = typeof plan.features === 'string' ? JSON.parse(plan.features) : (plan.features || []);
-          const featureList = Array.isArray(rawFeatures) ? rawFeatures : Object.entries(rawFeatures).map(([k, v]) => `${k}: ${v}`);
+          const rawFeatures = typeof plan.features === 'string' ? JSON.parse(plan.features) : (plan.features || {});
+          const featureList = Object.entries(rawFeatures);
 
           return (
             <Card key={plan.id}
@@ -125,12 +142,17 @@ export default function PlansPage() {
                 )}
               </div>
               <div style={{ marginBottom: 18 }}>
-                {featureList.slice(0, 5).map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
-                    <CheckOutlined style={{ color, fontSize: 13, marginTop: 2, flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, color: '#444' }}>{typeof f === 'string' ? f : JSON.stringify(f)}</span>
-                  </div>
-                ))}
+                {featureList.slice(0, 5).map(([k, v], i) => {
+                  const meta = AVAILABLE_FEATURES.find(m => m.key === k);
+                  const label = meta ? meta.label : k;
+                  const displayValue = meta?.type === 'boolean' ? (v ? 'Enabled' : 'Disabled') : v;
+                  return (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+                      <CheckOutlined style={{ color, fontSize: 13, marginTop: 2, flexShrink: 0 }} />
+                      <span style={{ fontSize: 13, color: '#444' }}><strong>{label}:</strong> {displayValue}</span>
+                    </div>
+                  );
+                })}
               </div>
               <Divider style={{ margin: '12px 0' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -165,12 +187,41 @@ export default function PlansPage() {
           </Form.Item>
           <Divider style={{ margin: '8px 0 16px' }} />
           <div style={{ marginBottom: 12, fontWeight: 600, fontSize: 13 }}>Features</div>
-          {features.map((f) => (
-            <div key={f.id} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-              <Input value={f.value} onChange={(e) => updateFeature(f.id, e.target.value)} placeholder="Feature description..." style={{ borderRadius: 8 }} />
-              <Button danger icon={<DeleteOutlined />} onClick={() => removeFeature(f.id)} style={{ borderRadius: 8, flexShrink: 0 }} />
-            </div>
-          ))}
+          {features.map((f, index) => {
+            const meta = AVAILABLE_FEATURES.find(m => m.key === f.key);
+            
+            return (
+              <div key={index} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                <select 
+                  value={f.key} 
+                  onChange={(e) => updateFeatureKey(index, e.target.value)}
+                  style={{ flex: 1, padding: '4px 11px', borderRadius: 8, border: '1px solid #d9d9d9' }}
+                >
+                  <option value="" disabled>Select a feature</option>
+                  {AVAILABLE_FEATURES.map(af => (
+                    <option key={af.key} value={af.key} disabled={features.some((existing, i) => existing.key === af.key && i !== index)}>{af.label}</option>
+                  ))}
+                </select>
+                
+                {meta && meta.type === 'number' && (
+                  <InputNumber 
+                    value={f.value} 
+                    onChange={(v) => updateFeatureValue(index, v)} 
+                    style={{ width: 100, borderRadius: 8 }} 
+                  />
+                )}
+                {meta && meta.type === 'boolean' && (
+                  <Switch 
+                    checked={f.value} 
+                    onChange={(checked) => updateFeatureValue(index, checked)} 
+                    style={{ backgroundColor: f.value ? '#6C63FF' : undefined }} 
+                  />
+                )}
+                
+                <Button danger icon={<DeleteOutlined />} onClick={() => removeFeature(index)} style={{ borderRadius: 8, flexShrink: 0 }} />
+              </div>
+            );
+          })}
           <Button block icon={<PlusOutlined />} onClick={addFeature} style={{ borderRadius: 8, marginBottom: 16 }}>+ Add Feature</Button>
           <Form.Item name="isActive" label="Status" valuePropName="checked" initialValue={true}>
             <Switch checkedChildren="Active" unCheckedChildren="Inactive" style={{ backgroundColor: '#6C63FF' }} />

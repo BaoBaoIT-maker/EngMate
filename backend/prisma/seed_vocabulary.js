@@ -124,14 +124,15 @@ async function main() {
   console.log('Start seeding topics and vocabularies...');
   
   for (const topicData of topicsData) {
-    const { vocabularies, ...topicMeta } = topicData;
+    const { vocabularies, category, ...topicMeta } = topicData;
     
-    // Tạo Topic
+    // Tạo Topic — schema dùng categoryCode thay vì category
     const topic = await prisma.vocabularyTopic.upsert({
       where: { name: topicMeta.name },
       update: {},
       create: {
         ...topicMeta,
+        categoryCode: category || 'GENERAL',
         wordCount: vocabularies.length
       },
     });
@@ -139,15 +140,17 @@ async function main() {
     // Tạo Vocabularies liên kết với Topic này
     let count = 0;
     for (const vocab of vocabularies) {
+      const { category: vocabCategory, ...vocabMeta } = vocab;
       // Dùng upsert dựa vào trường hợp. Bảng chưa có @unique trên word, nhưng để an toàn cứ dùng findFirst
       const existing = await prisma.systemVocabulary.findFirst({
-        where: { word: vocab.word, topicId: topic.id }
+        where: { word: vocabMeta.word, topicId: topic.id }
       });
       
       if (!existing) {
         await prisma.systemVocabulary.create({
           data: {
-            ...vocab,
+            ...vocabMeta,
+            categoryCode: vocabCategory || category || 'GENERAL',
             topicId: topic.id
           }
         });

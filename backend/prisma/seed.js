@@ -7,12 +7,15 @@ const { PrismaClient } = prismaClientPkg;
 const databaseUrl = process.env.DATABASE_URL;
 const parsedUrl = new URL(databaseUrl);
 
-const adapter = new PrismaMariaDb({
-  host: parsedUrl.hostname,
-  user: decodeURIComponent(parsedUrl.username),
-  password: decodeURIComponent(parsedUrl.password),
-  database: parsedUrl.pathname.replace(/^\//, ''),
-});
+// TiDB Cloud yêu cầu SSL — thêm ssl=true vào URL cho mariadb driver
+const isTiDB = parsedUrl.hostname.includes('tidbcloud.com');
+if (isTiDB || parsedUrl.searchParams.get('sslaccept') === 'strict') {
+  parsedUrl.searchParams.delete('sslaccept');
+  parsedUrl.searchParams.set('ssl', 'true');
+}
+const connectionUrl = parsedUrl.toString();
+
+const adapter = new PrismaMariaDb(connectionUrl);
 
 const prisma = new PrismaClient({ adapter });
 

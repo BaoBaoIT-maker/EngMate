@@ -1,5 +1,15 @@
 import * as gameService from '../services/game.service.js';
 import { sendSuccess } from '../utils/response.js';
+import prisma from '../config/prisma.js';
+
+export const getGameConfigs = async (req, res, next) => {
+  try {
+    const configs = await prisma.gameConfig.findMany();
+    return sendSuccess(res, configs);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getMatchingData = async (req, res, next) => {
   try {

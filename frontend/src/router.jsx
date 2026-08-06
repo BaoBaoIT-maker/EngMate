@@ -26,6 +26,7 @@ import AdminVocabularyPage from './pages/admin/VocabularyPage';
 import AdminPlansPage from './pages/admin/PlansPage';
 import AdminGamesPage from './pages/admin/GamesPage';
 import AdminTransactionsPage from './pages/admin/TransactionsPage';
+import AdminSupportChatPage from './pages/admin/SupportChatPage';
 
 const router = createBrowserRouter([
   {
@@ -122,6 +123,7 @@ const router = createBrowserRouter([
       { path: 'plans', element: <AdminPlansPage /> },
       { path: 'games', element: <AdminGamesPage /> },
       { path: 'transactions', element: <AdminTransactionsPage /> },
+      { path: 'support', element: <AdminSupportChatPage /> },
     ]
   }
 ]);

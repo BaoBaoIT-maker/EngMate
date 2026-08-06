@@ -2,41 +2,52 @@ import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import useAuthStore from '../store/useAuthStore';
 
-// URL của backend (thường là http://localhost:8080 trong dev)
-const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:8080';
+// URL của backend — bỏ phần /api vì socket kết nối thẳng vào server
+const SOCKET_URL = import.meta.env.VITE_API_BASE_URL
+  ? import.meta.env.VITE_API_BASE_URL.replace('/api', '')
+  : 'http://localhost:8080';
 
 export function useSocket() {
   const { user } = useAuthStore();
-  const socketRef = useRef(null);
+  const [socketInstance, setSocketInstance] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Chỉ kết nối khi đã có user đăng nhập
+    // Chỉ kết nối khi đã đăng nhập
     if (!user) return;
 
-    // Thay vì đọc JWT (chúng ta dùng HttpOnly Cookie nên không đọc được bằng JS),
-    // ta cứ set withCredentials = true để trình duyệt tự gửi Cookie lên.
-    socketRef.current = io(SOCKET_URL, {
-      withCredentials: true,
-      transports: ['websocket', 'polling'], // Ưu tiên websocket
+    // Tạo kết nối socket — trình duyệt sẽ tự gửi Cookie kèm theo nhờ withCredentials: true
+    const socket = io(SOCKET_URL, {
+      withCredentials: true,        // Gửi HttpOnly Cookie (accessToken) lên server
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 2000,
+      reconnectionAttempts: 5,
     });
 
-    socketRef.current.on('connect', () => {
-      console.log('Socket connected:', socketRef.current.id);
+    socket.on('connect', () => {
+      console.log('[Socket] Connected:', socket.id);
       setIsConnected(true);
     });
 
-    socketRef.current.on('disconnect', () => {
-      console.log('Socket disconnected');
+    socket.on('disconnect', (reason) => {
+      console.log('[Socket] Disconnected:', reason);
       setIsConnected(false);
     });
 
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
-  }, [user]);
+    socket.on('connect_error', (err) => {
+      // Không spam console — chỉ log 1 lần
+      console.warn('[Socket] Connection error:', err.message);
+    });
 
-  return { socket: socketRef.current, isConnected };
+    setSocketInstance(socket);
+
+    return () => {
+      socket.disconnect();
+      setSocketInstance(null);
+      setIsConnected(false);
+    };
+  }, [user?.id]); // Chỉ re-connect khi user thay đổi (đăng nhập / đăng xuất)
+
+  return { socket: socketInstance, isConnected };
 }

@@ -23,11 +23,13 @@ export default function SpeakingCoachPage() {
   const [messages, setMessages] = useState([]);
   const [micState, setMicState] = useState('idle'); // idle, recording, thinking, speaking
   const [input, setInput] = useState('');
+  const [rateLimitCountdown, setRateLimitCountdown] = useState(0); // giây đếm ngược
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
+  const countdownTimerRef = useRef(null);
 
   // Khởi tạo Speech Recognition (Web Speech API)
   useEffect(() => {
@@ -101,6 +103,23 @@ export default function SpeakingCoachPage() {
   // Cuộn xuống cuối
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, input, micState]);
 
+  // Cleanup countdown timer khi unmount
+  useEffect(() => () => clearInterval(countdownTimerRef.current), []);
+
+  const startCountdown = (seconds) => {
+    setRateLimitCountdown(seconds);
+    clearInterval(countdownTimerRef.current);
+    countdownTimerRef.current = setInterval(() => {
+      setRateLimitCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownTimerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const toggleMic = () => {
     if (!recognitionRef.current) return alert("Trình duyệt không hỗ trợ ghi âm.");
     
@@ -155,6 +174,16 @@ export default function SpeakingCoachPage() {
         body: JSON.stringify({ sessionId: currentSessionId, content: textToSend }),
         credentials: 'include' // Must include credentials to send HttpOnly cookies
       });
+
+      if (response.status === 429) {
+        const errorData = await response.json();
+        if (errorData.message === 'RATE_LIMITED') {
+          setMicState('idle');
+          setMessages(m => m.filter(msg => msg.id !== tempUserMsg.id));
+          startCountdown(errorData.retryAfter || 30);
+          return;
+        }
+      }
 
       if (response.status === 403) {
         const errorData = await response.json();
@@ -306,10 +335,11 @@ export default function SpeakingCoachPage() {
       {/* Input footer */}
       <div style={{ ...card(t), padding: '1rem', display: 'flex', gap: '0.75rem', alignItems: 'center', position: 'relative' }}>
         <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendText()}
-          placeholder="Nhập câu hoặc hỏi AI Coach..."
-          style={{ flex: 1, background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, borderRadius: 14, padding: '0.75rem 1.25rem', fontFamily: 'inherit', fontSize: '0.95rem', color: t.text, outline: 'none', transition: 'border-color 0.2s' }} />
+          disabled={rateLimitCountdown > 0 || micState === 'thinking'}
+          placeholder={rateLimitCountdown > 0 ? `Vui lòng chờ ${rateLimitCountdown}s để nhắn tiếp...` : "Nhập câu hoặc hỏi AI Coach..."}
+          style={{ flex: 1, background: rateLimitCountdown > 0 ? 'rgba(255,0,0,0.05)' : t.inputBg, border: `1.5px solid ${rateLimitCountdown > 0 ? '#ef4444' : t.inputBorder}`, borderRadius: 14, padding: '0.75rem 1.25rem', fontFamily: 'inherit', fontSize: '0.95rem', color: rateLimitCountdown > 0 ? '#ef4444' : t.text, outline: 'none', transition: 'border-color 0.2s' }} />
 
-        <button onClick={sendText} disabled={micState === 'thinking'} style={{ width: 44, height: 44, borderRadius: 12, border: 'none', background: t.goldBg, cursor: micState === 'thinking' ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: micState === 'thinking' ? 0.5 : 1 }}>
+        <button onClick={sendText} disabled={micState === 'thinking' || rateLimitCountdown > 0} style={{ width: 44, height: 44, borderRadius: 12, border: 'none', background: t.goldBg, cursor: (micState === 'thinking' || rateLimitCountdown > 0) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (micState === 'thinking' || rateLimitCountdown > 0) ? 0.5 : 1 }}>
           {Icon.send(t.gold)}
         </button>
 
@@ -319,12 +349,12 @@ export default function SpeakingCoachPage() {
             <div style={{ position: 'absolute', inset: -8, borderRadius: '50%', border: `2px solid ${micColor}`, animation: 'mic-ring 1.2s ease-out infinite' }} />
             <div style={{ position: 'absolute', inset: -14, borderRadius: '50%', border: `2px solid ${micColor}`, animation: 'mic-ring2 1.2s ease-out infinite 0.3s' }} />
           </>}
-          <button onClick={toggleMic} disabled={micState === 'thinking'} style={{
-            width: 52, height: 52, borderRadius: '50%', border: 'none', cursor: micState === 'thinking' ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          <button onClick={toggleMic} disabled={micState === 'thinking' || rateLimitCountdown > 0} style={{
+            width: 52, height: 52, borderRadius: '50%', border: 'none', cursor: (micState === 'thinking' || rateLimitCountdown > 0) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: micState === 'idle' ? `linear-gradient(135deg, ${t.gold}, ${t.goldDark})` : micState === 'recording' ? 'linear-gradient(135deg,#EF4444,#DC2626)' : micState === 'speaking' ? 'linear-gradient(135deg,#10B981,#059669)' : 'linear-gradient(135deg,#8B5CF6,#6D28D9)',
             animation: micState === 'idle' ? 'mic-breathe 2.5s ease-in-out infinite' : 'none',
             transition: 'background 0.3s',
-            opacity: micState === 'thinking' ? 0.5 : 1,
+            opacity: (micState === 'thinking' || rateLimitCountdown > 0) ? 0.5 : 1,
           }}>
             {micState === 'recording' ? <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> : Icon.mic('#fff')}
           </button>

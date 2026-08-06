@@ -1,1 +1,27 @@
 Figma
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files (KHÔNG bao giờ push lên GitHub)
+.env
+.env.local
+.env.production
+**/.env
+**/.env.local
+
+# Build outputs
+frontend/dist/
+frontend/.vite/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local uploads
+backend/uploads/

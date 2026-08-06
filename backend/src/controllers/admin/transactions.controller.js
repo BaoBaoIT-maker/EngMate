@@ -24,6 +24,7 @@ export const listTransactions = async (req, res) => {
         orderBy: { transactionDate: 'desc' },
         include: {
           user: { select: { id: true, email: true, profile: { select: { username: true } } } },
+          plan: { select: { id: true, name: true, code: true } },
         },
       }),
       prisma.transaction.count({ where }),

@@ -8,6 +8,7 @@ import statRoutes from './stat.routes.js';
 import gameRoutes from './game.routes.js';
 import paymentRoutes from './payment.routes.js';
 import adminRoutes from './admin.routes.js';
+import supportRoutes from './support.routes.js';
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use('/stats', statRoutes);
 router.use('/games', gameRoutes);
 router.use('/payment', paymentRoutes);
 router.use('/admin', adminRoutes);
+router.use('/support', supportRoutes);
 
 export default router;

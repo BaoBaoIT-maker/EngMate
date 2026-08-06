@@ -110,17 +110,13 @@ export default function RegisterPage() {
         Tạo tài khoản miễn phí chỉ trong 30 giây.
       </p>
 
-      {/* Social buttons — 2 cột cân xứng */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: 12, overflow: 'hidden',
-          background: '#fff', minHeight: 44,
-        }}>
+      {/* Social buttons — xếp dọc */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem', width: '100%' }}>
+        <div style={{ width: '100%', overflow: 'hidden', borderRadius: 20 }}>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => setError('Đăng ký Google thất bại')}
-            width={160}
+            width="100%"
             size="large"
             shape="rectangular"
             theme="outline"

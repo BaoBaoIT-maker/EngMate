@@ -43,6 +43,24 @@ paymentEvents.on('PAYMENT_SUCCESS', async ({ userId, planId, amount, transaction
     // Xóa Redis cache để Frontend polling nhận data mới ngay lập tức
     await cacheDelete(`engmate:user:me:${userId}`);
 
+    // 4. Lưu lại lịch sử Giao dịch (Transaction)
+    try {
+      await prisma.transaction.create({
+        data: {
+          userId,
+          planId,
+          sepayTranId: String(transactionCode),
+          amount: amount,
+          code: `EMVIP${userId}P${planId}T${Date.now()}`,
+          gateway: 'SEPAY',
+          transactionDate: new Date(),
+          status: 'SUCCESS'
+        }
+      });
+    } catch (txnError) {
+      console.error('[Webhook] Lỗi lưu Transaction lịch sử:', txnError.message);
+    }
+
     // Notify admins about new transaction
     try {
       const { getIO } = await import('../../config/socket.js');

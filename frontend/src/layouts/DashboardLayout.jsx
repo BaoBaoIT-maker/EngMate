@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useThemeStore from '../store/useThemeStore';
 import { Icon } from '../components/icons';
 import useAuthStore from '../store/useAuthStore';
+import SupportChatWidget from '../components/support/SupportChatWidget';
 
 const NAV = [
   { id: '/dashboard', label: 'Trang chủ', icon: Icon.home },
@@ -180,6 +181,7 @@ export default function DashboardLayout() {
       </main>
 
       {isMobile && <BottomNav t={t} user={user} />}
+      <SupportChatWidget />
     </div>
   );
 }

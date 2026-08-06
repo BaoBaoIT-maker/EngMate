@@ -94,25 +94,38 @@ const storeAndSendVerificationOtp = async ({ user, email, username }) => {
 };
 
 const createDefaultRelations = async (userId, defaults = {}) => {
-  await upsertUserProfile(userId, {
-    username: defaults.username,
-    avatarUrl: defaults.avatarUrl || null,
-    bio: defaults.bio || null,
-  });
+  const user = await findUserById(userId);
 
-  await upsertUserSetting(userId, {
-    theme: 'LIGHT',
-    receiveEmails: true,
-    dailyWordGoal: 15,
-    onboardingDone: false,
-  });
+  if (!user?.profile) {
+    await createUserProfile({
+      userId,
+      username: defaults.username || 'User',
+      avatarUrl: defaults.avatarUrl || null,
+      bio: defaults.bio || null,
+    });
+  } else if (defaults.avatarUrl && !user.profile.avatarUrl) {
+    await updateUserProfile(userId, { avatarUrl: defaults.avatarUrl });
+  }
 
-  await upsertUserSkill(userId, {
-    currentLevel: 'A1',
-    vocabularyScore: 0,
-    grammarScore: 0,
-    speakingScore: 0,
-  });
+  if (!user?.setting) {
+    await createUserSetting({
+      userId,
+      theme: 'LIGHT',
+      receiveEmails: true,
+      dailyWordGoal: 15,
+      onboardingDone: false,
+    });
+  }
+
+  if (!user?.skill) {
+    await createUserSkill({
+      userId,
+      currentLevel: 'A1',
+      vocabularyScore: 0,
+      grammarScore: 0,
+      speakingScore: 0,
+    });
+  }
 };
 
 const createVerifiedAccountRelations = async (userId, username, avatarUrl = null) => {

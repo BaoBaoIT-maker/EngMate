@@ -13,3 +13,6 @@ export const authorizeRoles = (...allowedRoles) => {
     return next();
   };
 };
+
+// Shorthand middleware: chỉ cho Admin
+export const requireAdmin = authorizeRoles('ADMIN');

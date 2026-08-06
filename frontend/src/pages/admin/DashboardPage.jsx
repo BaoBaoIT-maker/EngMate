@@ -4,7 +4,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import * as adminService from '../../services/adminService';
 import { useSocket } from '../../hooks/useSocket';
 
@@ -39,21 +39,32 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const { socket } = useSocket();
 
+  const fetchAll = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [ovRes, growthRes, revRes] = await Promise.all([
+        adminService.getOverview(),
+        adminService.getUserGrowth(growthRange),
+        adminService.getRevenue(revenueRange),
+      ]);
+      setOverview(ovRes?.data || ovRes);
+      setGrowthData(growthRes?.data || growthRes || []);
+      setRevenueData(revRes?.data || revRes || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [growthRange, revenueRange]);
+
   useEffect(() => {
     if (socket) {
       socket.on('NEW_USER_REGISTERED', () => {
-        setOverview(prev => prev ? {
-          ...prev,
-          totalUsers: prev.totalUsers + 1,
-          newUsersToday: prev.newUsersToday + 1
-        } : prev);
+        fetchAll();
       });
 
       socket.on('NEW_TRANSACTION', (amount) => {
-        setOverview(prev => prev ? {
-          ...prev,
-          totalRevenue: Number(prev.totalRevenue) + Number(amount)
-        } : prev);
+        fetchAll();
       });
 
       return () => {
@@ -61,28 +72,11 @@ export default function DashboardPage() {
         socket.off('NEW_TRANSACTION');
       };
     }
-  }, [socket]);
+  }, [socket, fetchAll]);
 
   useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        setLoading(true);
-        const [ovRes, growthRes, revRes] = await Promise.all([
-          adminService.getOverview(),
-          adminService.getUserGrowth(growthRange),
-          adminService.getRevenue(revenueRange),
-        ]);
-        setOverview(ovRes?.data || ovRes);
-        setGrowthData(growthRes?.data || growthRes || []);
-        setRevenueData(revRes?.data || revRes || []);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchAll();
-  }, []);
+  }, [fetchAll]);
 
   useEffect(() => {
     adminService.getUserGrowth(growthRange).then(res => setGrowthData(res?.data || res || [])).catch(console.error);
@@ -160,7 +154,7 @@ export default function DashboardPage() {
         <Row gutter={32} align="middle">
           <Col xs={24} md={10} style={{ display: 'flex', justifyContent: 'center' }}>
             <PieChart width={240} height={240}>
-              <Pie data={planBreakdown.map((p, i) => ({ name: p.planName || p.name, value: p._count?.id || p.count || 0, color: PLAN_COLORS[i % PLAN_COLORS.length] }))}
+              <Pie data={planBreakdown.map((p, i) => ({ name: p.plan?.name || p.planName || p.name || 'Unknown', value: p.count || p._count?.id || 0, color: PLAN_COLORS[i % PLAN_COLORS.length] }))}
                 cx={115} cy={115} innerRadius={68} outerRadius={110} dataKey="value" labelLine={false} label={renderCustomLabel}>
                 {planBreakdown.map((_, i) => <Cell key={i} fill={PLAN_COLORS[i % PLAN_COLORS.length]} />)}
               </Pie>
@@ -178,14 +172,15 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {planBreakdown.map((plan, i) => {
-                  const count = plan._count?.id || plan.count || 0;
+                  const planName = plan.plan?.name || plan.planName || plan.name || 'Unknown';
+                  const count = plan.count || plan._count?.id || 0;
                   const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
                   return (
                     <tr key={i} style={{ borderBottom: '1px solid #fafafa' }}>
                       <td style={{ padding: '12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: PLAN_COLORS[i % PLAN_COLORS.length] }} />
-                          <span style={{ fontWeight: 500, fontSize: 14 }}>{plan.planName || plan.name || 'Free'}</span>
+                          <span style={{ fontWeight: 500, fontSize: 14 }}>{planName}</span>
                         </div>
                       </td>
                       <td style={{ padding: '12px', textAlign: 'right', fontWeight: 600 }}>{count.toLocaleString()}</td>
@@ -201,6 +196,7 @@ export default function DashboardPage() {
                   );
                 })}
               </tbody>
+
             </table>
           </Col>
         </Row>
@@ -216,10 +212,10 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={growthData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#999' }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#999' }} tickLine={false} axisLine={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#999' }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: '#999' }} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.12)' }} formatter={(val) => [val, 'New Users']} />
-                <Line type="monotone" dataKey="users" stroke="#6C63FF" strokeWidth={2.5} dot={{ fill: '#6C63FF', r: 4 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="count" stroke="#6C63FF" strokeWidth={2.5} dot={{ fill: '#6C63FF', r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </Card>
@@ -232,10 +228,10 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#999' }} tickLine={false} axisLine={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#999' }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#999' }} tickLine={false} axisLine={false} tickFormatter={formatVND} />
                 <Tooltip contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.12)' }} formatter={(val) => [`${val?.toLocaleString()} VND`, 'Revenue']} />
-                <Bar dataKey="revenue" fill="#6C63FF" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="total" fill="#6C63FF" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Card>

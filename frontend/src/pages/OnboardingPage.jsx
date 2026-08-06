@@ -264,7 +264,7 @@ const STEPS = [
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { setUser, fetchMe } = useAuthStore();
   const { isDark } = useThemeStore();
 
   const [step, setStep] = useState(0);
@@ -303,9 +303,9 @@ export default function OnboardingPage() {
         targetScore: pathConfig[cat]?.targetScore || null,
       }));
 
-      const res = await axiosInstance.post('/users/me/onboarding', { paths, dailyWordGoal: dailyGoal });
-      const updatedUser = res.data;
-      if (updatedUser) setUser(updatedUser);
+      await axiosInstance.post('/users/me/onboarding', { paths, dailyWordGoal: dailyGoal });
+      // Dùng fetchMe để lấy lại user mới nhất từ server (có onboardingDone = true)
+      await fetchMe();
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
@@ -408,7 +408,18 @@ export default function OnboardingPage() {
         {/* Skip */}
         <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
           <button
-            onClick={() => navigate('/dashboard', { replace: true })}
+            onClick={async () => {
+              setLoading(true);
+              try {
+                // Đánh dấu đã xong Onboarding dù chưa chọn gì
+                await axiosInstance.patch('/users/me/settings', { onboardingDone: true });
+                await fetchMe();
+                navigate('/dashboard', { replace: true });
+              } catch (err) {
+                console.error('Skip onboarding failed:', err);
+                navigate('/dashboard', { replace: true });
+              }
+            }}
             style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem', cursor: 'pointer', fontFamily: 'inherit' }}
             onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.25)')}

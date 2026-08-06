@@ -5,7 +5,7 @@ import { Avatar, Badge, Dropdown, Space, Tooltip } from 'antd';
 import {
   DashboardOutlined, UserOutlined, BookOutlined, CrownOutlined,
   PlayCircleOutlined, SwapOutlined, LogoutOutlined, BulbOutlined,
-  BellOutlined, SettingOutlined, DownOutlined,
+  BellOutlined, SettingOutlined, DownOutlined, MessageOutlined,
 } from '@ant-design/icons';
 import useAuthStore from '../store/useAuthStore';
 import 'antd/dist/reset.css';
@@ -38,6 +38,7 @@ const navItems = [
   { key: 'plans', label: 'Plans', icon: <CrownOutlined />, path: '/admin/plans' },
   { key: 'games', label: 'Games', icon: <PlayCircleOutlined />, path: '/admin/games' },
   { key: 'transactions', label: 'Transactions', icon: <SwapOutlined />, path: '/admin/transactions' },
+  { key: 'support', label: 'Hỗ trợ', icon: <MessageOutlined />, path: '/admin/support' },
 ];
 
 const pageTitles = {
@@ -47,6 +48,7 @@ const pageTitles = {
   plans: 'Plans Management',
   games: 'Games Configuration',
   transactions: 'Transactions',
+  support: 'Hỗ trợ người dùng',
 };
 
 function Sidebar({ currentPage, onNavigate }) {
@@ -184,6 +186,7 @@ export default function AdminLayout() {
     if (path.includes('/admin/plans')) return 'plans';
     if (path.includes('/admin/games')) return 'games';
     if (path.includes('/admin/transactions')) return 'transactions';
+    if (path.includes('/admin/support')) return 'support';
     return 'dashboard';
   };
 

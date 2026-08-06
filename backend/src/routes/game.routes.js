@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
+router.get('/configs', gameController.getGameConfigs);
 router.get('/matching/data', gameController.getMatchingData);
 router.get('/fill-blank/data', gameController.getFillBlankData);
 router.post('/submit', gameController.submitGameResult);

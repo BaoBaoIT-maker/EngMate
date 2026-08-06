@@ -11,80 +11,81 @@ generator client {
 // ==========================================
 
 model User {
-  id            Int            @id @default(autoincrement())
-  email         String         @unique @db.VarChar(100)
-  passwordHash  String?        @map("password_hash") @db.VarChar(255)
-  role          Role           @default(USER)
-  isVerified    Boolean        @default(false) @map("is_verified")
-  verifiedAt    DateTime?      @map("verified_at")
+  id           Int       @id @default(autoincrement())
+  email        String    @unique @db.VarChar(100)
+  passwordHash String?   @map("password_hash") @db.VarChar(255)
+  role         Role      @default(USER)
+  isVerified   Boolean   @default(false) @map("is_verified")
+  verifiedAt   DateTime? @map("verified_at")
 
   // Auth bên thứ 3 (Google, Facebook)
-  provider      AuthProvider   @default(LOCAL)
-  providerId    String?        @map("provider_id") @db.VarChar(255)
+  provider   AuthProvider @default(LOCAL)
+  providerId String?      @map("provider_id") @db.VarChar(255)
 
-  isBanned      Boolean        @default(false) @map("is_banned")
-  bannedAt      DateTime?      @map("banned_at")
+  isBanned Boolean   @default(false) @map("is_banned")
+  bannedAt DateTime? @map("banned_at")
 
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Quan hệ 1-1 (Tách bảng để tối ưu hiệu suất)
-  profile         UserProfile?
-  setting         UserSetting?
-  skill           UserSkill?
-  subscription    UserSubscription?
+  profile      UserProfile?
+  setting      UserSetting?
+  skill        UserSkill?
+  subscription UserSubscription?
 
   // Quan hệ 1-Nhiều
-  flashcards      Flashcard[]
-  chatSessions    ChatSession[]
-  transactions    Transaction[]
-  learningPaths   UserLearningPath[]
+  flashcards          Flashcard[]
+  chatSessions        ChatSession[]
+  transactions        Transaction[]
+  learningPaths       UserLearningPath[]
+  supportConversation SupportConversation?
 
   @@map("users")
 }
 
 model UserProfile {
-  userId        Int            @id @map("user_id")
-  username      String         @db.VarChar(50)
-  avatarUrl     String?        @map("avatar_url") @db.Text
-  bio           String?        @db.Text
-  updatedAt     DateTime       @updatedAt @map("updated_at")
+  userId    Int      @id @map("user_id")
+  username  String   @db.VarChar(50)
+  avatarUrl String?  @map("avatar_url") @db.Text
+  bio       String?  @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_profiles")
 }
 
 model UserSetting {
-  userId          Int            @id @map("user_id")
-  theme           ThemeMode      @default(LIGHT)
-  receiveEmails   Boolean        @default(true)  @map("receive_emails")
-  dailyWordGoal   Int            @default(15)    @map("daily_word_goal")
-  onboardingDone  Boolean        @default(false) @map("onboarding_done")
+  userId         Int       @id @map("user_id")
+  theme          ThemeMode @default(LIGHT)
+  receiveEmails  Boolean   @default(true) @map("receive_emails")
+  dailyWordGoal  Int       @default(15) @map("daily_word_goal")
+  onboardingDone Boolean   @default(false) @map("onboarding_done")
 
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
 }
 
 model UserSkill {
-  userId          Int            @id @map("user_id")
-  currentLevel    EnglishLevel   @default(A1) @map("current_level")
-  vocabularyScore Int            @default(0) @map("vocabulary_score")
-  grammarScore    Int            @default(0) @map("grammar_score")
-  speakingScore   Int            @default(0) @map("speaking_score")
+  userId          Int          @id @map("user_id")
+  currentLevel    EnglishLevel @default(A1) @map("current_level")
+  vocabularyScore Int          @default(0) @map("vocabulary_score")
+  grammarScore    Int          @default(0) @map("grammar_score")
+  speakingScore   Int          @default(0) @map("speaking_score")
 
-  streakDays      Int            @default(0) @map("streak_days")
-  maxStreak       Int            @default(0) @map("max_streak")
-  totalExp        Int            @default(0) @map("total_exp")
-  lastActiveDate  DateTime?      @map("last_active_date")
+  streakDays     Int       @default(0) @map("streak_days")
+  maxStreak      Int       @default(0) @map("max_streak")
+  totalExp       Int       @default(0) @map("total_exp")
+  lastActiveDate DateTime? @map("last_active_date")
 
-  aiChatCountToday Int           @default(0) @map("ai_chat_count_today")
-  lastAiChatDate   DateTime?     @map("last_ai_chat_date")
+  aiChatCountToday Int       @default(0) @map("ai_chat_count_today")
+  lastAiChatDate   DateTime? @map("last_ai_chat_date")
 
-  updatedAt       DateTime       @updatedAt @map("updated_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_skills")
 }
@@ -100,37 +101,38 @@ model SubscriptionPlan {
   createdAt    DateTime @default(now()) @map("created_at")
 
   subscriptions UserSubscription[]
+  transactions  Transaction[]
 
   @@map("subscription_plans")
 }
 
 model UserSubscription {
-  userId         Int          @id @map("user_id")
-  planId         Int          @map("plan_id")
-  startDate      DateTime     @default(now()) @map("start_date")
-  endDate        DateTime?    @map("end_date")
-  isValid        Boolean      @default(true) @map("is_valid")
+  userId    Int       @id @map("user_id")
+  planId    Int       @map("plan_id")
+  startDate DateTime  @default(now()) @map("start_date")
+  endDate   DateTime? @map("end_date")
+  isValid   Boolean   @default(true) @map("is_valid")
 
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan           SubscriptionPlan @relation(fields: [planId], references: [id])
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
 
   @@map("user_subscriptions")
 }
 
 // 1 user có thể học nhiều khóa cùng lúc, mỗi khóa có trình độ và mục tiêu riêng
 model UserLearningPath {
-  id            Int          @id @default(autoincrement())
-  userId        Int          @map("user_id")
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
   // Lưu code của Category (VD: "GENERAL", "TOEIC", "IELTS")
   // Dùng String thay vì FK để tránh JOIN và linh hoạt khi thêm category mới
-  categoryCode  String       @map("category_code") @db.VarChar(50)
-  currentLevel  String       @default("A1") @map("current_level") @db.VarChar(50)
-  targetScore   String?      @map("target_score") @db.VarChar(50)
-  isActive      Boolean      @default(true) @map("is_active")
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @updatedAt @map("updated_at")
+  categoryCode String   @map("category_code") @db.VarChar(50)
+  currentLevel String   @default("A1") @map("current_level") @db.VarChar(50)
+  targetScore  String?  @map("target_score") @db.VarChar(50)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, categoryCode])
   @@map("user_learning_paths")
@@ -143,8 +145,8 @@ model UserLearningPath {
 // Bảng Category động — Admin có thể thêm/sửa/ẩn mà không cần migration
 model Category {
   id          Int      @id @default(autoincrement())
-  code        String   @unique @db.VarChar(50)  // "GENERAL", "TOEIC", "IELTS", ...
-  name        String   @db.VarChar(100)          // "Giao tiếp chung", "Luyện thi TOEIC", ...
+  code        String   @unique @db.VarChar(50) // "GENERAL", "TOEIC", "IELTS", ...
+  name        String   @db.VarChar(100) // "Giao tiếp chung", "Luyện thi TOEIC", ...
   description String?  @db.Text
   isActive    Boolean  @default(true) @map("is_active")
   sortOrder   Int      @default(0) @map("sort_order")
@@ -158,15 +160,15 @@ model Category {
 // ==========================================
 
 model VocabularyTopic {
-  id           Int              @id @default(autoincrement())
-  name         String           @unique @db.VarChar(100)
-  description  String?          @db.Text
-  categoryCode String           @default("GENERAL") @map("category_code") @db.VarChar(50)
-  level        EnglishLevel     @default(B1)
-  isPremium    Boolean          @default(false) @map("is_premium")
-  wordCount    Int              @default(0) @map("word_count")
-  thumbnailUrl String?          @map("thumbnail_url") @db.Text
-  createdAt    DateTime         @default(now()) @map("created_at")
+  id           Int          @id @default(autoincrement())
+  name         String       @unique @db.VarChar(100)
+  description  String?      @db.Text
+  categoryCode String       @default("GENERAL") @map("category_code") @db.VarChar(50)
+  level        EnglishLevel @default(B1)
+  isPremium    Boolean      @default(false) @map("is_premium")
+  wordCount    Int          @default(0) @map("word_count")
+  thumbnailUrl String?      @map("thumbnail_url") @db.Text
+  createdAt    DateTime     @default(now()) @map("created_at")
 
   vocabularies SystemVocabulary[]
 
@@ -174,68 +176,68 @@ model VocabularyTopic {
 }
 
 model SystemVocabulary {
-  id                 Int               @id @default(autoincrement())
-  topicId            Int?              @map("topic_id")
-  word               String            @db.VarChar(100)
-  type               String            @db.VarChar(20)
-  phonetic           String            @db.VarChar(100)
-  definitionText     String            @map("definition_text") @db.Text
-  vietnameseMeaning  String            @map("vietnamese_meaning") @db.Text
-  exampleJson        Json              @map("example_json")
-  categoryCode       String            @default("GENERAL") @map("category_code") @db.VarChar(50)
-  level              EnglishLevel      @default(B1)
+  id                Int          @id @default(autoincrement())
+  topicId           Int?         @map("topic_id")
+  word              String       @db.VarChar(100)
+  type              String       @db.VarChar(20)
+  phonetic          String       @db.VarChar(100)
+  definitionText    String       @map("definition_text") @db.Text
+  vietnameseMeaning String       @map("vietnamese_meaning") @db.Text
+  exampleJson       Json         @map("example_json")
+  categoryCode      String       @default("GENERAL") @map("category_code") @db.VarChar(50)
+  level             EnglishLevel @default(B1)
 
-  topic              VocabularyTopic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
-  flashcards         Flashcard[]
+  topic      VocabularyTopic? @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  flashcards Flashcard[]
 
   @@map("system_vocabulary")
 }
 
 model Flashcard {
-  id                 Int               @id @default(autoincrement())
-  userId             Int               @map("user_id")
-  systemVocabularyId Int?              @map("system_vocabulary_id")
+  id                 Int  @id @default(autoincrement())
+  userId             Int  @map("user_id")
+  systemVocabularyId Int? @map("system_vocabulary_id")
 
-  customWord         String?           @map("custom_word") @db.VarChar(100)
-  customMeaning      String?           @map("custom_meaning") @db.VarChar(255)
-  customDefinition   String?           @map("custom_definition") @db.Text
-  customPhonetic     String?           @map("custom_phonetic") @db.VarChar(100)
-  customExamples     Json?             @map("custom_examples")
+  customWord       String? @map("custom_word") @db.VarChar(100)
+  customMeaning    String? @map("custom_meaning") @db.VarChar(255)
+  customDefinition String? @map("custom_definition") @db.Text
+  customPhonetic   String? @map("custom_phonetic") @db.VarChar(100)
+  customExamples   Json?   @map("custom_examples")
 
-  createdAt          DateTime          @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  systemVocabulary   SystemVocabulary? @relation(fields: [systemVocabularyId], references: [id], onDelete: SetNull)
-  progress           StudyProgress?
-  reviewLogs         ReviewLog[]
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  systemVocabulary SystemVocabulary? @relation(fields: [systemVocabularyId], references: [id], onDelete: SetNull)
+  progress         StudyProgress?
+  reviewLogs       ReviewLog[]
 
   @@map("flashcards")
 }
 
 model StudyProgress {
-  flashcardId        Int               @id @map("flashcard_id")
-  boxLevel           Int               @default(1) @map("box_level")
-  easinessFactor     Float             @default(2.5) @map("easiness_factor")
-  repetitions        Int               @default(0)
-  interval           Int               @default(0)
-  nextReviewDate     DateTime          @default(now()) @map("next_review_date")
-  updatedAt          DateTime          @updatedAt @map("updated_at")
+  flashcardId    Int      @id @map("flashcard_id")
+  boxLevel       Int      @default(1) @map("box_level")
+  easinessFactor Float    @default(2.5) @map("easiness_factor")
+  repetitions    Int      @default(0)
+  interval       Int      @default(0)
+  nextReviewDate DateTime @default(now()) @map("next_review_date")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  flashcard          Flashcard         @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
 
   @@map("study_progresses")
 }
 
 model ReviewLog {
-  id              Int          @id @default(autoincrement())
-  flashcardId     Int          @map("flashcard_id")
+  id            Int      @id @default(autoincrement())
+  flashcardId   Int      @map("flashcard_id")
   // String thay cho GameType enum — linh hoạt khi thêm game mới
-  gameType        String       @map("game_type") @db.VarChar(50)
-  qualityRating   Int          @map("quality_rating")
-  isCorrect       Boolean      @map("is_correct")
-  createdAt       DateTime     @default(now()) @map("created_at")
+  gameType      String   @map("game_type") @db.VarChar(50)
+  qualityRating Int      @map("quality_rating")
+  isCorrect     Boolean  @map("is_correct")
+  createdAt     DateTime @default(now()) @map("created_at")
 
-  flashcard       Flashcard    @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
 
   @@map("review_logs")
 }
@@ -245,39 +247,73 @@ model ReviewLog {
 // ==========================================
 
 model ChatSession {
-  id             Int          @id @default(autoincrement())
-  userId         Int          @map("user_id")
-  topic          String       @db.VarChar(255)
-  categoryCode   String       @default("GENERAL") @map("category_code") @db.VarChar(50)
-  targetLevel    EnglishLevel @map("target_level")
-  aiFeedback     Json?        @map("ai_feedback")
-  createdAt      DateTime     @default(now()) @map("created_at")
+  id           Int          @id @default(autoincrement())
+  userId       Int          @map("user_id")
+  topic        String       @db.VarChar(255)
+  categoryCode String       @default("GENERAL") @map("category_code") @db.VarChar(50)
+  targetLevel  EnglishLevel @map("target_level")
+  aiFeedback   Json?        @map("ai_feedback")
+  createdAt    DateTime     @default(now()) @map("created_at")
 
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages       ChatMessage[]
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
 
   @@map("chat_sessions")
 }
 
 model ChatMessage {
-  id             Int          @id @default(autoincrement())
-  sessionId      Int          @map("session_id")
-  senderRole     SenderRole   @map("sender_role")
-  content        String       @db.Text
-  createdAt      DateTime     @default(now()) @map("created_at")
+  id         Int        @id @default(autoincrement())
+  sessionId  Int        @map("session_id")
+  senderRole SenderRole @map("sender_role")
+  content    String     @db.Text
+  createdAt  DateTime   @default(now()) @map("created_at")
 
-  session        ChatSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@map("chat_messages")
 }
 
 // ==========================================
-// 5. NHÓM THANH TOÁN (SEPAY)
+// 5. NHÓM HỖ TRỢ NGƯỜI DÙNG (LIVE CHAT)
+// ==========================================
+
+// Mỗi user có duy nhất 1 cuộc hội thoại với Admin
+model SupportConversation {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @unique @map("user_id")
+  isOpen        Boolean   @default(true) @map("is_open")
+  unreadByAdmin Int       @default(0) @map("unread_by_admin")
+  unreadByUser  Int       @default(0) @map("unread_by_user")
+  lastMessage   String?   @map("last_message") @db.Text
+  lastMessageAt DateTime? @map("last_message_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages SupportMessage[]
+
+  @@map("support_conversations")
+}
+
+model SupportMessage {
+  id             Int               @id @default(autoincrement())
+  conversationId Int               @map("conversation_id")
+  senderId       Int               @map("sender_id")
+  senderRole     SupportSenderRole @map("sender_role")
+  content        String            @db.Text
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  conversation SupportConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("support_messages")
+}
+
+// ==========================================
+// 6. NHÓM THANH TOÁN (SEPAY)
 // ==========================================
 
 model Transaction {
-  id              Int               @id @default(autoincrement())
-  userId          Int               @map("user_id")
+  id     Int @id @default(autoincrement())
+  userId Int @map("user_id")
 
   sepayTranId     String            @unique @map("sepay_tran_id") @db.VarChar(100)
   amount          Decimal           @db.Decimal(10, 2)
@@ -285,10 +321,12 @@ model Transaction {
   gateway         String            @db.VarChar(50)
   transactionDate DateTime          @map("transaction_date")
   status          TransactionStatus @default(PENDING)
+  planId          Int?              @map("plan_id")
 
-  createdAt       DateTime          @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
 
   @@map("transactions")
 }
@@ -342,6 +380,11 @@ enum EnglishLevel {
 enum SenderRole {
   USER
   MODEL
+}
+
+enum SupportSenderRole {
+  USER
+  ADMIN
 }
 
 enum TransactionStatus {

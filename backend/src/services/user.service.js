@@ -171,7 +171,15 @@ export const completeOnboarding = async (userId, { paths, dailyWordGoal }) => {
     }
   }
   await updateUserSetting(userId, settingUpdate);
+
+  // Xóa cache TRƯỜC khi đọc lại để đảm bảo fetchMe không trả về dữ liệu cũ
   await cacheDelete(userCacheKey(userId));
 
-  return getMe(userId);
+  // Trả về user mới nhất (không có cache)
+  const user = await findUserById(userId);
+  if (!user) throw new Error('User not found');
+  const payload = sanitizeUser(user);
+  // Lưu lại cache với dữ liệu mới
+  await cacheSetJson(userCacheKey(userId), payload, 300);
+  return payload;
 };
