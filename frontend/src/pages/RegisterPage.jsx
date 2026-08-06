@@ -122,6 +122,8 @@ export default function RegisterPage() {
             theme="outline"
             text="signup_with"
             locale="vi"
+            auto_select={false}
+            use_fedcm_for_prompt={false}
           />
         </div>
 

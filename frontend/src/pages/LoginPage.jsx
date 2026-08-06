@@ -119,6 +119,8 @@ export default function LoginPage() {
             theme="outline"
             text="signin_with"
             locale="vi"
+            auto_select={false}
+            use_fedcm_for_prompt={false}
           />
         </div>
 
