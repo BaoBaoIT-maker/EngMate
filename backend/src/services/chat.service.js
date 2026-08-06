@@ -54,7 +54,7 @@ export const createSession = async (userId, data) => {
       userId,
       topic,
       targetLevel,
-      category,
+      categoryCode: category,
     }
   });
 

@@ -8,8 +8,8 @@ const CACHE_TTL = 15 * 60; // 15 phút
 // GET /admin/stats/overview
 export const getOverview = async (req, res) => {
   try {
-    const cached = await cacheGetJson(CACHE_KEY_OVERVIEW);
-    if (cached) return sendSuccess(res, cached, 'Overview stats (cached)');
+    // const cached = await cacheGetJson(CACHE_KEY_OVERVIEW);
+    // if (cached) return sendSuccess(res, cached, 'Overview stats (cached)');
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);

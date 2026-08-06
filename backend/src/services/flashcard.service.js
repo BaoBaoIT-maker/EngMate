@@ -3,21 +3,21 @@ import * as statService from './stat.service.js';
 import * as aiService from './ai.service.js';
 
 export const getTopics = async (userId) => {
-  const activePaths = await prisma.userLearningPath.findMany({
-    where: { userId, isActive: true },
-    select: { categoryCode: true, currentLevel: true }
-  });
-
-  if (activePaths.length === 0) return [];
-
-  const categoryCodes = activePaths.map(p => p.categoryCode);
-
+  // Lấy toàn bộ chủ đề và map categoryCode sang category để frontend FlashcardPage đọc được
   const topics = await prisma.vocabularyTopic.findMany({
-    where: { categoryCode: { in: categoryCodes } },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    include: {
+      _count: {
+        select: { vocabularies: true }
+      }
+    }
   });
 
-  return topics;
+  return topics.map(t => ({
+    ...t,
+    category: t.categoryCode,
+    wordCount: t._count.vocabularies
+  }));
 };
 
 const formatSystemCard = (fc) => ({

@@ -48,6 +48,21 @@ export const updateCategory = async (req, res) => {
   }
 };
 
+// DELETE /admin/categories/:id
+export const deleteCategory = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const topicCount = await prisma.vocabularyTopic.count({ where: { categoryCode: (await prisma.category.findUnique({where:{id}}))?.code } });
+    if (topicCount > 0) {
+      return sendError(res, `Cannot delete category with ${topicCount} topics. Remove all topics first.`, 400);
+    }
+    await prisma.category.delete({ where: { id } });
+    return sendSuccess(res, null, 'Category deleted');
+  } catch (error) {
+    return sendError(res, error.message, 500);
+  }
+};
+
 // ─── TOPICS ────────────────────────────────────────────────────────────────────
 
 // GET /admin/topics?page=1&search=&categoryCode=
@@ -207,23 +222,33 @@ export const createVocabulary = async (req, res) => {
 };
 
 // POST /admin/topics/:topicId/vocabularies/ai-generate
-// AI tự điền thông tin từ — Admin chỉ cần nhập 1 từ tiếng Anh
+// Admin truyền vào mảng các từ, AI sinh đồng loạt — không lưu vào DB ngay, chờ Admin review
 export const aiGenerateVocabulary = async (req, res) => {
   try {
-    const { word } = req.body;
-    if (!word) return sendError(res, 'word is required', 400);
+    const { words } = req.body;
+    if (!words || !Array.isArray(words) || words.length === 0) {
+      return sendError(res, 'words must be a non-empty array of strings', 400);
+    }
+    if (words.length > 30) {
+      return sendError(res, 'Maximum 30 words per request', 400);
+    }
 
-    const aiData = await generateFlashcardContent(word);
+    const cleanedWords = words.map(w => String(w).trim()).filter(Boolean);
+    const aiResults = await generateFlashcardContent(cleanedWords);
 
-    // Trả về data để Admin review trước khi lưu, không lưu thẳng vào DB
-    return sendSuccess(res, {
-      word: aiData.word || word,
-      type: 'noun', // default, admin sẽ chỉnh
-      phonetic: aiData.phonetic || '',
-      definitionText: aiData.definition || '',
-      vietnameseMeaning: aiData.meaning || '',
-      exampleJson: aiData.examples || [],
-    }, 'AI generated vocabulary data');
+    // Map thành dạng chuẩn để frontend hiển thị trong review table
+    const formatted = Array.isArray(aiResults)
+      ? aiResults.map(item => ({
+          word: item.word || '',
+          type: 'noun',
+          phonetic: item.phonetic || '',
+          definitionText: item.definition || '',
+          vietnameseMeaning: item.meaning || '',
+          exampleJson: item.examples || [],
+        }))
+      : [];
+
+    return sendSuccess(res, formatted, `AI generated ${formatted.length} vocabulary items`);
   } catch (error) {
     return sendError(res, error.message, 500);
   }
@@ -250,6 +275,47 @@ export const updateVocabulary = async (req, res) => {
   }
 };
 
+// POST /admin/topics/:topicId/vocabularies/bulk-save
+// Lưu hàng loạt các từ Admin đã review từ kết quả AI
+export const bulkSaveVocabularies = async (req, res) => {
+  try {
+    const topicId = parseInt(req.params.topicId);
+    const { vocabularies } = req.body;
+
+    if (!Array.isArray(vocabularies) || vocabularies.length === 0) {
+      return sendError(res, 'vocabularies must be a non-empty array', 400);
+    }
+
+    const topic = await prisma.vocabularyTopic.findUnique({ where: { id: topicId } });
+    if (!topic) return sendError(res, 'Topic not found', 404);
+
+    const created = await prisma.systemVocabulary.createMany({
+      data: vocabularies.map(v => ({
+        topicId,
+        word: v.word,
+        type: v.type || 'noun',
+        phonetic: v.phonetic || '',
+        definitionText: v.definitionText || '',
+        vietnameseMeaning: v.vietnameseMeaning || '',
+        exampleJson: v.exampleJson || [],
+        categoryCode: v.categoryCode || topic.categoryCode,
+        level: v.level || topic.level,
+      })),
+      skipDuplicates: true,
+    });
+
+    // Cập nhật wordCount
+    await prisma.vocabularyTopic.update({
+      where: { id: topicId },
+      data: { wordCount: { increment: created.count } },
+    });
+
+    return sendSuccess(res, { savedCount: created.count }, `Saved ${created.count} vocabularies`);
+  } catch (error) {
+    return sendError(res, error.message, 500);
+  }
+};
+
 // DELETE /admin/vocabularies/:id
 export const deleteVocabulary = async (req, res) => {
   try {
@@ -259,7 +325,6 @@ export const deleteVocabulary = async (req, res) => {
 
     await prisma.systemVocabulary.delete({ where: { id } });
 
-    // Giảm wordCount của topic
     if (vocab.topicId) {
       await prisma.vocabularyTopic.update({
         where: { id: vocab.topicId },

@@ -43,6 +43,14 @@ paymentEvents.on('PAYMENT_SUCCESS', async ({ userId, planId, amount, transaction
     // Xóa Redis cache để Frontend polling nhận data mới ngay lập tức
     await cacheDelete(`engmate:user:me:${userId}`);
 
+    // Notify admins about new transaction
+    try {
+      const { getIO } = await import('../../config/socket.js');
+      getIO().to('admins').emit('NEW_TRANSACTION', amount);
+    } catch (e) {
+      console.error('[Webhook] Error emitting socket event:', e.message);
+    }
+
   } catch (error) {
     console.error(`[Webhook] ❌ Error processing payment for User ${userId}:`, error.message);
   }

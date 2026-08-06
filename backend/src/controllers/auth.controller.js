@@ -1,5 +1,6 @@
 import * as authService from '../services/auth.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
+import { getIO } from '../config/socket.js';
 import {
   validateRegisterInput,
   validateLoginInput,
@@ -61,6 +62,9 @@ export const register = async (req, res) => {
     const { email, password, username } = req.body;
     const result = await authService.register({ email, password, username });
     
+    // Notify admins about new user
+    try { getIO().to('admins').emit('NEW_USER_REGISTERED'); } catch(e) {}
+
     // Đăng ký thành công trả về OTP require, không có token
     return sendSuccess(res, result, 'OTP sent to email', 201);
   } catch (error) {

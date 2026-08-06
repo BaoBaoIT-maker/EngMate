@@ -18,6 +18,15 @@ import ProtectedRoute from './components/ProtectedRoute';
 import OnboardingPage from './pages/OnboardingPage';
 import PremiumPaywall from './pages/dashboard/PremiumPaywall';
 
+import AdminRoute from './components/AdminRoute';
+import AdminLayout from './layouts/AdminLayout';
+import AdminDashboardPage from './pages/admin/DashboardPage';
+import AdminUserManagementPage from './pages/admin/UserManagementPage';
+import AdminVocabularyPage from './pages/admin/VocabularyPage';
+import AdminPlansPage from './pages/admin/PlansPage';
+import AdminGamesPage from './pages/admin/GamesPage';
+import AdminTransactionsPage from './pages/admin/TransactionsPage';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -96,6 +105,23 @@ const router = createBrowserRouter([
         path: 'premium',
         element: <PremiumPaywall />,
       },
+    ]
+  },
+  {
+    path: '/admin',
+    element: (
+      <AdminRoute>
+        <AdminLayout />
+      </AdminRoute>
+    ),
+    children: [
+      { index: true, element: <AdminDashboardPage /> },
+      { path: 'dashboard', element: <AdminDashboardPage /> },
+      { path: 'users', element: <AdminUserManagementPage /> },
+      { path: 'vocabulary', element: <AdminVocabularyPage /> },
+      { path: 'plans', element: <AdminPlansPage /> },
+      { path: 'games', element: <AdminGamesPage /> },
+      { path: 'transactions', element: <AdminTransactionsPage /> },
     ]
   }
 ]);

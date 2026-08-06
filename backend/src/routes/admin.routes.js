@@ -35,6 +35,7 @@ router.patch('/plans/:id/toggle', plansCtrl.togglePlan);
 router.get('/categories', vocabCtrl.listCategories);
 router.post('/categories', vocabCtrl.createCategory);
 router.patch('/categories/:id', vocabCtrl.updateCategory);
+router.delete('/categories/:id', vocabCtrl.deleteCategory);
 
 // ── Topics ───────────────────────────────────────────────────────────
 router.get('/topics', vocabCtrl.listTopics);
@@ -46,6 +47,7 @@ router.delete('/topics/:id', vocabCtrl.deleteTopic);
 router.get('/topics/:topicId/vocabularies', vocabCtrl.listVocabularies);
 router.post('/topics/:topicId/vocabularies', vocabCtrl.createVocabulary);
 router.post('/topics/:topicId/vocabularies/ai-generate', vocabCtrl.aiGenerateVocabulary);
+router.post('/topics/:topicId/vocabularies/bulk-save', vocabCtrl.bulkSaveVocabularies);
 router.patch('/vocabularies/:id', vocabCtrl.updateVocabulary);
 router.delete('/vocabularies/:id', vocabCtrl.deleteVocabulary);
 

@@ -77,10 +77,7 @@ export default function SpeakingCoachPage() {
           setSessions(sessionList);
           setCurrentSessionId(sessionList[0].id);
         }
-          setSessions(sessionList);
-          setCurrentSessionId(sessionList[0].id);
-        }
-        catch (err) {
+      } catch (err) {
         console.error("Failed to init chat session", err);
       }
     };
@@ -154,10 +151,9 @@ export default function SpeakingCoachPage() {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Ensure auth passes if api.defaults fails
         },
         body: JSON.stringify({ sessionId: currentSessionId, content: textToSend }),
-        credentials: 'omit' // Assuming token is in header, omit credentials to avoid CORS issues if not configured perfectly
+        credentials: 'include' // Must include credentials to send HttpOnly cookies
       });
 
       if (response.status === 403) {

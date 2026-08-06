@@ -7,6 +7,9 @@ import { errorHandler, notFound } from './middlewares/error.middleware.js';
 
 const app = express();
 
+// Trust proxy for rate limiter (if behind Nginx/Render/etc)
+app.set('trust proxy', 1);
+
 const allowedOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:5173'];
 
 app.use(cors({
