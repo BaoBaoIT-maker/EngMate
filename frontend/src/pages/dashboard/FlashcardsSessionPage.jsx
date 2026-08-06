@@ -32,6 +32,7 @@ export default function FlashcardsSessionPage() {
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [rated, setRated] = useState([]);
+  const [isRating, setIsRating] = useState(false);
 
   useEffect(() => {
     fetchSession();
@@ -61,6 +62,8 @@ export default function FlashcardsSessionPage() {
   };
 
   const rate = async (quality) => {
+    if (isRating) return;
+    setIsRating(true);
     const currentCard = cards[idx];
     
     // Ghi nhận UI liền mạch
@@ -74,7 +77,10 @@ export default function FlashcardsSessionPage() {
       console.error("Lỗi lưu kết quả", err);
     }
 
-    setTimeout(() => setIdx(i => i + 1), 200);
+    setTimeout(() => {
+      setIdx(i => i + 1);
+      setIsRating(false);
+    }, 200);
   };
 
   if (loading) {
@@ -207,13 +213,13 @@ export default function FlashcardsSessionPage() {
 
       {/* Rating buttons */}
       <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <button className="rate-btn" onClick={() => rate(1)} style={{ background: 'rgba(239,68,68,0.1)', border: '1.5px solid rgba(239,68,68,0.3)', color: '#EF4444', boxShadow: '0 4px 16px rgba(239,68,68,0.1)', flex: 1, padding: '1rem 0', borderRadius: 12, fontWeight: 700, cursor: 'pointer' }}>
+        <button className="rate-btn" onClick={() => rate(1)} disabled={isRating} style={{ background: 'rgba(239,68,68,0.1)', border: '1.5px solid rgba(239,68,68,0.3)', color: '#EF4444', boxShadow: '0 4px 16px rgba(239,68,68,0.1)', flex: 1, padding: '1rem 0', borderRadius: 12, fontWeight: 700, cursor: isRating ? 'not-allowed' : 'pointer', opacity: isRating ? 0.6 : 1 }}>
           😰 Khó
         </button>
-        <button className="rate-btn" onClick={() => rate(4)} style={{ background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`, border: 'none', color: '#fff', boxShadow: `0 6px 20px rgba(234,179,8,0.4)`, flex: 1.5, padding: '1rem 0', borderRadius: 12, fontWeight: 700, cursor: 'pointer' }}>
+        <button className="rate-btn" onClick={() => rate(4)} disabled={isRating} style={{ background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`, border: 'none', color: '#fff', boxShadow: `0 6px 20px rgba(234,179,8,0.4)`, flex: 1.5, padding: '1rem 0', borderRadius: 12, fontWeight: 700, cursor: isRating ? 'not-allowed' : 'pointer', opacity: isRating ? 0.6 : 1 }}>
           👍 Tốt
         </button>
-        <button className="rate-btn" onClick={() => rate(5)} style={{ background: 'rgba(16,185,129,0.12)', border: '1.5px solid rgba(16,185,129,0.3)', color: '#10B981', boxShadow: '0 4px 16px rgba(16,185,129,0.1)', flex: 1, padding: '1rem 0', borderRadius: 12, fontWeight: 700, cursor: 'pointer' }}>
+        <button className="rate-btn" onClick={() => rate(5)} disabled={isRating} style={{ background: 'rgba(16,185,129,0.12)', border: '1.5px solid rgba(16,185,129,0.3)', color: '#10B981', boxShadow: '0 4px 16px rgba(16,185,129,0.1)', flex: 1, padding: '1rem 0', borderRadius: 12, fontWeight: 700, cursor: isRating ? 'not-allowed' : 'pointer', opacity: isRating ? 0.6 : 1 }}>
           😎 Dễ
         </button>
       </div>
