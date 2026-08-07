@@ -240,7 +240,7 @@ export const aiGenerateVocabulary = async (req, res) => {
     const formatted = Array.isArray(aiResults)
       ? aiResults.map(item => ({
           word: item.word || '',
-          type: 'noun',
+          type: item.type || 'noun',
           phonetic: item.phonetic || '',
           definitionText: item.definition || '',
           vietnameseMeaning: item.meaning || '',

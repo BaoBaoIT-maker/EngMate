@@ -4,11 +4,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const defaultModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
-/**
- * AI tự động sinh nội dung cho Flashcard (Từ vựng) - Hỗ trợ sinh nhiều từ cùng lúc
- * @param {string|string[]} words - Một từ tiếng Anh hoặc một mảng các từ
- * @returns {object|array} JSON object (nếu truyền string) hoặc Array JSON objects (nếu truyền array)
- */
 export const generateFlashcardContent = async (words) => {
   const model = genAI.getGenerativeModel({ model: defaultModel });
   const isArray = Array.isArray(words);
@@ -24,6 +19,7 @@ Hãy trả về DUY NHẤT một MẢNG JSON (JSON Array) chứa dữ liệu cho
 [
   {
     "word": "từ tiếng Anh đúng chính tả (sửa nếu sai)",
+    "type": "loại từ bằng tiếng Anh, ví dụ: noun, verb, adjective, adverb, pronoun, 
     "phonetic": "phiên âm IPA, ví dụ /həˈləʊ/",
     "meaning": "nghĩa tiếng Việt ngắn gọn, ví dụ: kế hoạch, toàn diện, yêu thương",
     "definition": "giải thích nghĩa bằng tiếng Việt, một câu rõ ràng, dễ hiểu",
@@ -34,6 +30,7 @@ Hãy trả về DUY NHẤT một MẢNG JSON (JSON Array) chứa dữ liệu cho
 YÊU CẦU BẮT BUỘC:
 - Mảng trả về phải chứa đủ số lượng object tương ứng với số từ yêu cầu hợp lệ.
 - Trường "word": phải là từ tiếng Anh đúng chính tả.
+- Trường "type": phải là loại từ phù hợp nhất với từ đó, viết bằng tiếng Anh, chữ thường.
 - Trường "meaning": tiếng Việt.
 - Trường "definition": giải thích bằng tiếng Việt.
 - Trường "examples": câu ví dụ tiếng Anh.
@@ -52,13 +49,3 @@ YÊU CẦU BẮT BUỘC:
     throw new Error("Failed to parse AI response: " + err.message);
   }
 };
-
-/**
- * (Tương lai) AI phân tích lỗi ngữ pháp
- */
-// export const analyzeGrammar = async (text) => { ... }
-
-/**
- * (Tương lai) AI Speaking Coach
- */
-// export const getSpeakingFeedback = async (audioUrl) => { ... }
