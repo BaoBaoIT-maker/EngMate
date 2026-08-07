@@ -1,11 +1,6 @@
 import { useEffect, useCallback } from 'react';
 
 const FB_APP_ID = import.meta.env.VITE_FACEBOOK_APP_ID;
-
-/**
- * Load Facebook JS SDK một lần duy nhất và khởi tạo.
- * Trả về hàm `loginWithFacebook()` để trigger popup.
- */
 export function useFacebookSDK() {
   useEffect(() => {
     // Tránh load 2 lần nếu đã có
