@@ -3,56 +3,50 @@ import useAuthStore from '../store/useAuthStore';
 import api from '../services/api';
 
 /**
- * Hàm ẩn splash screen HTML gốc (trong index.html) với hiệu ứng fade
+ * Ẩn splash screen HTML gốc (trong index.html) với hiệu ứng fade
  */
 const hideNativeSplash = () => {
   const splash = document.getElementById('app-splash');
   if (!splash) return;
   splash.classList.add('hide');
-  // Xoá khỏi DOM sau khi animation kết thúc để không chiếm z-index
   setTimeout(() => splash.remove(), 450);
 };
 
 /**
- * AuthInitializer: Gọi /users/me khi app khởi động để đồng bộ
- * user state từ server (dựa vào HttpOnly Cookie).
- * Nếu cookie hết hạn → logout. Nếu còn hợp lệ → cập nhật user mới nhất.
+ * AuthInitializer:
+ * - Splash screen hiển thị đúng 1.5s rồi ẩn (không đợi backend)
+ * - Backend check chạy song song, cập nhật user state khi xong
  */
 export default function AuthInitializer({ children }) {
   const { setAuth, logout } = useAuthStore();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const init = async () => {
-      const startTime = Date.now();
-      const MIN_SPLASH_MS = 1500; // Hiển thị splash ít nhất 1.5s
+    // Timer 1: Ẩn splash sau đúng 1.5s — không phụ thuộc backend
+    const splashTimer = setTimeout(() => {
+      hideNativeSplash();
+      setReady(true);
+    }, 1500);
 
+    // Timer 2: Gọi backend check session song song (không block splash)
+    const checkSession = async () => {
       try {
-        // Giới hạn tối đa 4s cho API call (tránh Render đang ngủ → splash bị treo)
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('timeout')), 4000)
-        );
-        const res = await Promise.race([api.get('/users/me'), timeoutPromise]);
+        const res = await api.get('/users/me');
         const user = res.data?.data;
         if (user) setAuth({ user });
       } catch {
-        // Cookie hết hạn, không hợp lệ, hoặc backend timeout → clear store
+        // Cookie hết hạn hoặc chưa đăng nhập → clear store, không cần làm gì thêm
         logout();
-      } finally {
-        // Đảm bảo splash hiển tối thiểu 1.5s dù API nhanh hay chậm
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(0, MIN_SPLASH_MS - elapsed);
-        await new Promise(resolve => setTimeout(resolve, remaining));
-        hideNativeSplash();
-        setReady(true);
       }
     };
+    checkSession();
 
-    init();
+    return () => clearTimeout(splashTimer);
   }, []);
 
   if (!ready) return null;
 
   return children;
 }
+
 
