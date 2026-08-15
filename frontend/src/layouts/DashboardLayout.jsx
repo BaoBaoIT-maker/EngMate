@@ -159,7 +159,7 @@ export default function DashboardLayout() {
 
   // Hiệu ứng Splash Screen khi chuyển trang
   useEffect(() => {
-    pulseSplash(400); // Pulse splash 400ms mỗi khi URL thay đổi
+    pulseSplash(700); // Pulse splash 700ms mỗi khi URL thay đổi để user nhìn rõ logo
   }, [location.pathname]);
 
   useEffect(() => {
