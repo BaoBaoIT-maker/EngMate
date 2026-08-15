@@ -17,9 +17,9 @@ export default function SplashScreen({ forceOpen = false, forceMessage = '' }) {
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
         zIndex: 9999, // Đảm bảo luôn nằm trên cùng
-        background: isDark ? 'rgba(15,15,20,0.85)' : 'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: isDark ? '#0f1623' : '#ffffff',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
