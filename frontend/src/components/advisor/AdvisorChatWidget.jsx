@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import useAuthStore from '../../store/useAuthStore';
 import useThemeStore from '../../store/useThemeStore';
 import api from '../../services/api';
+import ReactMarkdown from 'react-markdown';
 
 // ─── Suggested questions để gợi ý cho user ────────────────────────────────
 const SUGGESTED_QUESTIONS = [
@@ -346,13 +347,26 @@ export default function AdvisorChatWidget() {
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-word',
                     }}>
-                      {msg.content || (msg.isStreaming && (
-                        <span style={{ display: 'flex', gap: 4, padding: '2px 0' }}>
-                          {[0, 1, 2].map(i => (
-                            <span key={i} className="dot" style={{ background: '#6C63FF', animationDelay: `${i * 0.15}s` }} />
-                          ))}
-                        </span>
-                      ))}
+                      {msg.role === 'ai' ? (
+                        <div className="markdown-body" style={{ color: t.text }}>
+                          {msg.content ? <ReactMarkdown>{msg.content}</ReactMarkdown> : null}
+                          {msg.isStreaming && !msg.content && (
+                            <span style={{ display: 'flex', gap: 4, padding: '2px 0' }}>
+                              {[0, 1, 2].map(i => (
+                                <span key={i} className="dot" style={{ background: '#6C63FF', animationDelay: `${i * 0.15}s` }} />
+                              ))}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        msg.content || (msg.isStreaming && (
+                          <span style={{ display: 'flex', gap: 4, padding: '2px 0' }}>
+                            {[0, 1, 2].map(i => (
+                              <span key={i} className="dot" style={{ background: '#6C63FF', animationDelay: `${i * 0.15}s` }} />
+                            ))}
+                          </span>
+                        ))
+                      )}
                       {/* Blinking cursor khi đang stream */}
                       {msg.isStreaming && msg.content && (
                         <span style={{ display: 'inline-block', width: 2, height: '1em', background: '#6C63FF', marginLeft: 2, animation: 'blink 0.8s step-end infinite', verticalAlign: 'text-bottom' }} />
@@ -454,6 +468,16 @@ export default function AdvisorChatWidget() {
       <style>{`
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Markdown Styling inside chat */
+        .markdown-body p { margin-top: 0; margin-bottom: 8px; }
+        .markdown-body p:last-child { margin-bottom: 0; }
+        .markdown-body ul, .markdown-body ol { margin-top: 0; margin-bottom: 8px; padding-left: 20px; }
+        .markdown-body li { margin-bottom: 4px; }
+        .markdown-body strong { font-weight: 700; color: inherit; }
+        .markdown-body code { background: rgba(128,128,128,0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+        .markdown-body pre { background: rgba(0,0,0,0.1); padding: 8px; border-radius: 6px; overflow-x: auto; font-family: monospace; font-size: 0.85em; margin-top: 0; margin-bottom: 8px; }
+        .markdown-body a { color: #6C63FF; text-decoration: underline; }
       `}</style>
     </>
   );
