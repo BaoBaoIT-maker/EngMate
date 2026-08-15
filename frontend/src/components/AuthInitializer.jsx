@@ -15,7 +15,10 @@ export default function AuthInitializer({ children }) {
   useEffect(() => {
     const init = async () => {
       try {
-        const res = await api.get('/users/me');
+        const [res] = await Promise.all([
+          api.get('/users/me'),
+          new Promise(resolve => setTimeout(resolve, 1500)) // Đảm bảo Splash Screen hiện ít nhất 1.5s
+        ]);
         const user = res.data?.data;
         if (user) {
           setAuth({ user });
