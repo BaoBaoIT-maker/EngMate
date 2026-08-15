@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useThemeStore from '../store/useThemeStore';
 import { Icon } from '../components/icons';
 import useAuthStore from '../store/useAuthStore';
+import useSplashStore from '../store/useSplashStore';
 import SupportChatWidget from '../components/support/SupportChatWidget';
 import AdvisorChatWidget from '../components/advisor/AdvisorChatWidget';
 
@@ -153,6 +154,13 @@ export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const user = useAuthStore(s => s.user);
+  const pulseSplash = useSplashStore(s => s.pulse);
+  const location = useLocation();
+
+  // Hiệu ứng Splash Screen khi chuyển trang
+  useEffect(() => {
+    pulseSplash(400); // Pulse splash 400ms mỗi khi URL thay đổi
+  }, [location.pathname]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
