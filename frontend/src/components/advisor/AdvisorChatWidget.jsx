@@ -287,9 +287,9 @@ export default function AdvisorChatWidget() {
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               flexShrink: 0,
             }}>
-              <span style={{ fontSize: '0.7rem', color: t.textSub }}>
+              {/* <span style={{ fontSize: '0.7rem', color: t.textSub }}>
                 Quota hôm nay: <b style={{ color: quotaColor }}>{quotaLeft}</b>/{rateLimit.limit} câu
-              </span>
+              </span> */}
               {!rateLimit.isPremium && (
                 <span style={{ fontSize: '0.65rem', color: '#6C63FF', fontWeight: 600, cursor: 'pointer' }}
                   onClick={() => window.location.href = '/dashboard/premium'}
