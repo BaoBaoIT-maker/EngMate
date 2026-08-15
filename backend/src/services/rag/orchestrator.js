@@ -100,8 +100,9 @@ NGUYÊN TẮC BẮT BUỘC:
  * @param {string} userMessage - Câu hỏi của người dùng
  * @param {number} userId - ID của user đang đăng nhập
  * @param {import('express').Response} res - Express response object để stream
+ * @param {Array} history - Lịch sử hội thoại multi-turn từ client
  */
-export async function runAdvisorAgent(userMessage, userId, res) {
+export async function runAdvisorAgent(userMessage, userId, res, history = []) {
   const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genai.getGenerativeModel({
     model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
@@ -109,9 +110,11 @@ export async function runAdvisorAgent(userMessage, userId, res) {
     tools: [{ functionDeclarations: TOOL_DEFINITIONS }]
   });
 
-  // Lịch sử hội thoại (single-turn trong trường hợp này)
-  const history = [];
+  // Dùng lịch sử hội thoại từ client để tạo multi-turn context
+  const conversationHistory = Array.isArray(history) ? history : [];
   let currentMessage = userMessage;
+  // internalHistory chỉ dùng trong vòng lặp tool calling của request này
+  const internalHistory = [...conversationHistory];
 
   // Giới hạn vòng lặp để tránh vòng lặp vô tận
   const MAX_ITERATIONS = 5;
@@ -120,8 +123,8 @@ export async function runAdvisorAgent(userMessage, userId, res) {
   while (iteration < MAX_ITERATIONS) {
     iteration++;
 
-    // Gửi request tới Gemini
-    const chat = model.startChat({ history });
+    // Gửi request tới Gemini, khởi tạo chat với toàn bộ lịch sử hội thoại
+    const chat = model.startChat({ history: internalHistory });
     const result = await chat.sendMessage(currentMessage);
     const response = result.response;
     const candidate = response.candidates?.[0];
@@ -137,8 +140,8 @@ export async function runAdvisorAgent(userMessage, userId, res) {
 
     // ─── Nếu Gemini muốn gọi tools ─────────────────────────────────────────
     if (toolCallParts.length > 0) {
-      // Thêm turn của model (chứa tool calls) vào history
-      history.push({ role: 'model', parts });
+      // Thêm turn của model (chứa tool calls) vào internalHistory
+      internalHistory.push({ role: 'model', parts });
 
       // Thực thi TẤT CẢ tools được yêu cầu song song (Promise.all)
       const toolResults = await Promise.all(
@@ -167,8 +170,8 @@ export async function runAdvisorAgent(userMessage, userId, res) {
         })
       );
 
-      // Thêm kết quả tools vào history và lặp lại vòng tiếp theo
-      history.push({ role: 'user', parts: toolResults });
+      // Thêm kết quả tools vào internalHistory
+      internalHistory.push({ role: 'user', parts: toolResults });
       currentMessage = ''; // Gemini sẽ tiếp tục từ context history
 
       // Sau khi có tool results, gửi lại ngay (không cần user message mới)

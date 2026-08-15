@@ -7,7 +7,7 @@ import { sendError } from '../utils/response.js';
  * Response: SSE stream (text/event-stream)
  */
 export const advisorChat = async (req, res) => {
-  const { message } = req.body;
+  const { message, history } = req.body;
   const userId = req.user.id;
 
   if (!message || typeof message !== 'string' || message.trim() === '') {
@@ -35,7 +35,7 @@ export const advisorChat = async (req, res) => {
   });
 
   try {
-    await runAdvisorAgent(message.trim(), userId, res);
+    await runAdvisorAgent(message.trim(), userId, res, history || []);
   } catch (error) {
     console.error('[AdvisorController] Error:', error);
     // Nếu headers chưa được gửi, trả lỗi JSON bình thường

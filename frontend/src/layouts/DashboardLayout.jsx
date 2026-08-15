@@ -4,6 +4,7 @@ import useThemeStore from '../store/useThemeStore';
 import { Icon } from '../components/icons';
 import useAuthStore from '../store/useAuthStore';
 import SupportChatWidget from '../components/support/SupportChatWidget';
+import AdvisorChatWidget from '../components/advisor/AdvisorChatWidget';
 
 const NAV = [
   { id: '/dashboard', label: 'Trang chủ', icon: Icon.home },
@@ -181,6 +182,7 @@ export default function DashboardLayout() {
       </main>
 
       {isMobile && <BottomNav t={t} user={user} />}
+      <AdvisorChatWidget />
       <SupportChatWidget />
     </div>
   );
