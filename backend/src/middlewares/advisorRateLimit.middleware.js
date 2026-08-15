@@ -2,9 +2,8 @@ import { cacheGetJson, cacheSetJson } from '../config/redis.js';
 import prisma from '../config/prisma.js';
 
 /**
- * Rate Limit 2 lớp cho AI Advisor:
- *   Lớp 1 (chống spam tức thì): 1 request / phút (tất cả user)
- *   Lớp 2 (giới hạn ngày):
+ * Rate Limit cho AI Advisor:
+ *   Giới hạn ngày:
  *       Free:    5 câu hỏi / ngày
  *       Premium: 30 câu hỏi / ngày
  */
@@ -24,31 +23,8 @@ export default async function advisorRateLimitMiddleware(req, res, next) {
       (!user.subscription.endDate || new Date(user.subscription.endDate) > new Date());
 
     const DAILY_LIMIT = isPremium ? 30 : 5;
-    const MINUTE_LIMIT = 1; // Tất cả user chỉ 1 request/phút
-
-    const minuteKey = `engmate:advisor:minute:${userId}`;
     const dailyKey = `engmate:advisor:daily:${userId}`;
 
-    // ─── Lớp 1: Kiểm tra per-minute ──────────────────────────────────────────
-    let minuteData = null;
-    try {
-      minuteData = await cacheGetJson(minuteKey);
-    } catch (e) {
-      // Redis down → bỏ qua rate limit (graceful degradation)
-      return next();
-    }
-
-    const now = Date.now();
-
-    if (minuteData && minuteData.count >= MINUTE_LIMIT && now < minuteData.resetAt) {
-      const retryAfter = Math.ceil((minuteData.resetAt - now) / 1000);
-      return res.status(429).json({
-        success: false,
-        message: 'RATE_LIMITED_MINUTE',
-        retryAfter,
-        detail: `Vui lòng chờ ${retryAfter} giây trước khi gửi câu hỏi tiếp theo.`
-      });
-    }
 
     // ─── Lớp 2: Kiểm tra per-day ─────────────────────────────────────────────
     let dailyData = null;
@@ -58,6 +34,7 @@ export default async function advisorRateLimitMiddleware(req, res, next) {
       return next();
     }
 
+    const now = Date.now();
     if (dailyData && dailyData.count >= DAILY_LIMIT) {
       const resetTime = new Date(dailyData.resetAt).toLocaleTimeString('vi-VN');
       return res.status(429).json({
@@ -77,8 +54,6 @@ export default async function advisorRateLimitMiddleware(req, res, next) {
     const secondsUntilMidnight = Math.ceil((midnight.getTime() - now) / 1000);
 
     await Promise.all([
-      // Reset minute window
-      cacheSetJson(minuteKey, { count: 1, resetAt: now + 60 * 1000 }, 60),
       // Tăng daily counter
       cacheSetJson(
         dailyKey,
