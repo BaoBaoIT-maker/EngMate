@@ -24,6 +24,19 @@ export default function LoginPage() {
   const setAuth = useAuthStore(s => s.setAuth);
   const { loginWithFacebook } = useFacebookSDK();
 
+  // Hiển thị splash HTML trước khi chuyển vào dashboard sau đăng nhập
+  const showLoginSplash = (role, navigateFn) => {
+    const splash = document.getElementById('app-splash');
+    if (splash) {
+      splash.classList.remove('hide');
+      splash.style.opacity = '1';
+      splash.style.visibility = 'visible';
+    } else {
+      // Nếu đã bị xóa (như khi F5 xong rồi login lại), tạo lại splash React
+    }
+    setTimeout(() => navigateFn(role === 'ADMIN' ? '/admin' : '/dashboard'), 500);
+  };
+
   const handleFacebookLogin = async () => {
     try {
       setFbLoading(true);
@@ -31,11 +44,7 @@ export default function LoginPage() {
       const accessToken = await loginWithFacebook();
       const res = await facebookLogin({ accessToken });
       setAuth(res.data);
-      if (res.data?.user?.role === 'ADMIN') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      showLoginSplash(res.data?.user?.role, navigate);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Đăng nhập Facebook thất bại.');
     } finally {
@@ -49,11 +58,7 @@ export default function LoginPage() {
         setError('');
         const res = await googleLogin({ idToken: tokenResponse.access_token });
         setAuth(res.data);
-        if (res.data?.user?.role === 'ADMIN') {
-          navigate('/admin');
-        } else {
-          navigate('/dashboard');
-        }
+        showLoginSplash(res.data?.user?.role, navigate);
       } catch (err) {
         setError(err.response?.data?.message || 'Lỗi đăng nhập Google');
       } finally {
@@ -75,11 +80,7 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password });
       setAuth(res.data);
-      if (res.data?.user?.role === 'ADMIN') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      showLoginSplash(res.data?.user?.role, navigate);
     } catch (err) {
       setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
     } finally {

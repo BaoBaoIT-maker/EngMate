@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react';
 import useAuthStore from '../store/useAuthStore';
 import api from '../services/api';
-import useSplashStore from '../store/useSplashStore';
+
+/**
+ * Hàm ẩn splash screen HTML gốc (trong index.html) với hiệu ứng fade
+ */
+const hideNativeSplash = () => {
+  const splash = document.getElementById('app-splash');
+  if (!splash) return;
+  splash.classList.add('hide');
+  // Xoá khỏi DOM sau khi animation kết thúc để không chiếm z-index
+  setTimeout(() => splash.remove(), 450);
+};
 
 /**
  * AuthInitializer: Gọi /users/me khi app khởi động để đồng bộ
@@ -10,25 +20,24 @@ import useSplashStore from '../store/useSplashStore';
  */
 export default function AuthInitializer({ children }) {
   const { setAuth, logout } = useAuthStore();
-  const { show, hide } = useSplashStore();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const init = async () => {
-      show('Đang tải dữ liệu...'); // Bật Splash Screen ngay lập tức
       try {
         const [res] = await Promise.all([
           api.get('/users/me'),
-          new Promise(resolve => setTimeout(resolve, 1500)) // Hiển thị ít nhất 1.5s
+          new Promise(resolve => setTimeout(resolve, 1500)) // Hiển thị splash ít nhất 1.5s
         ]);
         const user = res.data?.data;
         if (user) {
           setAuth({ user });
         }
       } catch {
+        // Cookie hết hạn hoặc không hợp lệ → clear store
         logout();
       } finally {
-        hide(); // Tắt Splash Screen
+        hideNativeSplash(); // Ẩn splash HTML
         setReady(true);
       }
     };
@@ -40,3 +49,4 @@ export default function AuthInitializer({ children }) {
 
   return children;
 }
+
