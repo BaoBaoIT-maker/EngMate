@@ -19,7 +19,7 @@ export function useSocket() {
     // Tạo kết nối socket — trình duyệt sẽ tự gửi Cookie kèm theo nhờ withCredentials: true
     const socket = io(SOCKET_URL, {
       withCredentials: true,        // Gửi HttpOnly Cookie (accessToken) lên server
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'], // BẮT BUỘC 'polling' trước để gửi cookie trên cross-origin
       reconnection: true,
       reconnectionDelay: 2000,
       reconnectionAttempts: 5,

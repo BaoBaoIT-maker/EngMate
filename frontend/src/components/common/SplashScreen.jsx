@@ -2,12 +2,14 @@ import React from 'react';
 import useSplashStore from '../../store/useSplashStore';
 import useThemeStore from '../../store/useThemeStore';
 
-export default function SplashScreen() {
+export default function SplashScreen({ forceOpen = false, forceMessage = '' }) {
   const { isOpen, message } = useSplashStore();
   const { isDark, getTheme } = useThemeStore();
   const t = getTheme();
 
-  if (!isOpen) return null;
+  if (!isOpen && !forceOpen) return null;
+
+  const displayMessage = forceMessage || message;
 
   return (
     <>
@@ -80,14 +82,14 @@ export default function SplashScreen() {
               Eng<span style={{ color: t.gold }}>Mate</span>
             </div>
             
-            {message && (
+            {displayMessage && (
               <div style={{
                 fontSize: '1rem',
                 color: t.textSub,
                 fontWeight: 500,
                 animation: 'pulse-opacity 1.5s ease-in-out infinite'
               }}>
-                {message}
+                {displayMessage}
               </div>
             )}
           </div>

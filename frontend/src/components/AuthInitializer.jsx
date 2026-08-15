@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import useAuthStore from '../store/useAuthStore';
 import api from '../services/api';
+import SplashScreen from './common/SplashScreen';
 
 /**
  * AuthInitializer: Gọi /users/me khi app khởi động để đồng bộ
@@ -31,8 +32,8 @@ export default function AuthInitializer({ children }) {
   }, []);
 
   if (!ready) {
-    // Hiển thị màn hình trắng ngắn trong khi check session
-    return null;
+    // Hiển thị Splash Screen trong khi check session
+    return <SplashScreen forceOpen={true} forceMessage="Đang tải dữ liệu..." />;
   }
 
   return children;
