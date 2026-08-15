@@ -15,7 +15,7 @@
       #app-splash {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: #ffffff;
+        background: #0D0D10;
         z-index: 99999;
         display: flex;
         flex-direction: column;
@@ -25,11 +25,11 @@
         font-family: 'Inter', sans-serif;
         transition: opacity 0.4s ease, visibility 0.4s ease;
       }
-      @media (prefers-color-scheme: dark) {
-        #app-splash { background: #0f1623; }
-        #splash-title { color: #F9FAFB; }
-        #splash-subtitle { color: #9CA3AF; }
+      #app-splash.light {
+        background: #ffffff;
       }
+      #app-splash.light #splash-title { color: #1F2937; }
+      #app-splash.light #splash-subtitle { color: #6B7280; }
       #splash-logo-wrap {
         position: relative;
         width: 88px;
@@ -66,14 +66,14 @@
       #splash-title {
         font-size: 2.2rem;
         font-weight: 800;
-        color: #1F2937;
+        color: #F9FAFB;
         letter-spacing: -0.03em;
         margin: 0 0 6px 0;
       }
-      #splash-title span { color: #D97706; }
+      #splash-title span { color: #EAB308; }
       #splash-subtitle {
         font-size: 0.95rem;
-        color: #6B7280;
+        color: #9CA3AF;
         font-weight: 500;
         animation: splash-blink 1.4s ease-in-out infinite;
         margin: 0;
@@ -109,8 +109,17 @@
       </div>
     </div>
 
+    <!-- Đọc localStorage theme NGAY sau khi splash div tồn tại — tránh nháy màu -->
+    <script>
+      try {
+        var _t = JSON.parse(localStorage.getItem('theme-storage') || '{}');
+        if (!_t.state?.isDark) {
+          document.getElementById('app-splash').classList.add('light');
+        }
+      } catch(e) {}
+    </script>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-

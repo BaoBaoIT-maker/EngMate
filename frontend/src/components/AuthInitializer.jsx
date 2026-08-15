@@ -24,20 +24,26 @@ export default function AuthInitializer({ children }) {
 
   useEffect(() => {
     const init = async () => {
+      const startTime = Date.now();
+      const MIN_SPLASH_MS = 1500; // Hiển thị splash ít nhất 1.5s
+
       try {
-        const [res] = await Promise.all([
-          api.get('/users/me'),
-          new Promise(resolve => setTimeout(resolve, 1500)) // Hiển thị splash ít nhất 1.5s
-        ]);
+        // Giới hạn tối đa 4s cho API call (tránh Render đang ngủ → splash bị treo)
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 4000)
+        );
+        const res = await Promise.race([api.get('/users/me'), timeoutPromise]);
         const user = res.data?.data;
-        if (user) {
-          setAuth({ user });
-        }
+        if (user) setAuth({ user });
       } catch {
-        // Cookie hết hạn hoặc không hợp lệ → clear store
+        // Cookie hết hạn, không hợp lệ, hoặc backend timeout → clear store
         logout();
       } finally {
-        hideNativeSplash(); // Ẩn splash HTML
+        // Đảm bảo splash hiển tối thiểu 1.5s dù API nhanh hay chậm
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, MIN_SPLASH_MS - elapsed);
+        await new Promise(resolve => setTimeout(resolve, remaining));
+        hideNativeSplash();
         setReady(true);
       }
     };
