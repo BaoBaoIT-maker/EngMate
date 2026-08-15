@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import useAuthStore from '../store/useAuthStore';
 import api from '../services/api';
-import SplashScreen from './common/SplashScreen';
+import useSplashStore from '../store/useSplashStore';
 
 /**
  * AuthInitializer: Gọi /users/me khi app khởi động để đồng bộ
@@ -10,23 +10,25 @@ import SplashScreen from './common/SplashScreen';
  */
 export default function AuthInitializer({ children }) {
   const { setAuth, logout } = useAuthStore();
+  const { show, hide } = useSplashStore();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const init = async () => {
+      show('Đang tải dữ liệu...'); // Bật Splash Screen ngay lập tức
       try {
         const [res] = await Promise.all([
           api.get('/users/me'),
-          new Promise(resolve => setTimeout(resolve, 1500)) // Đảm bảo Splash Screen hiện ít nhất 1.5s
+          new Promise(resolve => setTimeout(resolve, 1500)) // Hiển thị ít nhất 1.5s
         ]);
         const user = res.data?.data;
         if (user) {
           setAuth({ user });
         }
       } catch {
-        // Cookie hết hạn hoặc không hợp lệ → clear store
         logout();
       } finally {
+        hide(); // Tắt Splash Screen
         setReady(true);
       }
     };
@@ -34,10 +36,7 @@ export default function AuthInitializer({ children }) {
     init();
   }, []);
 
-  if (!ready) {
-    // Hiển thị Splash Screen trong khi check session
-    return <SplashScreen forceOpen={true} forceMessage="Đang tải dữ liệu..." />;
-  }
+  if (!ready) return null;
 
   return children;
 }

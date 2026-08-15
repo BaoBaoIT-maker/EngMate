@@ -5,12 +5,16 @@ import SplashScreen from './components/common/SplashScreen';
 
 function App() {
   return (
-    <AuthInitializer>
-      <div className="min-h-screen">
-        <SplashScreen />
-        <AppRouter />
-      </div>
-    </AuthInitializer>
+    <>
+      {/* SplashScreen nằm NGOÀI AuthInitializer để luôn được mount */}
+      {/* dù AuthInitializer chưa render children (return null khi chưa ready) */}
+      <SplashScreen />
+      <AuthInitializer>
+        <div className="min-h-screen">
+          <AppRouter />
+        </div>
+      </AuthInitializer>
+    </>
   );
 }
 

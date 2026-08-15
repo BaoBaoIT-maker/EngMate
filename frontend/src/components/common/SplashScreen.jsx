@@ -2,14 +2,14 @@ import React from 'react';
 import useSplashStore from '../../store/useSplashStore';
 import useThemeStore from '../../store/useThemeStore';
 
-export default function SplashScreen({ forceOpen = false, forceMessage = '' }) {
+export default function SplashScreen() {
   const { isOpen, message } = useSplashStore();
   const { isDark, getTheme } = useThemeStore();
   const t = getTheme();
 
-  if (!isOpen && !forceOpen) return null;
+  if (!isOpen) return null;
 
-  const displayMessage = forceMessage || message;
+  const displayMessage = message;
 
   return (
     <>
