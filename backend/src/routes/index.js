@@ -9,6 +9,7 @@ import gameRoutes from './game.routes.js';
 import paymentRoutes from './payment.routes.js';
 import adminRoutes from './admin.routes.js';
 import supportRoutes from './support.routes.js';
+import advisorRoutes from './advisor.routes.js';
 
 const router = express.Router();
 
@@ -22,5 +23,6 @@ router.use('/games', gameRoutes);
 router.use('/payment', paymentRoutes);
 router.use('/admin', adminRoutes);
 router.use('/support', supportRoutes);
+router.use('/advisor', advisorRoutes);
 
 export default router;
