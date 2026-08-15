@@ -54,6 +54,39 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
         )}
       </div>
 
+      {/* User Info */}
+      <div
+        onClick={() => navigate('/dashboard/settings')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '0.75rem',
+          padding: collapsed ? '0.5rem 0' : '0.5rem 0.5rem',
+          marginBottom: '1rem', borderRadius: 12,
+          cursor: 'pointer', background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          transition: 'background 0.2s'
+        }}
+        onMouseOver={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}
+        onMouseOut={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}
+      >
+        <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 800, color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
+          {user?.profile?.avatarUrl ? (
+            <img src={user.profile.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            user?.profile?.username?.[0]?.toUpperCase() || 'U'
+          )}
+        </div>
+        {!collapsed && (
+          <div style={{ overflow: 'hidden' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {user?.profile?.username || 'Người dùng'}
+            </div>
+            <div style={{ fontSize: '0.7rem', color: t.textMuted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {isPremium ? 'Premium ✦' : 'Tài khoản Free'}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Nav items */}
       <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
         {NAV.map(item => {

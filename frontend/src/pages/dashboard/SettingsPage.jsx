@@ -23,6 +23,11 @@ export default function SettingsPage() {
   const [goal, setGoal] = useState(user?.setting?.dailyWordGoal || 20);
   const [isSavingPref, setIsSavingPref] = useState(false);
 
+  const [username, setUsername] = useState(user?.profile?.username || '');
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const fileInputRef = React.useRef(null);
+
   const initialNotif = user?.setting?.receiveEmails ?? true;
   const initialGoal = user?.setting?.dailyWordGoal || 20;
   const hasPrefChanges = notif !== initialNotif || goal !== initialGoal;
@@ -38,6 +43,52 @@ export default function SettingsPage() {
       console.error('Save settings error', err);
     }
     setIsSavingPref(false);
+  };
+  
+  const handleUpdateUsername = async () => {
+    if (username === user?.profile?.username || !username.trim()) return;
+    setIsSavingProfile(true);
+    try {
+      await api.patch('/users/me/profile', { username: username.trim() });
+      const res = await api.get('/users/me');
+      useAuthStore.getState().setUser(res.data);
+    } catch (err) {
+      console.error('Update username error', err);
+    }
+    setIsSavingProfile(false);
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    try {
+      await api.post('/users/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const res = await api.get('/users/me');
+      useAuthStore.getState().setUser(res.data);
+    } catch (err) {
+      console.error('Upload avatar error', err);
+    }
+    setIsUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDeleteAvatar = async () => {
+    setIsUploading(true);
+    try {
+      await api.delete('/users/me/avatar');
+      const res = await api.get('/users/me');
+      useAuthStore.getState().setUser(res.data);
+    } catch (err) {
+      console.error('Delete avatar error', err);
+    }
+    setIsUploading(false);
   };
   
   const getLevelOptions = (cat) => {
@@ -102,13 +153,47 @@ export default function SettingsPage() {
       {/* Profile */}
       <div style={{ ...card(t), padding: '1.25rem', marginBottom: '1rem' }}>
         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.875rem' }}>Tài khoản</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: 56, height: 56, borderRadius: '50%', background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 800, color: '#fff', flexShrink: 0 }}>
-            {user?.profile?.username?.[0]?.toUpperCase() || 'U'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+          {/* Avatar Area */}
+          <div style={{ position: 'relative' }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 800, color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
+              {isUploading ? (
+                <div style={{ width: 24, height: 24, border: '3px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+              ) : user?.profile?.avatarUrl ? (
+                <img src={user.profile.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                user?.profile?.username?.[0]?.toUpperCase() || 'U'
+              )}
+            </div>
+            
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: '50%', background: t.goldBg, border: `2px solid ${t.card}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.gold }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <input type="file" ref={fileInputRef} onChange={handleAvatarChange} accept="image/*" style={{ display: 'none' }} />
           </div>
-          <div>
-            <div style={{ fontWeight: 800, color: t.text, fontSize: '1.05rem' }}>{user?.profile?.username || 'User'}</div>
-            <div style={{ fontSize: '0.78rem', color: t.textMuted }}>{user?.email || 'user@example.com'}</div>
+
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: 4 }}>
+              <input 
+                type="text" 
+                value={username} 
+                onChange={(e) => setUsername(e.target.value)}
+                onBlur={handleUpdateUsername}
+                onKeyDown={(e) => e.key === 'Enter' && handleUpdateUsername()}
+                style={{ 
+                  fontWeight: 800, color: t.text, fontSize: '1.2rem', 
+                  background: 'transparent', border: 'none', borderBottom: `1.5px dashed ${username !== user?.profile?.username ? t.gold : 'transparent'}`, 
+                  outline: 'none', padding: '2px 0', width: '100%', maxWidth: 250,
+                  transition: 'border-color 0.2s'
+                }} 
+              />
+              {isSavingProfile && <span style={{ fontSize: '0.7rem', color: t.gold }}>Lưu...</span>}
+            </div>
+            <div style={{ fontSize: '0.85rem', color: t.textMuted }}>{user?.email || 'user@example.com'}</div>
             <div style={{ marginTop: 6, display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
               {user?.subscription?.isValid && user?.subscription?.plan?.code !== 'FREE' ? (
                 <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: t.goldBg, color: t.gold }}>
@@ -125,6 +210,15 @@ export default function SettingsPage() {
                 </span>
               ))}
             </div>
+            {user?.profile?.avatarUrl && (
+              <button 
+                onClick={handleDeleteAvatar}
+                disabled={isUploading}
+                style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+              >
+                Xóa ảnh đại diện
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -209,6 +303,9 @@ export default function SettingsPage() {
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-4px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
       `}</style>
 

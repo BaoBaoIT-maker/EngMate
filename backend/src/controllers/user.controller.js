@@ -34,6 +34,50 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+import cloudinary from '../config/cloudinary.js';
+import { Readable } from 'stream';
+
+export const uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return sendError(res, 'No image provided', 400);
+    }
+
+    // Upload to Cloudinary using stream
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'engmate/avatars',
+        public_id: `user_${req.user.id}_${Date.now()}`,
+        format: 'webp',
+        transformation: [{ width: 300, height: 300, crop: 'fill' }]
+      },
+      async (error, result) => {
+        if (error) {
+          console.error('Cloudinary upload error:', error);
+          return sendError(res, 'Failed to upload image', 500);
+        }
+
+        // Update database
+        const updatedUser = await userService.updateProfile(req.user.id, { avatarUrl: result.secure_url });
+        return sendSuccess(res, updatedUser, 'Avatar uploaded successfully');
+      }
+    );
+
+    Readable.from(req.file.buffer).pipe(uploadStream);
+  } catch (error) {
+    return sendError(res, error.message, error.statusCode || 500);
+  }
+};
+
+export const deleteAvatar = async (req, res) => {
+  try {
+    const updatedUser = await userService.updateProfile(req.user.id, { avatarUrl: null });
+    return sendSuccess(res, updatedUser, 'Avatar deleted successfully');
+  } catch (error) {
+    return sendError(res, error.message, error.statusCode || 500);
+  }
+};
+
 export const updateSetting = async (req, res) => {
   try {
     const { theme, receiveEmails, dailyWordGoal, onboardingDone } = req.body;

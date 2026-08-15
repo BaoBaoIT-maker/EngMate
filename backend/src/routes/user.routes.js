@@ -11,6 +11,12 @@ router.get('/me', userController.me);
 router.patch('/me/profile', userController.updateProfile);
 router.patch('/me/settings', userController.updateSetting);
 
+// Avatar
+import multer from 'multer';
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+router.post('/me/avatar', upload.single('avatar'), userController.uploadAvatar);
+router.delete('/me/avatar', userController.deleteAvatar);
+
 // Learning Paths
 router.get('/me/learning-paths', userController.getLearningPaths);
 router.put('/me/learning-paths', userController.saveLearningPaths);
