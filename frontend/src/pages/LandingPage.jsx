@@ -40,7 +40,7 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  const tickerItems = ['Từ vựng TOEIC', 'Luyện thi IELTS', 'Giao tiếp văn phòng', 'AI Speaking Coach', 'Spaced Repetition', 'Học qua Game', 'Thi thử mô phỏng', 'Học thích nghi AI'];
+  const tickerItems = ['Từ vựng TOEIC', 'Luyện thi IELTS', 'Giao tiếp văn phòng', 'AI Conversation', 'Spaced Repetition', 'Học qua Game', 'Thi thử mô phỏng', 'Học thích nghi AI'];
 
   return (
     <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", background: '#FAFAF8', minHeight: '100vh', overflowX: 'hidden', color: '#1C1407' }}>
@@ -220,12 +220,12 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Feature 2: AI Speaking Coach */}
+            {/* Feature 2: AI Conversation */}
             <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div style={{ fontSize: '2.5rem' }}>🎙️</div>
               <div>
-                <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>AI Speaking Coach</h3>
-                <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontSize: '0.95rem' }}>Luyện giao tiếp 1-1 với AI. Nhận phản hồi chi tiết về phát âm, ngữ pháp và gợi ý từ vựng tự nhiên hơn ngay lập tức. Vượt qua nỗi sợ giao tiếp tiếng Anh.</p>
+                <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>AI Conversation</h3>
+                <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontSize: '0.95rem' }}>Luyện giao tiếp 1-1 với AI bằng giọng nói. Nhận phản hồi về ngữ pháp và gợi ý từ vựng tự nhiên hơn ngay lập tức. Vượt qua nỗi sợ giao tiếp tiếng Anh.</p>
               </div>
             </div>
 

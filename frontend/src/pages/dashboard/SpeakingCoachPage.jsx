@@ -375,7 +375,7 @@ export default function SpeakingCoachPage() {
   return (
     <div className="screen-enter w-full max-w-5xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 4rem)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-        <Header title="AI Speaking Coach" subtitle={sessions.find(s => s.id === currentSessionId)?.topic || "Luyện nói · Nhận phản hồi tức thì"} />
+        <Header title="AI Conversation" subtitle={sessions.find(s => s.id === currentSessionId)?.topic || "Luyện hội thoại · Nhận phản hồi tức thì"} />
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
           {sessions.length > 0 && (
             <select 
@@ -544,7 +544,7 @@ function CreateSessionModal({ t, isDark, onClose, onCreate }) {
       <div className="scale-up" style={{ ...card(t, { background: isDark ? 'rgba(30,30,35,0.85)' : 'rgba(255,255,255,0.95)' }), width: '100%', maxWidth: 480, position: 'relative', overflow: 'hidden' }}>
         <div style={{ padding: '1.5rem', borderBottom: `1px solid ${t.cardBorder}` }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: t.text, margin: 0 }}>Create New Session</h2>
-          <p style={{ fontSize: '0.875rem', color: t.textSub, marginTop: '0.25rem' }}>Select a topic to practice speaking</p>
+          <p style={{ fontSize: '0.875rem', color: t.textSub, marginTop: '0.25rem' }}>Chọn chủ đề để bắt đầu luyện hội thoại</p>
         </div>
         
         <form onSubmit={handleSubmit} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

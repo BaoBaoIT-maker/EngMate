@@ -34,7 +34,7 @@ const NAV = [
     ),
   },
   {
-    id: '/dashboard/speaking', label: 'AI Coach',
+    id: '/dashboard/speaking', label: 'AI Conversation',
     icon: (color) => (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>

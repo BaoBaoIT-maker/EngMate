@@ -28,8 +28,8 @@ export default function SpeakingCoach() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
         <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #F0B429, #D4960A)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>🎙️</div>
         <div>
-          <div style={{ fontWeight: 800, color: '#fff', fontSize: '1.05rem' }}>AI Speaking Coach</div>
-          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)' }}>Phản hồi phát âm theo thời gian thực</div>
+          <div style={{ fontWeight: 800, color: '#fff', fontSize: '1.05rem' }}>AI Conversation</div>
+          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)' }}>Luyện hội thoại tiếng Anh với AI</div>
         </div>
       </div>
 

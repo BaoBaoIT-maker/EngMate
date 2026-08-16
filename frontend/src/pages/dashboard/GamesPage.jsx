@@ -7,7 +7,7 @@ import api from '../../services/api';
 const STATIC_GAMES_META = [
   { gameType: 'MATCHING', link: '/dashboard/games/matching', emoji: '🧩', desc: 'Tìm cặp từ tiếng Anh - Việt tương ứng', tag: 'Từ vựng' },
   { gameType: 'FILL_BLANK', link: '/dashboard/games/fill-blank', emoji: '🔤', desc: 'Hoàn thành câu với từ đúng', tag: 'Ngữ pháp' },
-  { gameType: 'SPEAKING_GAME', link: '/dashboard/speaking', emoji: '🎙️', desc: 'Luyện nói thực tế với AI Coach', tag: 'Phát âm' },
+  { gameType: 'SPEAKING_GAME', link: '/dashboard/speaking', emoji: '🎙️', desc: 'Luyện hội thoại thực tế với AI', tag: 'Hội thoại' },
   // Các game giả lập "Sắp ra mắt" nếu không có trong DB
   { gameType: 'SPEED_RUN', emoji: '⚡', name: 'Thử thách tốc độ', desc: 'Dịch 20 từ trong 60 giây', tag: 'Tốc độ', coming: true },
   { gameType: 'BATTLE_1V1', emoji: '🤝', name: 'Đấu 1v1 online', desc: 'Thi đấu trực tiếp với người khác', tag: 'Cạnh tranh', coming: true },
