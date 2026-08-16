@@ -15,7 +15,7 @@
       #app-splash {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: #0D0D10;
+        background: #FFFDF7; /* Default to light/cream theme */
         z-index: 99999;
         display: flex;
         flex-direction: column;
@@ -29,11 +29,15 @@
         opacity: 0;
         visibility: hidden;
       }
-      #app-splash.light {
-        background: #ffffff;
+      #app-splash.dark {
+        background: #0C1510;
       }
-      #app-splash.light #splash-title { color: #1F2937; }
-      #app-splash.light #splash-subtitle { color: #6B7280; }
+      /* Default Light Text */
+      #app-splash #splash-title { color: #1F2937; }
+      #app-splash #splash-subtitle { color: #6B7280; }
+      /* Dark Text */
+      #app-splash.dark #splash-title { color: #F9FAFB; }
+      #app-splash.dark #splash-subtitle { color: #9CA3AF; }
       #splash-logo-wrap {
         position: relative;
         width: 88px;
@@ -117,8 +121,8 @@
     <script>
       try {
         var _t = JSON.parse(localStorage.getItem('theme-storage') || '{}');
-        if (!_t.state?.isDark) {
-          document.getElementById('app-splash').classList.add('light');
+        if (_t.state?.isDark) {
+          document.getElementById('app-splash').classList.add('dark');
         }
       } catch(e) {}
     </script>

@@ -17,7 +17,7 @@ export default function SplashScreen() {
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
         zIndex: 9999, // Đảm bảo luôn nằm trên cùng
-        background: isDark ? '#0f1623' : '#ffffff',
+        background: t.bg, // Sử dụng màu nền từ theme hiện tại
         backdropFilter: 'none',
         WebkitBackdropFilter: 'none',
         display: 'flex',
