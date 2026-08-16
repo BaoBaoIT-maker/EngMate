@@ -14,6 +14,126 @@ const card = (t, extra) => ({
   ...extra,
 });
 
+// ─── Skeleton primitive ──────────────────────────────────────────────
+function Sk({ w = '100%', h = 16, r = 8, style = {} }) {
+  return (
+    <div style={{
+      width: w, height: h, borderRadius: r,
+      background: 'linear-gradient(90deg, var(--sk-from) 25%, var(--sk-to) 50%, var(--sk-from) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'sk-shimmer 1.6s ease-in-out infinite',
+      flexShrink: 0,
+      ...style,
+    }} />
+  );
+}
+
+function SpeakingCoachSkeleton({ t, isDark }) {
+  const skFrom = isDark ? 'rgba(47,158,86,0.08)' : '#F0EAD9';
+  const skTo   = isDark ? 'rgba(47,158,86,0.18)' : '#E5DBCA';
+
+  return (
+    <div
+      className="screen-enter w-full max-w-5xl mx-auto flex flex-col"
+      style={{ height: 'calc(100vh - 4rem)', '--sk-from': skFrom, '--sk-to': skTo }}
+    >
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+        <div>
+          <Sk w={220} h={28} r={8} />
+          <Sk w={280} h={14} r={6} style={{ marginTop: 8 }} />
+        </div>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <Sk w={180} h={38} r={8} />
+          <Sk w={120} h={38} r={8} />
+        </div>
+      </div>
+
+      {/* Chat bubble area */}
+      <div style={{
+        flex: 1, borderRadius: 16,
+        border: `1px solid ${t.cardBorder}`,
+        background: t.card,
+        padding: '1.5rem',
+        display: 'flex', flexDirection: 'column', gap: '1.5rem',
+        overflow: 'hidden',
+      }}>
+        {/* AI bubble */}
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+          <Sk w={36} h={36} r={18} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: '72%' }}>
+            <Sk w="100%" h={16} r={6} />
+            <Sk w="85%" h={16} r={6} />
+            <Sk w="60%" h={16} r={6} />
+          </div>
+        </div>
+
+        {/* User bubble */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: '60%', alignItems: 'flex-end' }}>
+            <Sk w="100%" h={16} r={6} />
+            <Sk w="70%" h={16} r={6} />
+          </div>
+        </div>
+
+        {/* AI bubble 2 */}
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+          <Sk w={36} h={36} r={18} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: '65%' }}>
+            <Sk w="100%" h={16} r={6} />
+            <Sk w="90%" h={16} r={6} />
+            <Sk w="50%" h={16} r={6} />
+          </div>
+        </div>
+
+        {/* User bubble 2 */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: '55%', alignItems: 'flex-end' }}>
+            <Sk w="100%" h={16} r={6} />
+          </div>
+        </div>
+
+        {/* AI typing indicator */}
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+          <Sk w={36} h={36} r={18} />
+          <div style={{ display: 'flex', gap: 8, padding: '0.75rem 1rem', background: t.bgSub, borderRadius: '6px 16px 16px 16px' }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: t.textMuted, animation: `sk-dot 1.2s ease-in-out ${i * 0.15}s infinite` }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Input bar */}
+      <div style={{
+        marginTop: '1rem',
+        display: 'flex', gap: '0.75rem', alignItems: 'center',
+        background: t.card, borderRadius: 16,
+        border: `1px solid ${t.cardBorder}`,
+        padding: '0.875rem 1rem',
+      }}>
+        {/* Mic button skeleton */}
+        <Sk w={52} h={52} r={26} />
+        {/* Text input skeleton */}
+        <Sk w="100%" h={24} r={8} />
+        {/* Send button skeleton */}
+        <Sk w={44} h={44} r={22} />
+      </div>
+
+      <style>{`
+        @keyframes sk-shimmer {
+          0%   { background-position: 200% center; }
+          100% { background-position: -200% center; }
+        }
+        @keyframes sk-dot {
+          0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+          40% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function SpeakingCoachPage() {
   const { isDark, getTheme } = useThemeStore();
   const t = getTheme();
@@ -23,8 +143,8 @@ export default function SpeakingCoachPage() {
   const [messages, setMessages] = useState([]);
   const [micState, setMicState] = useState('idle'); // idle, recording, thinking, speaking
   const [input, setInput] = useState('');
-  const [rateLimitCountdown, setRateLimitCountdown] = useState(0); // giây đếm ngược
-  
+  const [rateLimitCountdown, setRateLimitCountdown] = useState(0);
+  const [isLoading, setIsLoading] = useState(true); // skeleton loading state
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const bottomRef = useRef(null);
@@ -81,6 +201,8 @@ export default function SpeakingCoachPage() {
         }
       } catch (err) {
         console.error("Failed to init chat session", err);
+      } finally {
+        setIsLoading(false);
       }
     };
     initSession();
@@ -240,7 +362,6 @@ export default function SpeakingCoachPage() {
       setMicState('idle');
     }
   };
-
   const micLabel = micState === 'idle' ? 'Micro sẵn sàng' 
                  : micState === 'recording' ? 'Đang nghe...' 
                  : micState === 'thinking' ? 'AI đang phân tích...' 
@@ -248,6 +369,8 @@ export default function SpeakingCoachPage() {
   const micColor = micState === 'idle' ? t.gold 
                  : micState === 'recording' ? '#EF4444' 
                  : micState === 'speaking' ? '#10B981' : '#8B5CF6';
+
+  if (isLoading) return <SpeakingCoachSkeleton t={t} isDark={isDark} />;
 
   return (
     <div className="screen-enter w-full max-w-5xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 4rem)' }}>
