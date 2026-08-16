@@ -3,86 +3,86 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PhoneMockup from '../components/PhoneMockup';
 import CourseCard from '../components/CourseCard';
-import SpeakingCoach from '../components/SpeakingCoach';
-import AdaptiveDashboard from '../components/AdaptiveDashboard';
 import PricingCard from '../components/PricingCard';
 
 const GOLD = '#F0B429';
 const GOLD_DARK = '#C9920A';
 const GOLD_LIGHT = '#FEF3C7';
 
-const plans = [
+// ─── 1. KHÓA HỌC (STATIC) ────────────────────────────────────────────────
+const STATIC_COURSES = [
   {
-    name: 'Miễn phí',
-    price: '0₫',
-    period: '/tháng',
-    desc: 'Dành cho người mới bắt đầu',
-    features: ['50 từ mỗi ngày', '2 khóa học (TOEIC & IELTS)', 'Flashcard cơ bản', 'Báo cáo tiến độ hàng tuần', 'Diễn đàn cộng đồng'],
-    locked: ['AI Speaking Coach', 'Lộ trình học cá nhân hóa', 'Học offline', 'Thi thử mô phỏng', 'Hỗ trợ ưu tiên'],
-    cta: 'Bắt đầu miễn phí',
-    highlight: false,
+    id: 'toeic', tag: 'TOEIC', title: 'Luyện thi TOEIC 900+', level: 'Trung cấp',
+    words: 1200, progress: 0, emoji: '💼',
+    accent: '#F0B429', accentBg: 'rgba(240,180,41,0.1)',
+    desc: 'Lộ trình từ vựng công sở và luyện nghe chuyên sâu giúp bạn bứt phá điểm số TOEIC.'
   },
   {
-    name: 'Premium',
-    price: '199.000₫',
-    period: '/tháng',
-    desc: 'Dành cho người luyện thi nghiêm túc',
-    features: ['Không giới hạn từ/ngày', 'Toàn bộ khóa học', 'AI Speaking Coach', 'Lộ trình học cá nhân hóa', 'Học offline', 'Phân tích tiến độ', 'Thi thử mô phỏng', 'Hỗ trợ 24/7'],
-    locked: [],
-    cta: 'Dùng thử 7 ngày miễn phí',
-    highlight: true,
+    id: 'ielts', tag: 'IELTS', title: 'IELTS Học Thuật 8.0+', level: 'Nâng cao',
+    words: 2500, progress: 0, emoji: '🎓',
+    accent: '#8B5CF6', accentBg: 'rgba(139,92,246,0.1)',
+    desc: 'Nền tảng từ vựng học thuật cao cấp và phát âm chuẩn xác cho kỳ thi IELTS.'
   },
+  {
+    id: 'comm', tag: 'GIAO TIẾP', title: 'Tiếng Anh Giao Tiếp', level: 'Cơ bản',
+    words: 800, progress: 0, emoji: '🗣️',
+    accent: '#10B981', accentBg: 'rgba(16,185,129,0.1)',
+    desc: 'Phá bỏ rào cản ngôn ngữ, tự tin giao tiếp trong đời sống hằng ngày và công việc.'
+  }
 ];
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const [courses, setCourses] = useState([]);
-  const [loadingCourses, setLoadingCourses] = useState(true);
+  
+  // Dữ liệu bảng giá động
+  const [plans, setPlans] = useState([]);
+  const [loadingPricing, setLoadingPricing] = useState(true);
 
+  // Scroll effect
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', fn);
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
+  // Fetch Pricing
   useEffect(() => {
-    // Fetch dynamic topics from DB
-    const fetchTopics = async () => {
+    const fetchPricing = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'}/vocabulary/topics`);
-        const topics = res.data.data || res.data.topics || []; // Handle different wrapper formats
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'}/payment/plans`);
+        const plansData = res.data?.data || res.data || [];
+        // Map data từ DB sang dạng UI cần thiết
+        const mappedPlans = plansData.map(plan => ({
+          name: plan.name,
+          price: plan.price === 0 ? '0₫' : `${plan.price.toLocaleString('vi-VN')}₫`,
+          period: `/${plan.durationMonths} tháng`,
+          desc: plan.description || 'Gói dịch vụ cao cấp',
+          features: plan.features || [],
+          locked: plan.code === 'FREE' ? ['AI Speaking Coach', 'Hỗ trợ ưu tiên'] : [],
+          cta: plan.code === 'FREE' ? 'Bắt đầu miễn phí' : 'Nâng cấp ngay',
+          highlight: plan.code !== 'FREE',
+        }));
         
-        const mappedCourses = topics.map((topic, i) => {
-          const category = topic.category || 'GENERAL';
-          return {
-            id: topic.id,
-            tag: category,
-            title: topic.name || 'Chủ đề từ vựng',
-            level: category === 'TOEIC' ? 'Trung cấp' : category === 'IELTS' ? 'Nâng cao' : 'Cơ bản',
-            words: topic._count?.vocabularies || 30,
-            progress: 0,
-            emoji: category === 'TOEIC' ? '💼' : category === 'IELTS' ? '🎓' : '🌟',
-            accent: category === 'TOEIC' ? '#F0B429' : category === 'IELTS' ? '#8B5CF6' : '#10B981',
-            accentBg: category === 'TOEIC' ? 'rgba(240,180,41,0.1)' : category === 'IELTS' ? 'rgba(139,92,246,0.1)' : 'rgba(16,185,129,0.1)',
-            desc: topic.description || 'Khám phá bộ từ vựng chuyên sâu giúp bạn chinh phục mục tiêu.'
-          };
-        });
-        setCourses(mappedCourses);
+        // Nếu không có API trả về, dùng fallback
+        if (mappedPlans.length === 0) throw new Error("No plans");
+        
+        setPlans(mappedPlans);
       } catch (error) {
-        console.error('Error fetching topics:', error);
-        // Fallback for demo if API fails
-        setCourses([
-          { tag: 'TOEIC', title: 'Từ vựng TOEIC (Demo)', level: 'Trung cấp', words: 840, progress: 0, emoji: '💼', accent: '#F0B429', accentBg: 'rgba(240,180,41,0.1)', desc: 'Từ vựng kinh doanh' }
+        console.error('Error fetching plans:', error);
+        // Fallback
+        setPlans([
+          { name: 'Miễn phí', price: '0₫', period: '/tháng', desc: 'Dành cho người mới bắt đầu', features: ['50 từ mỗi ngày', 'Flashcard cơ bản'], locked: ['AI Speaking Coach'], cta: 'Bắt đầu', highlight: false },
+          { name: 'Premium', price: '199.000₫', period: '/tháng', desc: 'Dành cho người học nghiêm túc', features: ['Không giới hạn', 'AI Speaking Coach', 'Mini-games'], locked: [], cta: 'Nâng cấp', highlight: true }
         ]);
       } finally {
-        setLoadingCourses(false);
+        setLoadingPricing(false);
       }
     };
-    fetchTopics();
+    fetchPricing();
   }, []);
 
-  const tickerItems = ['Từ vựng TOEIC', 'Luyện thi IELTS', 'Giao tiếp văn phòng', 'Ngữ pháp nâng cao', 'Thành ngữ & Idioms', 'AI Speaking Coach', 'Thi thử mô phỏng', 'Học thích nghi AI'];
+  const tickerItems = ['Từ vựng TOEIC', 'Luyện thi IELTS', 'Giao tiếp văn phòng', 'AI Speaking Coach', 'Spaced Repetition', 'Học qua Game', 'Thi thử mô phỏng', 'Học thích nghi AI'];
 
   return (
     <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", background: '#FAFAF8', minHeight: '100vh', overflowX: 'hidden', color: '#1C1407' }}>
@@ -210,13 +210,9 @@ export default function LandingPage() {
             </p>
           </div>
           
-          {loadingCourses ? (
-             <div style={{ textAlign: 'center', color: '#9D8E6F' }}>Đang tải danh sách khóa học...</div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-              {courses.map((c, i) => <CourseCard key={c.id || i} course={c} delay={(i%4) * 80} />)}
-            </div>
-          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+            {STATIC_COURSES.map((c, i) => <CourseCard key={c.id || i} course={c} delay={(i%3) * 80} />)}
+          </div>
 
           <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
             <button style={{ padding: '0.75rem 2rem', borderRadius: 12, border: `1.5px solid rgba(240,180,41,0.35)`, background: 'transparent', color: GOLD_DARK, fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.2s' }}
@@ -239,15 +235,40 @@ export default function LandingPage() {
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: GOLD, letterSpacing: '0.08em', textTransform: 'uppercase' }}>AI Features</span>
             </div>
             <h2 style={{ fontSize: 'clamp(2rem, 4vw, 2.75rem)', fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', marginBottom: '0.875rem' }}>
-              Trí tuệ nhân tạo trong từng từ
+              Trí tuệ nhân tạo dẫn dắt lộ trình
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1.05rem', maxWidth: 460, margin: '0 auto' }}>
-              Hai hệ thống AI phối hợp — một luyện tai nghe, một dẫn dắt tư duy học tập của bạn.
+              EngMate sở hữu bộ 3 công cụ cốt lõi giúp bạn nhớ lâu, phát âm chuẩn và học không nhàm chán.
             </p>
           </div>
+          
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-            <SpeakingCoach />
-            <AdaptiveDashboard />
+            {/* Feature 1: Flashcard SM-2 */}
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ fontSize: '2.5rem' }}>🧠</div>
+              <div>
+                <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>Flashcard Thông Minh (SM-2)</h3>
+                <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontSize: '0.95rem' }}>Tối ưu hóa ghi nhớ dài hạn bằng thuật toán Spaced Repetition. Hệ thống tự động phân loại từ thành "Cần ôn gấp", "Đang ghi nhớ", "Đã khắc sâu" và tính toán thời điểm lặp lại tốt nhất cho não bộ của bạn.</p>
+              </div>
+            </div>
+
+            {/* Feature 2: AI Speaking Coach */}
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ fontSize: '2.5rem' }}>🎙️</div>
+              <div>
+                <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>AI Speaking Coach</h3>
+                <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontSize: '0.95rem' }}>Luyện giao tiếp 1-1 với AI. Nhận phản hồi chi tiết về phát âm, ngữ pháp và gợi ý từ vựng tự nhiên hơn ngay lập tức. Vượt qua nỗi sợ giao tiếp tiếng Anh.</p>
+              </div>
+            </div>
+
+            {/* Feature 3: Mini-games */}
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ fontSize: '2.5rem' }}>🎮</div>
+              <div>
+                <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>Hệ thống Mini-games</h3>
+                <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontSize: '0.95rem' }}>Học mà chơi, chơi mà học qua các game như Matching (Nối từ) và Fill-in-the-blank (Điền vào chỗ trống). Loại bỏ sự nhàm chán của việc học từ vựng truyền thống.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -264,9 +285,13 @@ export default function LandingPage() {
             </h2>
           </div>
           <div className="landing-pricing-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center' }}>
-            {plans.map(p => (
-              <PricingCard key={p.name} plan={p} onCta={() => navigate('/register')} />
-            ))}
+            {loadingPricing ? (
+              <div style={{ textAlign: 'center', color: '#9D8E6F', gridColumn: 'span 2' }}>Đang tải bảng giá...</div>
+            ) : (
+              plans.map(p => (
+                <PricingCard key={p.name} plan={p} onCta={() => navigate('/register')} />
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -300,21 +325,48 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ padding: '2.5rem 2rem', background: '#120D04' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #F0B429, #D4960A)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem' }}>✦</div>
-            <span style={{ fontWeight: 800, color: '#fff', fontSize: '1rem', letterSpacing: '-0.02em' }}>Eng<span style={{ color: GOLD }}>Mate</span></span>
+      <footer style={{ padding: '3.5rem 2rem 2.5rem', background: '#120D04' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '2rem' }}>
+            <div style={{ maxWidth: 300 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #F0B429, #D4960A)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem' }}>✦</div>
+                <span style={{ fontWeight: 800, color: '#fff', fontSize: '1.1rem', letterSpacing: '-0.02em' }}>Eng<span style={{ color: GOLD }}>Mate</span></span>
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', lineHeight: 1.6 }}>Nền tảng học tiếng Anh thích ứng với AI, Flashcard SM-2 và Mini-games thú vị giúp bạn chinh phục ngoại ngữ dễ dàng.</p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <h4 style={{ color: '#fff', fontWeight: 700, marginBottom: '0.5rem' }}>Thông tin liên hệ</h4>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}><strong style={{ color: 'rgba(255,255,255,0.7)' }}>Tác giả:</strong> Huỳnh Hoài Bảo</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}><strong style={{ color: 'rgba(255,255,255,0.7)' }}>Email:</strong> huynhhoaibao216@gmail.com</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}><strong style={{ color: 'rgba(255,255,255,0.7)' }}>Địa chỉ:</strong> Bình Chuẩn, Thuận An, Bình Dương</p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <h4 style={{ color: '#fff', fontWeight: 700, marginBottom: '0.5rem' }}>Liên kết nhanh</h4>
+              {[['Đăng nhập', '/login'], ['Đăng ký', '/register']].map(([label, path]) => (
+                <button key={label} onClick={() => navigate(path)} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', background: 'transparent', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', transition: 'color 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = GOLD)}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
-          <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.82rem' }}>© 2026 EngMate Inc. All rights reserved.</p>
-          <div className="landing-footer-links" style={{ display: 'flex', gap: '1.5rem' }}>
-            {['Bảo mật', 'Điều khoản', 'Liên hệ'].map(l => (
-              <a key={l} href="#" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.82rem', textDecoration: 'none', transition: 'color 0.2s' }}
-                onMouseEnter={e => (e.currentTarget.style.color = GOLD)}
-                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}>
-                {l}
-              </a>
-            ))}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.82rem' }}>© 2026 EngMate Inc. All rights reserved.</p>
+            <div className="landing-footer-links" style={{ display: 'flex', gap: '1.5rem' }}>
+              {['Bảo mật', 'Điều khoản'].map(l => (
+                <a key={l} href="#" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.82rem', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = GOLD)}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}>
+                  {l}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </footer>
