@@ -62,8 +62,12 @@ export default function SupportChatWidget() {
 
   // Khi mở widget → reset unread
   const handleOpen = () => {
-    setIsOpen(true);
-    setUnread(0);
+    if (!isOpen) {
+      setIsOpen(true);
+      setUnread(0);
+    } else {
+      setIsOpen(false);
+    }
   };
 
   const sendMessage = async () => {
@@ -225,22 +229,23 @@ export default function SupportChatWidget() {
           </div>
         )}
 
-        {/* Bubble button */}
         <button
           onClick={handleOpen}
           style={{
             width: 58, height: 58, borderRadius: '50%', border: 'none',
             background: `linear-gradient(135deg, #F0B429, #D97706)`,
-            color: '#fff', cursor: 'pointer', fontSize: '1.5rem',
+            color: '#fff', cursor: 'pointer', fontSize: isOpen ? '1.8rem' : '1.5rem',
             boxShadow: '0 8px 24px rgba(240,180,41,0.5)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            animation: 'mic-breathe 2.5s ease-in-out infinite',
+            animation: isOpen ? 'none' : 'mic-breathe 2.5s ease-in-out infinite',
             position: 'relative',
+            transition: 'transform 0.3s ease, background 0.3s',
+            transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
           }}
-          title="Liên hệ hỗ trợ"
+          title={isOpen ? "Đóng" : "Liên hệ hỗ trợ"}
         >
-          💬
-          {unread > 0 && (
+          {isOpen ? '✕' : '💬'}
+          {unread > 0 && !isOpen && (
             <div style={{
               position: 'absolute', top: -4, right: -4,
               background: '#ef4444', color: '#fff',
