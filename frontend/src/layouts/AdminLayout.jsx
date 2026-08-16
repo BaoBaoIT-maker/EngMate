@@ -226,9 +226,17 @@ function Header({ currentPage, user }) {
         </Badge>
         <Dropdown menu={{ items: adminMenuItems }} placement="bottomRight" trigger={['click']}>
           <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Avatar size={34} style={{ backgroundColor: '#6C63FF', flexShrink: 0 }}>
-              {user?.profile?.username?.[0]?.toUpperCase() || 'A'}
-            </Avatar>
+            {user?.profile?.avatarUrl ? (
+              <img
+                src={user.profile.avatarUrl}
+                alt="admin-avatar"
+                style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', display: 'block', flexShrink: 0 }}
+              />
+            ) : (
+              <Avatar size={34} style={{ backgroundColor: '#6C63FF', flexShrink: 0 }}>
+                {user?.profile?.username?.[0]?.toUpperCase() || 'A'}
+              </Avatar>
+            )}
             <div style={{ lineHeight: 1.3 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: '#0F1623' }}>{user?.profile?.username || 'Admin'}</div>
               <div style={{ fontSize: 11, color: '#999' }}>{user?.email || 'admin@engmate.com'}</div>
