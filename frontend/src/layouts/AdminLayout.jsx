@@ -1,13 +1,15 @@
-import { useState } from 'react';
-import { ConfigProvider } from 'antd';
+import { useState, useRef } from 'react';
+import { ConfigProvider, message } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Avatar, Badge, Dropdown, Space, Tooltip } from 'antd';
 import {
   DashboardOutlined, UserOutlined, BookOutlined, CrownOutlined,
   PlayCircleOutlined, SwapOutlined, LogoutOutlined, BulbOutlined,
   BellOutlined, SettingOutlined, DownOutlined, MessageOutlined,
+  CameraOutlined, LoadingOutlined,
 } from '@ant-design/icons';
 import useAuthStore from '../store/useAuthStore';
+import api from '../services/api';
 import 'antd/dist/reset.css';
 
 const antdTheme = {
@@ -52,12 +54,40 @@ const pageTitles = {
 };
 
 function Sidebar({ currentPage, onNavigate }) {
-  const { user, logout } = useAuthStore();
+  const { user, setUser, logout } = useAuthStore();
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      message.error('Ảnh không được vượt quá 5MB');
+      return;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      const res = await api.post('/users/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      // Cập nhật user store với avatarUrl mới
+      const updatedData = res.data?.data || res.data;
+      if (setUser && updatedData) setUser(updatedData);
+      message.success('Cập nhật ảnh đại diện thành công!');
+    } catch (err) {
+      message.error('Tải ảnh lên thất bại!');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   return (
@@ -105,17 +135,55 @@ function Sidebar({ currentPage, onNavigate }) {
         })}
       </div>
 
-      {/* Admin Profile */}
+      {/* Admin Profile với nút upload avatar */}
       <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <Avatar size={36} style={{ backgroundColor: '#6C63FF', flexShrink: 0 }}>
-          {user?.profile?.username?.[0]?.toUpperCase() || 'A'}
-        </Avatar>
+        {/* Input file ẩn */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleAvatarUpload}
+        />
+
+        {/* Avatar có nút cây bút */}
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          {user?.profile?.avatarUrl ? (
+            <img
+              src={user.profile.avatarUrl}
+              alt="admin-avatar"
+              style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+            />
+          ) : (
+            <Avatar size={36} style={{ backgroundColor: '#6C63FF' }}>
+              {user?.profile?.username?.[0]?.toUpperCase() || 'A'}
+            </Avatar>
+          )}
+          <Tooltip title="Thay ảnh đại diện">
+            <div
+              onClick={() => !uploading && fileInputRef.current?.click()}
+              style={{
+                position: 'absolute', bottom: -2, right: -4,
+                width: 16, height: 16, borderRadius: '50%',
+                background: '#6C63FF', border: '2px solid #0F1623',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: uploading ? 'wait' : 'pointer',
+              }}
+            >
+              {uploading
+                ? <LoadingOutlined style={{ color: '#fff', fontSize: 8 }} />
+                : <CameraOutlined style={{ color: '#fff', fontSize: 8 }} />}
+            </div>
+          </Tooltip>
+        </div>
+
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: '#fff', fontSize: 13, fontWeight: 600, lineHeight: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {user?.profile?.username || 'Admin'}
           </div>
           <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, lineHeight: '14px' }}>Super Admin</div>
         </div>
+
         <Tooltip title="Logout">
           <LogoutOutlined
             onClick={handleLogout}

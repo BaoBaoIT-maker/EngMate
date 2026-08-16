@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const GOLD = '#F0B429';
 const GOLD_DARK = '#C9920A';
 const GOLD_LIGHT = '#FEF3C7';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+
 export default function AboutPage() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const [adminProfile, setAdminProfile] = useState(null);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', fn);
     return () => window.removeEventListener('scroll', fn);
+  }, []);
+
+  useEffect(() => {
+    axios.get(`${API_BASE}/public/admin-profile`)
+      .then(res => setAdminProfile(res.data?.data || null))
+      .catch(() => {}); // Fallback tĩnh sẽ hiển thị nếu lỗi
   }, []);
 
   return (
@@ -92,8 +102,11 @@ export default function AboutPage() {
           {/* Ảnh/Avatar Tác giả */}
           <div style={{ position: 'relative' }}>
             <div style={{ width: '100%', aspectRatio: '4/5', borderRadius: 32, background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)', position: 'relative', overflow: 'hidden' }}>
-              {/* Fallback Image if no avatar */}
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem' }}>🧑‍💻</div>
+              {adminProfile?.avatarUrl ? (
+                <img src={adminProfile.avatarUrl} alt="Author Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem' }}>🧑‍💻</div>
+              )}
             </div>
             <div style={{ position: 'absolute', bottom: -20, right: -20, width: 140, height: 140, borderRadius: '50%', background: GOLD_LIGHT, border: '8px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: GOLD_DARK, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
               <span style={{ fontSize: '1.5rem', fontWeight: 800 }}>100%</span>

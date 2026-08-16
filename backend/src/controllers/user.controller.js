@@ -10,6 +10,15 @@ export const me = async (req, res) => {
   }
 };
 
+export const getAdminProfile = async (req, res) => {
+  try {
+    const admin = await userService.getFirstAdminProfile();
+    return sendSuccess(res, admin, 'Admin profile loaded');
+  } catch (error) {
+    return sendError(res, error.message, error.statusCode || 500);
+  }
+};
+
 export const updateProfile = async (req, res) => {
   try {
     const { username, avatarUrl, bio } = req.body;

@@ -183,3 +183,25 @@ export const completeOnboarding = async (userId, { paths, dailyWordGoal }) => {
   await cacheSetJson(userCacheKey(userId), payload, 300);
   return payload;
 };
+
+// Lấy profile admin đầu tiên để hiển thị trên trang About (public)
+export const getFirstAdminProfile = async () => {
+  const admin = await prisma.user.findFirst({
+    where: { role: 'ADMIN' },
+    select: {
+      id: true,
+      email: true,
+      profile: {
+        select: { username: true, avatarUrl: true, bio: true },
+      },
+    },
+  });
+  if (!admin) throw Object.assign(new Error('Admin not found'), { statusCode: 404 });
+  return {
+    id: admin.id,
+    email: admin.email,
+    username: admin.profile?.username || 'Admin',
+    avatarUrl: admin.profile?.avatarUrl || null,
+    bio: admin.profile?.bio || null,
+  };
+};

@@ -10,6 +10,7 @@ import paymentRoutes from './payment.routes.js';
 import adminRoutes from './admin.routes.js';
 import supportRoutes from './support.routes.js';
 import advisorRoutes from './advisor.routes.js';
+import publicRoutes from './public.routes.js';
 
 const router = express.Router();
 
@@ -24,5 +25,6 @@ router.use('/payment', paymentRoutes);
 router.use('/admin', adminRoutes);
 router.use('/support', supportRoutes);
 router.use('/advisor', advisorRoutes);
+router.use('/public', publicRoutes);
 
 export default router;
