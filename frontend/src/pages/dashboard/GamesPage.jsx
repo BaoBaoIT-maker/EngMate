@@ -24,6 +24,47 @@ const cardStyle = (t, extra) => ({
   ...extra,
 });
 
+// ─── Skeleton primitive ──────────────────────────────────────────────
+function Sk({ w = '100%', h = 16, r = 8, style = {} }) {
+  return (
+    <div style={{
+      width: w, height: h, borderRadius: r,
+      background: 'linear-gradient(90deg, var(--sk-from) 25%, var(--sk-to) 50%, var(--sk-from) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'sk-shimmer 1.6s ease-in-out infinite',
+      flexShrink: 0,
+      ...style,
+    }} />
+  );
+}
+
+function GamesSkeleton({ t, isDark }) {
+  const skFrom = isDark ? 'rgba(47,158,86,0.08)' : '#F0EAD9';
+  const skTo   = isDark ? 'rgba(47,158,86,0.18)' : '#E5DBCA';
+
+  return (
+    <div style={{ '--sk-from': skFrom, '--sk-to': skTo, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
+      {[0, 1, 2, 3, 4, 5].map(i => (
+        <div key={i} style={{ ...cardStyle(t), padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', animationDelay: `${i * 0.08}s` }}>
+          <Sk w={32} h={32} r={8} />
+          <Sk w="60%" h={16} r={6} style={{ marginTop: '0.25rem' }} />
+          <div>
+            <Sk w="90%" h={12} r={4} style={{ marginBottom: '0.35rem' }} />
+            <Sk w="70%" h={12} r={4} />
+          </div>
+          <Sk w={60} h={18} r={6} style={{ marginTop: '0.5rem' }} />
+        </div>
+      ))}
+      <style>{`
+        @keyframes sk-shimmer {
+          0%   { background-position: 200% center; }
+          100% { background-position: -200% center; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function GamesPage() {
   const { isDark, getTheme } = useThemeStore();
   const t = getTheme();
@@ -62,11 +103,7 @@ export default function GamesPage() {
       <Header title="Mini-games" subtitle="Học vui — không nhàm" />
       
       {loading ? (
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          {[1, 2, 3].map(i => (
-            <div key={i} style={{ ...cardStyle(t), width: 220, height: 160, opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
-          ))}
-        </div>
+        <GamesSkeleton t={t} isDark={isDark} />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
           {games.map((g, i) => (
