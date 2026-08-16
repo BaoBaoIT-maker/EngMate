@@ -1,7 +1,7 @@
 import prisma from '../config/prisma.js';
 import * as statService from './stat.service.js';
 import * as aiService from './ai.service.js';
-import { flashcardQueue } from '../queues/flashcard.queue.js';
+import { enqueueFlashcardReview } from '../queues/flashcard.queue.js';
 
 export const getTopics = async (userId) => {
   // Lấy toàn bộ chủ đề và map categoryCode sang category để frontend FlashcardPage đọc được
@@ -398,8 +398,8 @@ export const processFlashcardReview = async (userId, flashcardId, quality) => {
 export const reviewFlashcard = async (userId, flashcardId, quality) => {
   if (quality < 0 || quality > 5) throw new Error('Quality must be between 0 and 5');
   
-  // Đưa vào Queue để xử lý ngầm (SM2, exp, logs)
-  await flashcardQueue.add('review', { userId, flashcardId, quality });
+  // Đưa vào Queue để xử lý ngầm (hoặc đồng bộ nếu Redis lỗi)
+  await enqueueFlashcardReview({ userId, flashcardId, quality });
   
   // Trả về kết quả ngay lập tức (frontend sẽ dùng Optimistic UI)
   return { status: 'queued', message: 'Flashcard review added to background queue' };

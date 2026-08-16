@@ -27,3 +27,17 @@ if (emailWorker) {
     console.error(`[EmailWorker] Job ${job.id} failed with error ${err.message}`);
   });
 }
+
+// Wrapper to safely enqueue or fallback to synchronous execution if Redis is down
+export const enqueueEmail = async (type, data) => {
+  if (connection && connection.status === 'ready') {
+    await emailQueue.add('sendOtp', { type, data });
+  } else {
+    console.warn(`[EmailQueue] Redis not ready (status: ${connection?.status || 'null'}). Falling back to sync email sending.`);
+    if (type === 'SEND_VERIFICATION_OTP') {
+      await sendVerificationOtpEmail(data);
+    } else if (type === 'SEND_FORGOT_PWD_OTP') {
+      await sendForgotPasswordOtpEmail(data);
+    }
+  }
+};

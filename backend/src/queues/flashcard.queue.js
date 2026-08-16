@@ -21,3 +21,13 @@ if (flashcardWorker) {
     console.error(`[FlashcardWorker] Job ${job.id} failed with error ${err.message}`);
   });
 }
+
+// Wrapper to safely enqueue or fallback to synchronous execution
+export const enqueueFlashcardReview = async (data) => {
+  if (connection && connection.status === 'ready') {
+    await flashcardQueue.add('review', data);
+  } else {
+    console.warn(`[FlashcardQueue] Redis not ready. Falling back to sync flashcard review.`);
+    await processFlashcardReview(data.userId, data.flashcardId, data.quality);
+  }
+};
