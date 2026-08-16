@@ -53,16 +53,24 @@ export default function LandingPage() {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'}/payment/plans`);
         const plansData = res.data?.data || res.data || [];
         // Map data từ DB sang dạng UI cần thiết
-        const mappedPlans = plansData.map(plan => ({
-          name: plan.name,
-          price: plan.price === 0 ? '0₫' : `${plan.price.toLocaleString('vi-VN')}₫`,
-          period: `/${plan.durationMonths} tháng`,
-          desc: plan.description || 'Gói dịch vụ cao cấp',
-          features: plan.features || [],
-          locked: plan.code === 'FREE' ? ['AI Speaking Coach', 'Hỗ trợ ưu tiên'] : [],
-          cta: plan.code === 'FREE' ? 'Bắt đầu miễn phí' : 'Nâng cấp ngay',
-          highlight: plan.code !== 'FREE',
-        }));
+        const mappedPlans = plansData.map(plan => {
+          let parsedFeatures = [];
+          try {
+            parsedFeatures = typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features;
+            if (!Array.isArray(parsedFeatures)) parsedFeatures = [];
+          } catch(e) { parsedFeatures = []; }
+
+          return {
+            name: plan.name,
+            price: plan.price === 0 ? '0₫' : `${plan.price.toLocaleString('vi-VN')}₫`,
+            period: `/${plan.durationMonths || (plan.durationDays ? Math.round(plan.durationDays / 30) : 1)} tháng`,
+            desc: plan.description || 'Gói dịch vụ',
+            features: parsedFeatures,
+            locked: plan.code === 'FREE' ? ['AI Speaking Coach', 'Hỗ trợ ưu tiên'] : [],
+            cta: plan.code === 'FREE' ? 'Bắt đầu miễn phí' : 'Nâng cấp ngay',
+            highlight: plan.code !== 'FREE',
+          };
+        });
         
         // Nếu không có API trả về, dùng fallback
         if (mappedPlans.length === 0) throw new Error("No plans");
