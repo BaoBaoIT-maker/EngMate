@@ -176,6 +176,142 @@ function getGreeting() {
   return 'buổi tối';
 }
 
+// ─── Skeleton primitive ─────────────────────────────────────────────────
+function Sk({ w = '100%', h = 16, r = 8, style = {} }) {
+  return (
+    <div style={{
+      width: w, height: h, borderRadius: r,
+      background: 'linear-gradient(90deg, var(--sk-from) 25%, var(--sk-to) 50%, var(--sk-from) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'sk-shimmer 1.6s ease-in-out infinite',
+      flexShrink: 0,
+      ...style,
+    }} />
+  );
+}
+
+function DashboardSkeleton({ t, isDark }) {
+  const skFrom = isDark ? 'rgba(47,158,86,0.08)' : '#F0EAD9';
+  const skTo   = isDark ? 'rgba(47,158,86,0.18)' : '#E5DBCA';
+
+  return (
+    <div className="screen-enter w-full max-w-5xl mx-auto"
+      style={{ '--sk-from': skFrom, '--sk-to': skTo }}
+    >
+      {/* Hero header skeleton */}
+      <div style={{ marginBottom: '2rem' }}>
+        <Sk w="55%" h={44} r={10} />
+        <Sk w="38%" h={16} r={6} style={{ marginTop: 12 }} />
+      </div>
+
+      {/* Top row: Streak + XP + Goal */}
+      <div className="grid grid-cols-1 md:grid-cols-[auto_auto_1fr] gap-4 mb-4">
+        {/* Streak card */}
+        <div style={{ ...card(t), padding: '1.5rem 1.75rem', minWidth: 200 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            <Sk w={52} h={60} r={12} />
+            <div style={{ flex: 1 }}>
+              <Sk w={60} h={36} r={8} />
+              <Sk w={90} h={12} r={5} style={{ marginTop: 8 }} />
+              <Sk w={70} h={12} r={5} style={{ marginTop: 8 }} />
+            </div>
+          </div>
+        </div>
+
+        {/* XP card */}
+        <div style={{ ...card(t), padding: '1.5rem 1.75rem', minWidth: 160 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            <Sk w={52} h={52} r={26} />
+            <div style={{ flex: 1 }}>
+              <Sk w={60} h={36} r={8} />
+              <Sk w={80} h={12} r={5} style={{ marginTop: 8 }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Goal card */}
+        <div style={{ ...card(t), padding: '1.5rem 1.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ flex: 1 }}>
+              <Sk w={80} h={10} r={4} />
+              <Sk w={160} h={18} r={6} style={{ marginTop: 8 }} />
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <Sk w={60} h={28} r={8} />
+              <Sk w={50} h={10} r={4} style={{ marginTop: 6 }} />
+            </div>
+          </div>
+          <Sk w="100%" h={10} r={100} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+            <Sk w={80} h={10} r={4} />
+            <Sk w={100} h={10} r={4} />
+          </div>
+        </div>
+      </div>
+
+      {/* Section label skeleton */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem', marginTop: '0.5rem' }}>
+        <Sk w={18} h={18} r={4} />
+        <Sk w={130} h={18} r={6} />
+        <div style={{ flex: 1, height: 1, background: t.cardBorder }} />
+      </div>
+
+      {/* Heatmap + Memory */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        {/* Heatmap */}
+        <div style={{ ...card(t), padding: '1.5rem' }}>
+          <Sk w={180} h={12} r={5} style={{ marginBottom: 20 }} />
+          {/* Grid dots */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {[0,1,2,3,4,5,6].map(row => (
+              <div key={row} style={{ display: 'flex', gap: 3 }}>
+                {Array.from({ length: 26 }).map((_, col) => (
+                  <Sk key={col} w={12} h={12} r={3}
+                    style={{ animationDelay: `${(row * 26 + col) * 0.01}s` }} />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Memory */}
+        <div style={{ ...card(t), padding: '1.5rem' }}>
+          <Sk w={180} h={12} r={5} style={{ marginBottom: 24 }} />
+          <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+                <Sk w={68} h={68} r={34} />
+                <Sk w={70} h={10} r={4} />
+                <Sk w={55} h={9} r={4} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent words */}
+      <div style={{ ...card(t), padding: '1.5rem' }}>
+        <Sk w={160} h={12} r={5} style={{ marginBottom: 20 }} />
+        {[0,1,2,3,4].map(i => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', padding: '0.625rem 0.875rem', marginBottom: 4 }}>
+            <Sk w={18} h={18} r={4} />
+            <Sk w={`${100 + i * 30}px`} h={14} r={5} style={{ flex: 1 }} />
+            <Sk w={80} h={10} r={4} />
+            <Sk w={72} h={24} r={100} />
+          </div>
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes sk-shimmer {
+          0%   { background-position: 200% center; }
+          100% { background-position: -200% center; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 // ─── Main Component ────────────────────────────────────────────────────
 export default function DashboardOverview() {
   const { isDark, getTheme } = useThemeStore();
@@ -201,12 +337,7 @@ export default function DashboardOverview() {
   }, []);
 
   if (loading || !stats) {
-    return (
-      <div style={{ padding: '3rem', textAlign: 'center' }}>
-        <div style={{ fontSize: '2rem', marginBottom: 12 }}>🌱</div>
-        <div style={{ color: t.textMuted, fontFamily: "'Be Vietnam Pro', sans-serif" }}>Đang tải dữ liệu vườn từ vựng...</div>
-      </div>
-    );
+    return <DashboardSkeleton t={t} isDark={isDark} />;
   }
 
   const { streak, dailyGoal, memory, heatmap, recent } = stats;
