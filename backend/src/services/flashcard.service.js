@@ -264,7 +264,9 @@ export const getLearnedWords = async (userId, query) => {
       id: fc.id,
       word: fc.customWord,
       phonetic: fc.customPhonetic,
-      vietnameseMeaning: fc.customWord,
+      vietnameseMeaning: fc.customMeaning || fc.customWord,
+      definition: fc.customDefinition,
+      examples: fc.customExamples || [],
       progress: fc.progress,
       type: 'custom'
     }));
@@ -408,10 +410,24 @@ export const reviewFlashcard = async (userId, flashcardId, quality) => {
 export const createCustomFlashcard = async (userId, data) => {
   const { word, definition, phonetic, meaning, examples } = data;
 
+  // Kiểm tra trùng lặp từ vựng (case-insensitive)
+  const existing = await prisma.flashcard.findFirst({
+    where: {
+      userId,
+      customWord: { equals: word.trim(), mode: 'insensitive' }
+    }
+  });
+
+  if (existing) {
+    const error = new Error('Bạn đã thêm từ vựng này rồi!');
+    error.statusCode = 409;
+    throw error;
+  }
+
   const newFc = await prisma.flashcard.create({
     data: {
       userId,
-      customWord: word,
+      customWord: word.trim(),
       customMeaning: meaning || null,
       customDefinition: definition,
       customPhonetic: phonetic,
@@ -429,6 +445,68 @@ export const createCustomFlashcard = async (userId, data) => {
   });
 
   return newFc;
+};
+
+export const updateCustomFlashcard = async (userId, flashcardId, data) => {
+  const { word, definition, phonetic, meaning, examples } = data;
+
+  // Kiểm tra quyền sở hữu
+  const fc = await prisma.flashcard.findUnique({ where: { id: flashcardId } });
+  if (!fc || fc.userId !== userId) {
+    const error = new Error('Không tìm thấy flashcard hoặc không có quyền chỉnh sửa');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  if (!fc.customWord) {
+    const error = new Error('Chỉ có thể chỉnh sửa từ vựng cá nhân');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Kiểm tra trùng lặp nếu từ bị đổi tên (case-insensitive, loại bỏ chính nó)
+  if (word && word.trim().toLowerCase() !== fc.customWord.toLowerCase()) {
+    const duplicate = await prisma.flashcard.findFirst({
+      where: {
+        userId,
+        customWord: { equals: word.trim(), mode: 'insensitive' },
+        NOT: { id: flashcardId }
+      }
+    });
+    if (duplicate) {
+      const error = new Error('Bạn đã thêm từ vựng này rồi!');
+      error.statusCode = 409;
+      throw error;
+    }
+  }
+
+  const updated = await prisma.flashcard.update({
+    where: { id: flashcardId },
+    data: {
+      ...(word && { customWord: word.trim() }),
+      ...(meaning !== undefined && { customMeaning: meaning || null }),
+      ...(definition !== undefined && { customDefinition: definition }),
+      ...(phonetic !== undefined && { customPhonetic: phonetic }),
+      ...(examples !== undefined && { customExamples: examples || [] }),
+    }
+  });
+
+  return updated;
+};
+
+export const deleteFlashcard = async (userId, flashcardId) => {
+  // Kiểm tra quyền sở hữu
+  const fc = await prisma.flashcard.findUnique({ where: { id: flashcardId } });
+  if (!fc || fc.userId !== userId) {
+    const error = new Error('Không tìm thấy flashcard hoặc không có quyền xóa');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  // Cascade sẽ tự xóa StudyProgress và ReviewLog
+  await prisma.flashcard.delete({ where: { id: flashcardId } });
+
+  return { message: 'Đã xóa từ vựng thành công' };
 };
 
 export const generateAIContent = async (word) => {

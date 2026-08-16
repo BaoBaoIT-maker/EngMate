@@ -46,15 +46,44 @@ export const reviewFlashcard = async (req, res) => {
 
 export const createCustom = async (req, res) => {
   try {
-    const { word, definition, phonetic, meaning, examples } = req.body;
+    const { word, meaning } = req.body;
     if (!word || !meaning) {
-      return sendError(res, 'Word and meaning are required', 400);
+      return sendError(res, 'Từ vựng và Nghĩa là bắt buộc', 400);
     }
 
     const fc = await flashcardService.createCustomFlashcard(req.user.id, req.body);
-    return sendSuccess(res, fc, 'Custom flashcard created');
+    return sendSuccess(res, fc, 'Đã thêm từ vựng thành công');
   } catch (error) {
-    return sendError(res, error.message, 500);
+    return sendError(res, error.message, error.statusCode || 500);
+  }
+};
+
+export const updateCustom = async (req, res) => {
+  try {
+    const flashcardId = parseInt(req.params.id);
+    if (isNaN(flashcardId)) return sendError(res, 'ID không hợp lệ', 400);
+
+    const { word, meaning } = req.body;
+    if (!word || !meaning) {
+      return sendError(res, 'Từ vựng và Nghĩa là bắt buộc', 400);
+    }
+
+    const updated = await flashcardService.updateCustomFlashcard(req.user.id, flashcardId, req.body);
+    return sendSuccess(res, updated, 'Đã cập nhật từ vựng thành công');
+  } catch (error) {
+    return sendError(res, error.message, error.statusCode || 500);
+  }
+};
+
+export const deleteFlashcard = async (req, res) => {
+  try {
+    const flashcardId = parseInt(req.params.id);
+    if (isNaN(flashcardId)) return sendError(res, 'ID không hợp lệ', 400);
+
+    const result = await flashcardService.deleteFlashcard(req.user.id, flashcardId);
+    return sendSuccess(res, result, result.message);
+  } catch (error) {
+    return sendError(res, error.message, error.statusCode || 500);
   }
 };
 
