@@ -20,10 +20,9 @@ export default function SettingsPage() {
   const user = useAuthStore(s => s.user);
 
   const [notif, setNotif] = useState(user?.setting?.receiveEmails ?? true);
-  const [goal, setGoal] = useState(user?.setting?.dailyWordGoal || 20);
-  const [isSavingPref, setIsSavingPref] = useState(false);
-
   const [username, setUsername] = useState(user?.profile?.username || '');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const nameInputRef = React.useRef(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const fileInputRef = React.useRef(null);
@@ -46,12 +45,17 @@ export default function SettingsPage() {
   };
   
   const handleUpdateUsername = async () => {
-    if (username === user?.profile?.username || !username.trim()) return;
+    if (!username.trim() || username === user?.profile?.username) {
+      setIsEditingName(false);
+      setUsername(user?.profile?.username || '');
+      return;
+    }
     setIsSavingProfile(true);
     try {
       await api.patch('/users/me/profile', { username: username.trim() });
       const res = await api.get('/users/me');
       useAuthStore.getState().setUser(res.data);
+      setIsEditingName(false);
     } catch (err) {
       console.error('Update username error', err);
     }
@@ -177,21 +181,57 @@ export default function SettingsPage() {
           </div>
 
           <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: 4 }}>
-              <input 
-                type="text" 
-                value={username} 
-                onChange={(e) => setUsername(e.target.value)}
-                onBlur={handleUpdateUsername}
-                onKeyDown={(e) => e.key === 'Enter' && handleUpdateUsername()}
-                style={{ 
-                  fontWeight: 800, color: t.text, fontSize: '1.2rem', 
-                  background: 'transparent', border: 'none', borderBottom: `1.5px dashed ${username !== user?.profile?.username ? t.gold : 'transparent'}`, 
-                  outline: 'none', padding: '2px 0', width: '100%', maxWidth: 250,
-                  transition: 'border-color 0.2s'
-                }} 
-              />
-              {isSavingProfile && <span style={{ fontSize: '0.7rem', color: t.gold }}>Lưu...</span>}
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: 4 }}>
+              {isEditingName ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: t.bg, borderRadius: 8, padding: '4px 8px', border: `1px solid ${t.gold}` }}>
+                  <input 
+                    ref={nameInputRef}
+                    type="text" 
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleUpdateUsername();
+                      if (e.key === 'Escape') {
+                        setIsEditingName(false);
+                        setUsername(user?.profile?.username || '');
+                      }
+                    }}
+                    style={{ 
+                      fontWeight: 800, color: t.text, fontSize: '1.2rem', 
+                      background: 'transparent', border: 'none',
+                      outline: 'none', width: '100%', maxWidth: 220
+                    }} 
+                  />
+                  <button 
+                    onClick={handleUpdateUsername}
+                    disabled={isSavingProfile}
+                    style={{ background: t.goldBg, color: t.gold, border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                  >
+                    {isSavingProfile ? '...' : 'Lưu'}
+                  </button>
+                  <button 
+                    onClick={() => { setIsEditingName(false); setUsername(user?.profile?.username || ''); }}
+                    style={{ background: 'transparent', color: t.textMuted, border: 'none', fontSize: '0.75rem', cursor: 'pointer' }}
+                  >
+                    Hủy
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ fontWeight: 800, color: t.text, fontSize: '1.2rem' }}>
+                    {user?.profile?.username || 'Người dùng'}
+                  </div>
+                  <button 
+                    onClick={() => { setIsEditingName(true); setTimeout(() => nameInputRef.current?.focus(), 50); }}
+                    style={{ background: 'transparent', border: 'none', color: t.textMuted, cursor: 'pointer', display: 'flex', padding: 4, borderRadius: 4, transition: 'background 0.2s' }}
+                    onMouseOver={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}
+                    onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                    title="Đổi tên"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  </button>
+                </div>
+              )}
             </div>
             <div style={{ fontSize: '0.85rem', color: t.textMuted }}>{user?.email || 'user@example.com'}</div>
             <div style={{ marginTop: 6, display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
