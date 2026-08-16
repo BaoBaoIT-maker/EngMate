@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import PhoneMockup from '../components/PhoneMockup';
 import CourseCard from '../components/CourseCard';
-import PricingCard from '../components/PricingCard';
 
 const GOLD = '#F0B429';
 const GOLD_DARK = '#C9920A';
@@ -35,59 +33,11 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   
-  // Dữ liệu bảng giá động
-  const [plans, setPlans] = useState([]);
-  const [loadingPricing, setLoadingPricing] = useState(true);
-
   // Scroll effect
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', fn);
     return () => window.removeEventListener('scroll', fn);
-  }, []);
-
-  // Fetch Pricing
-  useEffect(() => {
-    const fetchPricing = async () => {
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'}/payment/plans`);
-        const plansData = res.data?.data || res.data || [];
-        // Map data từ DB sang dạng UI cần thiết
-        const mappedPlans = plansData.map(plan => {
-          let parsedFeatures = [];
-          try {
-            parsedFeatures = typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features;
-            if (!Array.isArray(parsedFeatures)) parsedFeatures = [];
-          } catch(e) { parsedFeatures = []; }
-
-          return {
-            name: plan.name,
-            price: plan.price === 0 ? '0₫' : `${plan.price.toLocaleString('vi-VN')}₫`,
-            period: `/${plan.durationMonths || (plan.durationDays ? Math.round(plan.durationDays / 30) : 1)} tháng`,
-            desc: plan.description || 'Gói dịch vụ',
-            features: parsedFeatures,
-            locked: plan.code === 'FREE' ? ['AI Speaking Coach', 'Hỗ trợ ưu tiên'] : [],
-            cta: plan.code === 'FREE' ? 'Bắt đầu miễn phí' : 'Nâng cấp ngay',
-            highlight: plan.code !== 'FREE',
-          };
-        });
-        
-        // Nếu không có API trả về, dùng fallback
-        if (mappedPlans.length === 0) throw new Error("No plans");
-        
-        setPlans(mappedPlans);
-      } catch (error) {
-        console.error('Error fetching plans:', error);
-        // Fallback
-        setPlans([
-          { name: 'Miễn phí', price: '0₫', period: '/tháng', desc: 'Dành cho người mới bắt đầu', features: ['50 từ mỗi ngày', 'Flashcard cơ bản'], locked: ['AI Speaking Coach'], cta: 'Bắt đầu', highlight: false },
-          { name: 'Premium', price: '199.000₫', period: '/tháng', desc: 'Dành cho người học nghiêm túc', features: ['Không giới hạn', 'AI Speaking Coach', 'Mini-games'], locked: [], cta: 'Nâng cấp', highlight: true }
-        ]);
-      } finally {
-        setLoadingPricing(false);
-      }
-    };
-    fetchPricing();
   }, []);
 
   const tickerItems = ['Từ vựng TOEIC', 'Luyện thi IELTS', 'Giao tiếp văn phòng', 'AI Speaking Coach', 'Spaced Repetition', 'Học qua Game', 'Thi thử mô phỏng', 'Học thích nghi AI'];
@@ -117,8 +67,18 @@ export default function LandingPage() {
         </div>
 
         <div className="landing-nav-links" style={{ display: 'flex', gap: '2rem' }}>
-          {[['Khóa học', '#courses'], ['Tính năng', '#features'], ['Bảng giá', '#pricing']].map(([label, href]) => (
-            <a key={label} href={href} className="nav-link">{label}</a>
+          {[['Khóa học', '/#courses'], ['Tính năng', '/#features'], ['Về chúng tôi', '/about']].map(([label, href]) => (
+            <a key={label} href={href} onClick={(e) => {
+              if (href.startsWith('/#')) {
+                // Let anchor links work normally if on the same page, or redirect to landing
+                if (window.location.pathname === '/') return; 
+                e.preventDefault();
+                navigate(href);
+              } else {
+                e.preventDefault();
+                navigate(href);
+              }
+            }} className="nav-link">{label}</a>
           ))}
         </div>
 
@@ -277,29 +237,6 @@ export default function LandingPage() {
                 <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontSize: '0.95rem' }}>Học mà chơi, chơi mà học qua các game như Matching (Nối từ) và Fill-in-the-blank (Điền vào chỗ trống). Loại bỏ sự nhàm chán của việc học từ vựng truyền thống.</p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── PRICING ── */}
-      <section id="pricing" style={{ padding: '6rem 2rem', background: '#FAFAF8' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-            <div style={{ display: 'inline-block', padding: '0.375rem 1rem', borderRadius: 100, background: GOLD_LIGHT, border: `1px solid rgba(240,180,41,0.3)`, marginBottom: '1rem' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: GOLD_DARK, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Bảng giá</span>
-            </div>
-            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 2.75rem)', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '0.875rem' }}>
-              Đầu tư cho tương lai của bạn
-            </h2>
-          </div>
-          <div className="landing-pricing-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center' }}>
-            {loadingPricing ? (
-              <div style={{ textAlign: 'center', color: '#9D8E6F', gridColumn: 'span 2' }}>Đang tải bảng giá...</div>
-            ) : (
-              plans.map(p => (
-                <PricingCard key={p.name} plan={p} onCta={() => navigate('/register')} />
-              ))
-            )}
           </div>
         </div>
       </section>
