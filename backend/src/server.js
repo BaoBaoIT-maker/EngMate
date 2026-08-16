@@ -1,5 +1,9 @@
 import 'dotenv/config';
 import http from 'http';
+import dns from 'dns';
+
+// Fix for Render IPv6 routing issues with Nodemailer
+dns.setDefaultResultOrder('ipv4first');
 import app from './app.js';
 import { initSocket } from './config/socket.js';
 
