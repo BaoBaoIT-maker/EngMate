@@ -20,6 +20,8 @@ export default function SettingsPage() {
   const user = useAuthStore(s => s.user);
 
   const [notif, setNotif] = useState(user?.setting?.receiveEmails ?? true);
+  const [goal, setGoal] = useState(user?.setting?.dailyWordGoal || 20);
+  const [isSavingPref, setIsSavingPref] = useState(false);
   const [username, setUsername] = useState(user?.profile?.username || '');
   const [isEditingName, setIsEditingName] = useState(false);
   const nameInputRef = React.useRef(null);
