@@ -58,7 +58,6 @@ api.interceptors.response.use(
         processQueue(err, null);
         // Nếu refresh thất bại (cookie hết hạn, không hợp lệ), logout
         useAuthStore.getState().logout();
-        window.location.href = '/login';
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
