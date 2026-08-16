@@ -19,7 +19,7 @@ import { hashPassword, comparePassword } from '../utils/password.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import { cacheDelete, cacheGetJson, cacheSetJson } from '../config/redis.js';
 import { generateOtpCode, hashOtpCode, verifyOtpCode } from '../utils/otp.js';
-import { sendVerificationOtpEmail, sendForgotPasswordOtpEmail } from './email.service.js';
+import { emailQueue } from '../queues/email.queue.js';
 
 const sanitizeUser = (user) => {
   if (!user) {
@@ -86,10 +86,10 @@ const storeAndSendVerificationOtp = async ({ user, email, username }) => {
     otpHash: hashOtpCode(otpCode),
   }, OTP_TTL_SECONDS);
 
-  await sendVerificationOtpEmail({
-    email,
-    username,
-    otpCode,
+  // Đưa vào Queue để gửi email ngầm (background job)
+  await emailQueue.add('sendOtp', {
+    type: 'SEND_VERIFICATION_OTP',
+    data: { email, username, otpCode }
   });
 };
 
@@ -561,10 +561,13 @@ export const forgotPassword = async ({ email }) => {
     otpHash: hashOtpCode(otpCode),
   }, OTP_TTL_SECONDS);
 
-  await sendForgotPasswordOtpEmail({
-    email: normalizedEmail,
-    username,
-    otpCode,
+  await emailQueue.add('sendOtp', {
+    type: 'SEND_FORGOT_PWD_OTP',
+    data: {
+      email,
+      username: user.profile?.username,
+      otpCode,
+    }
   });
 
   return {
