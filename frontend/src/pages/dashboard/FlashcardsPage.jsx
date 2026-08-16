@@ -7,6 +7,119 @@ import api from '../../services/api';
 import AddFlashcardModal from './AddFlashcardModal';
 import LearnedWordsPanel from './LearnedWordsPanel';
 
+// ─── Skeleton primitive ──────────────────────────────────────────────
+function Sk({ w = '100%', h = 16, r = 8, style = {} }) {
+  return (
+    <div style={{
+      width: w, height: h, borderRadius: r,
+      background: 'linear-gradient(90deg, var(--sk-from) 25%, var(--sk-to) 50%, var(--sk-from) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'sk-shimmer 1.6s ease-in-out infinite',
+      flexShrink: 0,
+      ...style,
+    }} />
+  );
+}
+
+function FlashcardsSkeleton({ t, isDark }) {
+  const skFrom = isDark ? 'rgba(47,158,86,0.08)' : '#F0EAD9';
+  const skTo   = isDark ? 'rgba(47,158,86,0.18)' : '#E5DBCA';
+  const cardStyle = {
+    background: t.card,
+    borderRadius: 16,
+    padding: '1.25rem',
+    border: `1px solid ${t.cardBorder}`,
+    boxShadow: `0 4px 12px ${t.shadow}`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+  };
+
+  return (
+    <div className="screen-enter w-full max-w-5xl mx-auto pb-20"
+      style={{ '--sk-from': skFrom, '--sk-to': skTo }}
+    >
+      {/* Header row */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.75rem' }}>
+        <div>
+          <Sk w={160} h={28} r={8} />
+          <Sk w={240} h={14} r={6} style={{ marginTop: 8 }} />
+        </div>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <Sk w={130} h={40} r={10} />
+          <Sk w={140} h={40} r={10} />
+        </div>
+      </div>
+
+      {/* General review card */}
+      <div style={{ marginBottom: '2rem' }}>
+        <Sk w={200} h={20} r={6} style={{ marginBottom: '1rem' }} />
+        <div style={{ ...cardStyle }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Sk w="50%" h={20} r={6} />
+            <Sk w={100} h={24} r={6} />
+          </div>
+          <Sk w="90%" h={14} r={5} />
+          <Sk w="75%" h={14} r={5} />
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <Sk w="100%" h={38} r={8} />
+            <Sk w="100%" h={38} r={8} />
+          </div>
+        </div>
+      </div>
+
+      <div style={{ borderTop: `1px dashed ${t.cardBorder}`, marginBottom: '2rem' }} />
+
+      {/* Custom vocab */}
+      <div style={{ marginBottom: '2rem' }}>
+        <Sk w={180} h={20} r={6} style={{ marginBottom: '1rem' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+          <div style={{ ...cardStyle }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Sk w="55%" h={18} r={6} />
+              <Sk w={60} h={22} r={6} />
+            </div>
+            <Sk w="85%" h={13} r={5} />
+            <Sk w="70%" h={13} r={5} />
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <Sk w="100%" h={36} r={8} />
+              <Sk w="100%" h={36} r={8} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* System topic cards grid */}
+      <div>
+        <Sk w={200} h={20} r={6} style={{ marginBottom: '1rem' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+          {[0, 1, 2, 3, 4, 5].map(i => (
+            <div key={i} style={{ ...cardStyle, animationDelay: `${i * 0.08}s` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Sk w="55%" h={18} r={6} />
+                <Sk w={50} h={22} r={6} />
+              </div>
+              <Sk w="80%" h={13} r={5} />
+              <Sk w={`${50 + (i % 3) * 15}%`} h={13} r={5} />
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <Sk w="100%" h={36} r={8} />
+                <Sk w="100%" h={36} r={8} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes sk-shimmer {
+          0%   { background-position: 200% center; }
+          100% { background-position: -200% center; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function FlashcardsPage() {
   const { isDark, getTheme } = useThemeStore();
   const t = getTheme();
@@ -125,7 +238,7 @@ export default function FlashcardsPage() {
       </div>
 
       {loading ? (
-        <div style={{ color: t.textMuted, marginTop: '2rem' }}>Đang tải chủ đề...</div>
+        <FlashcardsSkeleton t={t} isDark={isDark} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '1rem' }}>
           
