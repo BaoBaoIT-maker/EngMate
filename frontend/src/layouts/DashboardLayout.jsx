@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useThemeStore from '../store/useThemeStore';
 import useAuthStore from '../store/useAuthStore';
@@ -331,6 +331,7 @@ export default function DashboardLayout() {
   const user = useAuthStore(s => s.user);
   const pulseSplash = useSplashStore(s => s.pulse);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     pulseSplash(700);
