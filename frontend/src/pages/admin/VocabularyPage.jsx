@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Button, Input, Table, Tag, Modal, Drawer, Checkbox, Spin,
   Space, Tooltip, Popconfirm, message, Select, Form, Breadcrumb, Card, Badge, Empty, Typography
@@ -9,6 +9,7 @@ import {
   SoundOutlined, DeleteFilled
 } from '@ant-design/icons';
 import * as adminService from '../../services/adminService';
+import TargetConfigBuilder from './TargetConfigBuilder';
 
 const { Text } = Typography;
 
