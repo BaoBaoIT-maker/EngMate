@@ -1,5 +1,18 @@
 import prisma from '../config/prisma.js';
 
+export const findActiveCategories = () =>
+  prisma.category.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: 'asc' },
+    select: {
+      code: true,
+      name: true,
+      description: true,
+      targetConfig: true,
+      sortOrder: true,
+    },
+  });
+
 export const findAllTopics = () =>
   prisma.vocabularyTopic.findMany({
     orderBy: [{ categoryCode: 'asc' }, { level: 'asc' }],

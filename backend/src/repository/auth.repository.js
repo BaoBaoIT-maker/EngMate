@@ -19,6 +19,7 @@ export const findUserById = (id) => prisma.user.findUnique({
     learningPaths: {
       where: { isActive: true },
       orderBy: { createdAt: 'asc' },
+      include: { progress: true },
     },
   },
 });
@@ -72,15 +73,6 @@ export const upsertUserSetting = (userId, data) => prisma.userSetting.upsert({
 
 export const createUserSkill = (data) => prisma.userSkill.create({ data });
 
-export const upsertUserSkill = (userId, data) => prisma.userSkill.upsert({
-  where: { userId },
-  update: data,
-  create: {
-    userId,
-    ...data,
-  },
-});
-
 export const updatePassword = (id, passwordHash) => prisma.user.update({
   where: { id },
   data: { passwordHash },
@@ -92,6 +84,7 @@ export const findLearningPathsByUserId = (userId) =>
   prisma.userLearningPath.findMany({
     where: { userId, isActive: true },
     orderBy: { updatedAt: 'desc' },
+    include: { progress: true },
   });
 
 export const upsertLearningPath = (userId, categoryCode, data) =>

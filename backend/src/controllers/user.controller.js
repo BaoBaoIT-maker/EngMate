@@ -128,7 +128,7 @@ export const getLearningPaths = async (req, res) => {
 /**
  * PUT /api/users/me/learning-paths
  * Upsert một hoặc nhiều lộ trình học
- * Body: { paths: [{ category, currentLevel, targetScore }] }
+ * Body: { paths: [{ category, targetLevel, targetWordCount }] }
  */
 export const saveLearningPaths = async (req, res) => {
   try {

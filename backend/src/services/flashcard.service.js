@@ -1,6 +1,7 @@
-import prisma from '../config/prisma.js';
+﻿import prisma from '../config/prisma.js';
 import * as statService from './stat.service.js';
 import * as aiService from './ai.service.js';
+import * as learningProgressService from './learningProgress.service.js';
 import { enqueueFlashcardReview } from '../queues/flashcard.queue.js';
 
 export const getTopics = async (userId) => {
@@ -337,8 +338,14 @@ export const processFlashcardReview = async (userId, flashcardId, quality) => {
 
   if (!progress) throw new Error('Progress not found');
 
-  // Kiểm tra quyền sở hữu
-  const fc = await prisma.flashcard.findUnique({ where: { id: flashcardId } });
+  // Kiểm tra quyền sở hữu + lấy categoryCode để enqueue progress update
+  const fc = await prisma.flashcard.findUnique({
+    where: { id: flashcardId },
+    select: {
+      userId: true,
+      systemVocabulary: { select: { categoryCode: true } },
+    },
+  });
   if (!fc || fc.userId !== userId) throw new Error('Unauthorized access to flashcard');
 
   let { repetitions, interval, easinessFactor } = progress;
@@ -393,7 +400,18 @@ export const processFlashcardReview = async (userId, flashcardId, quality) => {
     // Dù trả lời sai vẫn tính streak nhưng chỉ +1 EXP động viên
     await statService.updateActivityAndExp(userId, 1);
   }
-  
+  // Enqueue job tính lại tiến độ (bất đồng bộ, không block API)
+  // try/catch: Redis lỗi KHÔNG được làm hỏng luồng ghi StudyProgress và ReviewLog
+  const categoryCode = fc.systemVocabulary?.categoryCode;
+  if (categoryCode) {
+    try {
+      const { enqueueProgressUpdate } = await import('../queues/progress.queue.js');
+      await enqueueProgressUpdate(userId, categoryCode);
+    } catch (queueErr) {
+      console.error('[FlashcardService] enqueue progress failed (non-critical):', queueErr.message);
+    }
+  }
+
   return updatedProgress;
 };
 

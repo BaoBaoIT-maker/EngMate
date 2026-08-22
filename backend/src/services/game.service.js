@@ -1,4 +1,4 @@
-import prisma from '../config/prisma.js';
+﻿import prisma from '../config/prisma.js';
 import * as flashcardService from './flashcard.service.js';
 import * as statService from './stat.service.js';
 

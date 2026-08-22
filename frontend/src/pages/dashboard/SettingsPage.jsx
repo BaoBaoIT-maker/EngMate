@@ -14,6 +14,43 @@ const card = (t, extra) => ({
   ...extra,
 });
 
+const LEVEL_OPTIONS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const SCORE_OPTIONS = {
+  TOEIC: [250, 350, 450, 550, 650, 730, 800, 850, 900, 990],
+  IELTS: ['1.0', '2.0', '3.0', '4.0', '5.0', '5.5', '6.0', '6.5', '7.0', '7.5', '8.0', '8.5', '9.0'],
+};
+
+const usesScoreTarget = (category) => Boolean(SCORE_OPTIONS[category]);
+const getTargetOptions = (category) => SCORE_OPTIONS[category] || LEVEL_OPTIONS;
+const getDefaultTargetValue = (category) => {
+  if (category === 'TOEIC') return '650';
+  if (category === 'IELTS') return '6.5';
+  return 'B1';
+};
+
+const getPathTargetValue = (path) => {
+  const category = path?.category || 'GENERAL';
+  return String(
+    usesScoreTarget(category)
+      ? path?.targetScore || getDefaultTargetValue(category)
+      : path?.targetLevel || getDefaultTargetValue(category)
+  );
+};
+
+const getPathPayload = (pathForm) => {
+  if (usesScoreTarget(pathForm.category)) {
+    return {
+      category: pathForm.category,
+      targetScore: getPathTargetValue(pathForm),
+    };
+  }
+
+  return {
+    category: pathForm.category,
+    targetLevel: getPathTargetValue(pathForm),
+  };
+};
+
 export default function SettingsPage() {
   const { isDark, toggleDark, getTheme } = useThemeStore();
   const t = getTheme();
@@ -97,37 +134,29 @@ export default function SettingsPage() {
     setIsUploading(false);
   };
   
-  const getLevelOptions = (cat) => {
-    if (cat === 'IELTS') return Array.from({ length: 19 }, (_, i) => (i * 0.5).toFixed(1));
-    if (cat === 'TOEIC') {
-      const arr = Array.from({ length: 20 }, (_, i) => (i * 50).toString());
-      arr.push('990');
-      return arr;
-    }
-    return ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-  };
-
-  const initialPath = user?.learningPaths?.[0] || { category: 'GENERAL', currentLevel: 'A1', targetScore: 'B1' };
+  const initialPath = user?.learningPaths?.[0] || { category: 'GENERAL', targetLevel: 'B1' };
   const [pathForm, setPathForm] = useState(initialPath);
   const [isSavingPath, setIsSavingPath] = useState(false);
 
   const savedPathForCategory = user?.learningPaths?.find(p => p.category === pathForm.category);
   const referencePath = savedPathForCategory || {
     category: pathForm.category,
-    currentLevel: pathForm.category === 'IELTS' ? '0.0' : pathForm.category === 'TOEIC' ? '0' : 'A1',
-    targetScore: pathForm.category === 'IELTS' ? '0.0' : pathForm.category === 'TOEIC' ? '0' : 'A1'
+    targetLevel: usesScoreTarget(pathForm.category) ? null : getDefaultTargetValue(pathForm.category),
+    targetScore: usesScoreTarget(pathForm.category) ? getDefaultTargetValue(pathForm.category) : null,
   };
+  const currentPathProgress = savedPathForCategory?.progress || pathForm.progress;
 
   const hasChanges = 
     pathForm.category !== referencePath.category || 
-    pathForm.currentLevel !== referencePath.currentLevel || 
-    pathForm.targetScore !== referencePath.targetScore;
+    getPathTargetValue(pathForm) !== getPathTargetValue(referencePath);
 
   const handleSavePath = async () => {
     if (!hasChanges) return;
     setIsSavingPath(true);
     try {
-      await api.put('/users/me/learning-paths', { paths: [pathForm] });
+      await api.put('/users/me/learning-paths', {
+        paths: [getPathPayload(pathForm)]
+      });
       const res = await api.get('/users/me');
       useAuthStore.getState().setUser(res.data);
     } catch (err) {
@@ -248,7 +277,7 @@ export default function SettingsPage() {
               )}
               {user?.learningPaths?.map((path, idx) => (
                 <span key={idx} style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>
-                  {path.category} · Lên {path.targetScore || path.currentLevel}
+                  {path.category} · {path.progress?.currentLevel || 'A1'} → {getPathTargetValue(path)}
                 </span>
               ))}
             </div>
@@ -281,8 +310,12 @@ export default function SettingsPage() {
               if (existingPath) {
                 setPathForm({ ...existingPath });
               } else {
-                const defaultLevel = newCat === 'IELTS' ? '0.0' : newCat === 'TOEIC' ? '0' : 'A1';
-                setPathForm({ ...pathForm, category: newCat, currentLevel: defaultLevel, targetScore: defaultLevel });
+                setPathForm({
+                  category: newCat,
+                  targetLevel: usesScoreTarget(newCat) ? null : getDefaultTargetValue(newCat),
+                  targetScore: usesScoreTarget(newCat) ? getDefaultTargetValue(newCat) : null,
+                  progress: null
+                });
               }
             }}
             style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: `1px solid ${t.cardBorder}`, background: t.bg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
@@ -295,11 +328,11 @@ export default function SettingsPage() {
         
         <Row label="Trình độ hiện tại" desc="Level tiếng Anh hiện tại" right={
           <select 
-            value={pathForm.currentLevel}
-            onChange={e => setPathForm({ ...pathForm, currentLevel: e.target.value })}
+            value={currentPathProgress?.currentLevel || 'A1'}
+            disabled
             style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: `1px solid ${t.cardBorder}`, background: t.bg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
           >
-            {getLevelOptions(pathForm.category).map(l => (
+            {LEVEL_OPTIONS.map(l => (
               <option key={l} value={l}>{l}</option>
             ))}
           </select>
@@ -307,11 +340,15 @@ export default function SettingsPage() {
         
         <Row label="Mục tiêu" desc="Số điểm/Trình độ mong muốn" right={
           <select 
-            value={pathForm.targetScore || ''}
-            onChange={e => setPathForm({ ...pathForm, targetScore: e.target.value })}
+            value={getPathTargetValue(pathForm)}
+            onChange={e => setPathForm({
+              ...pathForm,
+              targetLevel: usesScoreTarget(pathForm.category) ? null : e.target.value,
+              targetScore: usesScoreTarget(pathForm.category) ? e.target.value : null,
+            })}
             style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: `1px solid ${t.cardBorder}`, background: t.bg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
           >
-            {getLevelOptions(pathForm.category).map(l => (
+            {getTargetOptions(pathForm.category).map(l => (
               <option key={l} value={l}>{l}</option>
             ))}
           </select>

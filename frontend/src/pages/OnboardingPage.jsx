@@ -1,8 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useThemeStore from '../store/useThemeStore';
 import useAuthStore from '../store/useAuthStore';
 import axiosInstance from '../services/api';
+import { listCategories } from '../services/vocabularyService';
+import {
+  buildPathPayload,
+  getCategoryByCode,
+  getDefaultTargetValue,
+  getTargetOptions,
+  toLearningCategory,
+  usesScoreTarget,
+} from '../utils/learningCategories';
 
 const GOLD = '#F0B429';
 const GOLD_DARK = '#C9920A';
@@ -17,7 +26,7 @@ const COURSES = [
     accent: GOLD,
     accentBg: 'rgba(240,180,41,0.12)',
     scoreLabel: 'Điểm mục tiêu',
-    scoreOptions: [450, 550, 650, 730, 800, 850, 900, 990],
+    scoreOptions: [250, 350, 450, 550, 650, 730, 800, 850, 900, 990],
     scoreUnit: 'điểm',
   },
   {
@@ -28,7 +37,7 @@ const COURSES = [
     accent: '#8B5CF6',
     accentBg: 'rgba(139,92,246,0.12)',
     scoreLabel: 'Band mục tiêu',
-    scoreOptions: [50, 55, 60, 65, 70, 75, 80], // lưu *10 để tránh float, ví dụ 65 = 6.5
+    scoreOptions: [10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 90], // lưu *10 để tránh float, ví dụ 65 = 6.5
     scoreUnit: 'band (×0.1)',
   },
   {
@@ -62,7 +71,13 @@ const DAILY_GOALS = [
 ];
 
 // ─── STEP COMPONENTS ───────────────────────────────────────────────
-function StepCourses({ selected, setSelected }) {
+const hasTargetConfig = (category, config) => (
+  usesScoreTarget(category)
+    ? config?.targetScore !== undefined
+    : Boolean(config?.targetLevel)
+);
+
+function StepCourses({ courses, selected, setSelected }) {
   const toggle = (cat) =>
     setSelected((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
@@ -74,7 +89,7 @@ function StepCourses({ selected, setSelected }) {
         Chọn <strong style={{ color: '#fff' }}>một hoặc nhiều</strong> lộ trình — bạn có thể học song song.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-        {COURSES.map((c) => {
+        {courses.map((c) => {
           const active = selected.includes(c.category);
           return (
             <div
@@ -116,14 +131,16 @@ function StepCourses({ selected, setSelected }) {
   );
 }
 
-function StepLevel({ pathConfig, setPathConfig, selectedCourses }) {
+function StepLevel({ courses, pathConfig, setPathConfig, selectedCourses }) {
   return (
     <div>
       <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', marginBottom: '1.25rem' }}>
-        Tự đánh giá trình độ hiện tại của bạn cho từng khóa.
+        Chọn mục tiêu học tập cho từng khóa.
       </p>
       {selectedCourses.map((cat) => {
-        const course = COURSES.find((c) => c.category === cat);
+        const course = getCategoryByCode(courses, cat);
+        const isScoreTarget = usesScoreTarget(course);
+        if (!course) return null;
         return (
           <div key={cat} style={{ marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -131,14 +148,21 @@ function StepLevel({ pathConfig, setPathConfig, selectedCourses }) {
               <span style={{ fontWeight: 700, color: course.accent, fontSize: '0.9rem' }}>{course.title}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {LEVELS.map((lv) => {
-                const active = pathConfig[cat]?.level === lv.value;
+              {getTargetOptions(course).map((option) => {
+                const value = option.value;
+                const label = option.label;
+                const desc = option.desc;
+                const active = isScoreTarget
+                  ? pathConfig[cat]?.targetScore === value
+                  : pathConfig[cat]?.targetLevel === value;
                 return (
                   <div
-                    key={lv.value}
+                    key={value}
                     onClick={() => setPathConfig((prev) => ({
                       ...prev,
-                      [cat]: { ...prev[cat], level: lv.value },
+                      [cat]: isScoreTarget
+                        ? { ...prev[cat], targetScore: value }
+                        : { ...prev[cat], targetLevel: value },
                     }))}
                     style={{
                       padding: '0.75rem 1rem',
@@ -150,8 +174,8 @@ function StepLevel({ pathConfig, setPathConfig, selectedCourses }) {
                     }}
                   >
                     <div>
-                      <div style={{ fontWeight: 700, color: active ? course.accent : '#fff', fontSize: '0.85rem' }}>{lv.label}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>{lv.desc}</div>
+                      <div style={{ fontWeight: 700, color: active ? course.accent : '#fff', fontSize: '0.85rem' }}>{label}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>{desc}</div>
                     </div>
                     {active && <span style={{ color: course.accent, fontWeight: 800 }}>✓</span>}
                   </div>
@@ -165,6 +189,7 @@ function StepLevel({ pathConfig, setPathConfig, selectedCourses }) {
   );
 }
 
+/*
 function StepTarget({ pathConfig, setPathConfig, selectedCourses }) {
   const coursesWithScore = selectedCourses.filter((cat) => COURSES.find((c) => c.category === cat)?.scoreOptions.length > 0);
 
@@ -220,6 +245,7 @@ function StepTarget({ pathConfig, setPathConfig, selectedCourses }) {
   );
 }
 
+*/
 function StepGoal({ dailyGoal, setDailyGoal }) {
   return (
     <div>
@@ -257,10 +283,11 @@ function StepGoal({ dailyGoal, setDailyGoal }) {
 // ─── MAIN COMPONENT ────────────────────────────────────────────────
 const STEPS = [
   { id: 'courses', title: 'Chọn khóa học', subtitle: 'Bạn muốn chinh phục chứng chỉ nào?' },
-  { id: 'level', title: 'Trình độ hiện tại', subtitle: 'Để AI biết nên bắt đầu từ đâu' },
+  { id: 'level', title: 'Mục tiêu khóa học', subtitle: 'Chọn level hoặc điểm mục tiêu bạn muốn đạt' },
   { id: 'target', title: 'Điểm mục tiêu', subtitle: 'Đặt mục tiêu rõ ràng để có lộ trình tối ưu' },
   { id: 'goal', title: 'Mục tiêu hàng ngày', subtitle: 'Học đều đặn quan trọng hơn học nhiều một lúc' },
 ];
+const ACTIVE_STEPS = STEPS.filter((item) => item.id !== 'target');
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
@@ -269,27 +296,62 @@ export default function OnboardingPage() {
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingCourses, setLoadingCourses] = useState(true);
   const [error, setError] = useState('');
 
   // State
+  const [courses, setCourses] = useState(() =>
+    COURSES.map((course, index) => toLearningCategory({
+      code: course.category,
+      name: course.title,
+      description: course.desc,
+    }, index))
+  );
   const [selectedCourses, setSelectedCourses] = useState([]);
-  const [pathConfig, setPathConfig] = useState({}); // { TOEIC: { level, targetScore }, ... }
+  const [pathConfig, setPathConfig] = useState({}); // { TOEIC: { targetScore }, GENERAL: { targetLevel }, ... }
   const [dailyGoal, setDailyGoal] = useState(15);
 
-  const currentStep = STEPS[step];
+  const currentStep = ACTIVE_STEPS[step];
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCourses = async () => {
+      try {
+        const categories = await listCategories();
+        if (!mounted) return;
+        const mapped = categories.map(toLearningCategory).filter((category) => category.category);
+        if (mapped.length > 0) setCourses(mapped);
+      } catch (err) {
+        console.error('Load learning categories failed:', err);
+      } finally {
+        if (mounted) setLoadingCourses(false);
+      }
+    };
+
+    loadCourses();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Validation per step
   const isStepValid = () => {
     if (step === 0) return selectedCourses.length > 0;
-    if (step === 1) return selectedCourses.every((cat) => pathConfig[cat]?.level);
-    if (step === 2) return true; // target score optional for GENERAL
+    if (step === 1) {
+      return selectedCourses.every((cat) => {
+        const category = getCategoryByCode(courses, cat);
+        return category && hasTargetConfig(category, pathConfig[cat]);
+      });
+    }
+    if (step === 2) return true;
     if (step === 3) return dailyGoal > 0;
     return true;
   };
 
   const handleNext = async () => {
     setError('');
-    if (step < STEPS.length - 1) {
+    if (step < ACTIVE_STEPS.length - 1) {
       setStep((s) => s + 1);
       return;
     }
@@ -297,11 +359,10 @@ export default function OnboardingPage() {
     // Final step → submit
     setLoading(true);
     try {
-      const paths = selectedCourses.map((cat) => ({
-        category: cat,
-        currentLevel: pathConfig[cat]?.level || 'A1',
-        targetScore: pathConfig[cat]?.targetScore || null,
-      }));
+      const paths = selectedCourses.map((cat) => {
+        const category = getCategoryByCode(courses, cat);
+        return buildPathPayload(category, pathConfig[cat]);
+      });
 
       await axiosInstance.post('/users/me/onboarding', { paths, dailyWordGoal: dailyGoal });
       // Dùng fetchMe để lấy lại user mới nhất từ server (có onboardingDone = true)
@@ -314,7 +375,7 @@ export default function OnboardingPage() {
     }
   };
 
-  const progress = ((step + 1) / STEPS.length) * 100;
+  const progress = ((step + 1) / ACTIVE_STEPS.length) * 100;
 
   return (
     <div style={{
@@ -339,7 +400,7 @@ export default function OnboardingPage() {
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-              Bước {step + 1} / {STEPS.length}
+              Bước {step + 1} / {ACTIVE_STEPS.length}
             </span>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: GOLD }}>{Math.round(progress)}%</span>
           </div>
@@ -366,8 +427,7 @@ export default function OnboardingPage() {
           {/* Step content */}
           {step === 0 && <StepCourses selected={selectedCourses} setSelected={setSelectedCourses} />}
           {step === 1 && <StepLevel pathConfig={pathConfig} setPathConfig={setPathConfig} selectedCourses={selectedCourses} />}
-          {step === 2 && <StepTarget pathConfig={pathConfig} setPathConfig={setPathConfig} selectedCourses={selectedCourses} />}
-          {step === 3 && <StepGoal dailyGoal={dailyGoal} setDailyGoal={setDailyGoal} />}
+          {step === 2 && <StepGoal dailyGoal={dailyGoal} setDailyGoal={setDailyGoal} />}
 
           {/* Error */}
           {error && (
@@ -400,7 +460,7 @@ export default function OnboardingPage() {
                 boxShadow: isStepValid() ? '0 6px 20px rgba(240,180,41,0.3)' : 'none',
               }}
             >
-              {loading ? 'Đang lưu…' : step === STEPS.length - 1 ? 'Bắt đầu học ✦' : 'Tiếp theo →'}
+              {loading ? 'Đang lưu…' : step === ACTIVE_STEPS.length - 1 ? 'Bắt đầu học ✦' : 'Tiếp theo →'}
             </button>
           </div>
         </div>

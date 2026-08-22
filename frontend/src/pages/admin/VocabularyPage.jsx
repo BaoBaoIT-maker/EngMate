@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import {
   Button, Input, Table, Tag, Modal, Drawer, Checkbox, Spin,
   Space, Tooltip, Popconfirm, message, Select, Form, Breadcrumb, Card, Badge, Empty, Typography
@@ -143,7 +143,13 @@ export default function VocabularyPage() {
   const openCatEdit = (cat, e) => {
     e.stopPropagation();
     setEditingCat(cat);
-    catForm.setFieldsValue({ code: cat.code, name: cat.name, description: cat.description, sortOrder: cat.sortOrder });
+    catForm.setFieldsValue({
+      code: cat.code,
+      name: cat.name,
+      description: cat.description,
+      sortOrder: cat.sortOrder,
+      targetConfig: cat.targetConfig,
+    });
     setCatModalOpen(true);
   };
 
@@ -595,6 +601,9 @@ export default function VocabularyPage() {
           <Form.Item name="name" label="Tên danh mục" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="description" label="Mô tả"><Input.TextArea rows={3} /></Form.Item>
           <Form.Item name="sortOrder" label="Thứ tự hiển thị" initialValue={0}><Input type="number" /></Form.Item>
+          <Form.Item name="targetConfig">
+            <TargetConfigBuilder />
+          </Form.Item>
         </Form>
       </Modal>
 

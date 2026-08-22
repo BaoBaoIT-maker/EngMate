@@ -1,4 +1,16 @@
-import { findAllTopics, findTopicById } from '../repository/vocabulary.repository.js';
+import {
+  findActiveCategories,
+  findAllTopics,
+  findTopicById,
+} from '../repository/vocabulary.repository.js';
+
+export const getCategories = async () => {
+  const categories = await findActiveCategories();
+  return categories.map((category) => ({
+    ...category,
+    category: category.code,
+  }));
+};
 
 export const getTopics = async () => {
   const topics = await findAllTopics();

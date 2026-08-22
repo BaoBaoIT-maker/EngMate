@@ -64,7 +64,7 @@ export const getUserDetail = async (req, res) => {
         setting: true,
         skill: true,
         subscription: { include: { plan: true } },
-        learningPaths: { where: { isActive: true } },
+        learningPaths: { where: { isActive: true }, include: { progress: true } },
         transactions: { orderBy: { createdAt: 'desc' }, take: 10 },
       },
     });

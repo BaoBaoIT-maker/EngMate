@@ -11,15 +11,18 @@ import {
   createUserSetting,
   upsertUserSetting,
   createUserSkill,
-  upsertUserSkill,
   updatePassword,
-  upsertLearningPath,
 } from '../repository/auth.repository.js';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import { cacheDelete, cacheGetJson, cacheSetJson } from '../config/redis.js';
 import { generateOtpCode, hashOtpCode, verifyOtpCode } from '../utils/otp.js';
 import { enqueueEmail } from '../queues/email.queue.js';
+
+const formatLearningPath = (path) => path ? ({
+  ...path,
+  category: path.categoryCode,
+}) : path;
 
 const sanitizeUser = (user) => {
   if (!user) {
@@ -37,7 +40,7 @@ const sanitizeUser = (user) => {
     setting: user.setting || null,
     skill: user.skill || null,
     subscription: user.subscription || null,
-    learningPaths: user.learningPaths || [],
+    learningPaths: (user.learningPaths || []).map(formatLearningPath),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -115,13 +118,7 @@ const createDefaultRelations = async (userId, defaults = {}) => {
   }
 
   if (!user?.skill) {
-    await createUserSkill({
-      userId,
-      currentLevel: 'A1',
-      vocabularyScore: 0,
-      grammarScore: 0,
-      speakingScore: 0,
-    });
+    await createUserSkill({ userId });
   }
 };
 
@@ -141,13 +138,7 @@ const createVerifiedAccountRelations = async (userId, username, avatarUrl = null
     onboardingDone: false,
   });
 
-  await createUserSkill({
-    userId,
-    currentLevel: 'A1',
-    vocabularyScore: 0,
-    grammarScore: 0,
-    speakingScore: 0,
-  });
+  await createUserSkill({ userId });
 };
 
 const prepareLocalAuthUser = async ({ email, password, username }) => {

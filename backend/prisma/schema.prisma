@@ -39,6 +39,7 @@ model User {
   chatSessions        ChatSession[]
   transactions        Transaction[]
   learningPaths       UserLearningPath[]
+  pathProgresses      UserPathProgress[]
   supportConversation SupportConversation?
 
   @@map("users")
@@ -70,18 +71,11 @@ model UserSetting {
 
 model UserSkill {
   userId          Int          @id @map("user_id")
-  currentLevel    EnglishLevel @default(A1) @map("current_level")
-  vocabularyScore Int          @default(0) @map("vocabulary_score")
-  grammarScore    Int          @default(0) @map("grammar_score")
-  speakingScore   Int          @default(0) @map("speaking_score")
 
   streakDays     Int       @default(0) @map("streak_days")
   maxStreak      Int       @default(0) @map("max_streak")
   totalExp       Int       @default(0) @map("total_exp")
   lastActiveDate DateTime? @map("last_active_date")
-
-  aiChatCountToday Int       @default(0) @map("ai_chat_count_today")
-  lastAiChatDate   DateTime? @map("last_ai_chat_date")
 
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -126,16 +120,43 @@ model UserLearningPath {
   // Lưu code của Category (VD: "GENERAL", "TOEIC", "IELTS")
   // Dùng String thay vì FK để tránh JOIN và linh hoạt khi thêm category mới
   categoryCode String   @map("category_code") @db.VarChar(50)
-  currentLevel String   @default("A1") @map("current_level") @db.VarChar(50)
-  targetScore  String?  @map("target_score") @db.VarChar(50)
+  targetLevel     String? @map("target_level") @db.VarChar(50)
+  targetScore     String? @map("target_score") @db.VarChar(50)
+  targetWordCount Int?    @map("target_word_count")
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  progress UserPathProgress?
 
   @@unique([userId, categoryCode])
   @@map("user_learning_paths")
+}
+
+model UserPathProgress {
+  pathId Int @id @map("path_id")
+  userId Int @map("user_id")
+
+  currentLevel    String @default("A1") @map("current_level") @db.VarChar(50)
+  vocabularyScore Int    @default(0) @map("vocabulary_score")
+
+  totalWords    Int   @default(0) @map("total_words")
+  studiedWords  Int   @default(0) @map("studied_words")
+  masteredWords Int   @default(0) @map("mastered_words")
+  accuracy      Float @default(0)
+
+  progressToTarget Float @default(0) @map("progress_to_target")
+  levelBreakdown   Json? @map("level_breakdown")
+
+  lastEvaluatedAt DateTime? @map("last_evaluated_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  path UserLearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_path_progresses")
 }
 
 // ==========================================
@@ -148,6 +169,7 @@ model Category {
   code        String   @unique @db.VarChar(50) // "GENERAL", "TOEIC", "IELTS", ...
   name        String   @db.VarChar(100) // "Giao tiếp chung", "Luyện thi TOEIC", ...
   description String?  @db.Text
+  targetConfig Json?   @map("target_config")
   isActive    Boolean  @default(true) @map("is_active")
   sortOrder   Int      @default(0) @map("sort_order")
   createdAt   DateTime @default(now()) @map("created_at")
@@ -190,6 +212,7 @@ model SystemVocabulary {
   topic      VocabularyTopic? @relation(fields: [topicId], references: [id], onDelete: SetNull)
   flashcards Flashcard[]
 
+  @@index([categoryCode, level])
   @@map("system_vocabulary")
 }
 
@@ -211,6 +234,7 @@ model Flashcard {
   progress         StudyProgress?
   reviewLogs       ReviewLog[]
 
+  @@index([userId, systemVocabularyId])
   @@map("flashcards")
 }
 
@@ -239,6 +263,7 @@ model ReviewLog {
 
   flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
 
+  @@index([flashcardId])
   @@map("review_logs")
 }
 

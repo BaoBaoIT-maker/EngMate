@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import prismaClientPkg from '@prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import { DEFAULT_CATEGORY_TARGET_CONFIGS } from '../src/services/learningTarget.service.js';
 
 const { PrismaClient } = prismaClientPkg;
 
@@ -27,10 +28,11 @@ async function main() {
     { code: 'IELTS',   name: 'Luyện thi IELTS',    description: 'Từ vựng và kỹ năng thi IELTS',              sortOrder: 3 },
   ];
   for (const cat of categories) {
+    const targetConfig = DEFAULT_CATEGORY_TARGET_CONFIGS[cat.code] || null;
     await prisma.category.upsert({
       where: { code: cat.code },
-      update: { name: cat.name, description: cat.description, sortOrder: cat.sortOrder },
-      create: cat,
+      update: { name: cat.name, description: cat.description, sortOrder: cat.sortOrder, targetConfig },
+      create: { ...cat, targetConfig },
     });
   }
   console.log('✅ Categories seeded');

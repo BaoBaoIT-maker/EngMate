@@ -8,8 +8,15 @@ import {
   deleteLearningPath,
 } from '../repository/auth.repository.js';
 import { cacheDelete, cacheGetJson, cacheSetJson } from '../config/redis.js';
+import * as learningProgressService from './learningProgress.service.js';
+import { getCategoryTargetConfig, TARGET_TYPES } from './learningTarget.service.js';
 
 const userCacheKey = (userId) => `engmate:user:me:${userId}`;
+
+const formatLearningPath = (path) => path ? ({
+  ...path,
+  category: path.categoryCode,
+}) : path;
 
 const sanitizeUser = (user) => {
   if (!user) return null;
@@ -25,7 +32,7 @@ const sanitizeUser = (user) => {
     subscription: user.subscription
       ? { ...user.subscription, plan: user.subscription.plan || null }
       : null,
-    learningPaths: user.learningPaths || [],
+    learningPaths: (user.learningPaths || []).map(formatLearningPath),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -93,12 +100,60 @@ export const updateSetting = async (userId, payload) => {
 // ---- Learning Paths ----
 
 export const getLearningPaths = async (userId) => {
-  return findLearningPathsByUserId(userId);
+  const paths = await findLearningPathsByUserId(userId);
+  return paths.map(formatLearningPath);
+};
+
+const normalizeTargetScore = (category, value) => {
+  if (value === null) return null;
+
+  const config = getCategoryTargetConfig(category);
+  if (config.targetType !== TARGET_TYPES.SCORE) {
+    return value === undefined ? undefined : null;
+  }
+  if (value === undefined) return config.defaultTarget;
+
+  const score = Number(value);
+  const minScore = Number.isFinite(config.minScore) ? config.minScore : null;
+  const maxScore = Number.isFinite(config.maxScore) ? config.maxScore : null;
+  if (
+    !Number.isFinite(score)
+    || (minScore !== null && score < minScore)
+    || (maxScore !== null && score > maxScore)
+  ) {
+    const range = minScore !== null && maxScore !== null
+      ? ` between ${minScore} and ${maxScore}`
+      : '';
+    const error = new Error(`${category.code} targetScore must be a number${range}`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return String(value);
+};
+
+const normalizeTargetLevel = (category, value) => {
+  if (value === null) return null;
+
+  const config = getCategoryTargetConfig(category);
+  if (config.targetType !== TARGET_TYPES.LEVEL) {
+    return value === undefined ? undefined : null;
+  }
+  if (value === undefined) return config.defaultTarget;
+
+  const level = String(value).toUpperCase();
+  const validTargets = config.options.map((option) => option.value);
+  if (!validTargets.includes(level)) {
+    const error = new Error(`targetLevel must be one of ${validTargets.join(', ')}`);
+    error.statusCode = 400;
+    throw error;
+  }
+  return level;
 };
 
 /**
  * Upsert một hoặc nhiều lộ trình học cho user.
- * payload.paths = [{ category, currentLevel, targetScore }, ...]
+ * payload.paths = [{ category/categoryCode, targetLevel, targetWordCount }, ...]
  */
 export const saveLearningPaths = async (userId, paths) => {
   if (!Array.isArray(paths) || paths.length === 0) {
@@ -110,13 +165,21 @@ export const saveLearningPaths = async (userId, paths) => {
   // Validate categories dynamically from DB
   const activeCategories = await prisma.category.findMany({
     where: { isActive: true },
-    select: { code: true },
+    select: { code: true, targetConfig: true },
   });
-  const validCodes = activeCategories.map(c => c.code);
+  const categoryByCode = new Map(activeCategories.map((category) => [category.code, category]));
+  const validCodes = activeCategories.map((category) => category.code);
 
   for (const path of paths) {
-    const { category, categoryCode: rawCode, currentLevel, targetScore } = path;
-    const code = rawCode || category; // support both old and new field name
+    const {
+      category,
+      categoryCode: rawCode,
+      targetLevel,
+      targetWordCount,
+      targetScore,
+      currentLevel,
+    } = path;
+    const code = String(rawCode || category || '').toUpperCase(); // support both old and new field name
 
     if (!validCodes.includes(code)) {
       const error = new Error(`Invalid category: ${code}. Must be one of ${validCodes.join(', ')}`);
@@ -125,18 +188,37 @@ export const saveLearningPaths = async (userId, paths) => {
     }
 
     const data = {
-      currentLevel: currentLevel ? String(currentLevel) : 'A1',
       isActive: true,
     };
-    if (targetScore !== undefined) {
-      data.targetScore = targetScore === null ? null : String(targetScore);
+
+    const categoryRecord = categoryByCode.get(code);
+    const normalizedTargetLevel = normalizeTargetLevel(categoryRecord, targetLevel ?? currentLevel);
+    if (normalizedTargetLevel !== undefined) {
+      data.targetLevel = normalizedTargetLevel;
+    }
+
+    const normalizedTargetScore = normalizeTargetScore(categoryRecord, targetScore);
+    if (normalizedTargetScore !== undefined) {
+      data.targetScore = normalizedTargetScore;
+    }
+
+    if (targetWordCount !== undefined) {
+      const count = parseInt(targetWordCount, 10);
+      if (Number.isNaN(count) || count < 1) {
+        const error = new Error('targetWordCount must be a positive number');
+        error.statusCode = 400;
+        throw error;
+      }
+      data.targetWordCount = count;
     }
 
     await upsertLearningPath(userId, code, data);
+    await learningProgressService.recalculatePathProgress(userId, code);
   }
 
   await cacheDelete(userCacheKey(userId));
-  return findLearningPathsByUserId(userId);
+  const savedPaths = await findLearningPathsByUserId(userId);
+  return savedPaths.map(formatLearningPath);
 };
 
 /**
@@ -152,7 +234,8 @@ export const removeLearningPath = async (userId, categoryCode) => {
   }
   await deleteLearningPath(userId, categoryCode);
   await cacheDelete(userCacheKey(userId));
-  return findLearningPathsByUserId(userId);
+  const remainingPaths = await findLearningPathsByUserId(userId);
+  return remainingPaths.map(formatLearningPath);
 };
 
 /**

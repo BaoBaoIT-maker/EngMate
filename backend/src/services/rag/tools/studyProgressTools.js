@@ -9,7 +9,7 @@ export const getStudyOverviewTool = {
 Gọi khi user hỏi tổng quát về tiến độ: "tôi học được bao nhiêu từ rồi", "XP của tôi là bao nhiêu", "streak của tôi thế nào", "trình độ tôi đang ở đâu", "tiến độ học tập của tôi".`,
 
   execute: async (userId) => {
-    const [skill, totalFlashcards, masteredCards] = await Promise.all([
+    const [skill, totalFlashcards, masteredCards, pathProgresses] = await Promise.all([
       prisma.userSkill.findUnique({ where: { userId } }),
       prisma.flashcard.count({ where: { userId } }),
       prisma.flashcard.count({
@@ -17,6 +17,20 @@ Gọi khi user hỏi tổng quát về tiến độ: "tôi học được bao nh
           userId,
           progress: { boxLevel: { gte: 4 } } // Box 4-5 là đã thuộc tốt
         }
+      }),
+      prisma.userPathProgress.findMany({
+        where: { userId },
+        include: {
+          path: {
+            select: {
+              categoryCode: true,
+              targetLevel: true,
+              targetScore: true,
+              targetWordCount: true
+            }
+          }
+        },
+        orderBy: { updatedAt: 'desc' }
       })
     ]);
 
@@ -29,9 +43,19 @@ Gọi khi user hỏi tổng quát về tiến độ: "tôi học được bao nh
       totalExp: skill.totalExp,
       streakDays: skill.streakDays,
       maxStreak: skill.maxStreak,
-      currentLevel: skill.currentLevel,
-      vocabularyScore: skill.vocabularyScore,
-      speakingScore: skill.speakingScore,
+      pathProgresses: pathProgresses.map((progress) => ({
+        category: progress.path.categoryCode,
+        targetLevel: progress.path.targetLevel,
+        targetScore: progress.path.targetScore,
+        targetWordCount: progress.path.targetWordCount,
+        currentLevel: progress.currentLevel,
+        vocabularyScore: progress.vocabularyScore,
+        progressToTarget: progress.progressToTarget,
+        studiedWords: progress.studiedWords,
+        masteredWords: progress.masteredWords,
+        totalWords: progress.totalWords,
+        accuracy: progress.accuracy
+      })),
       lastActiveDate: skill.lastActiveDate
         ? new Date(skill.lastActiveDate).toLocaleDateString('vi-VN')
         : 'Chưa có'
@@ -158,26 +182,35 @@ Gọi khi user hỏi: "tôi nên học gì tiếp theo", "gợi ý lộ trình c
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-    const [skill, dueCards, recentSessions] = await Promise.all([
+    const [skill, dueCards, pathProgresses] = await Promise.all([
       prisma.userSkill.findUnique({ where: { userId } }),
       prisma.studyProgress.count({
         where: { flashcard: { userId }, nextReviewDate: { lte: tomorrow } }
       }),
-      prisma.chatSession.count({
-        where: {
-          userId,
-          createdAt: { gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) }
-        }
+      prisma.userPathProgress.findMany({
+        where: { userId },
+        include: {
+          path: { select: { categoryCode: true, targetLevel: true, targetScore: true, targetWordCount: true } }
+        },
+        orderBy: [{ vocabularyScore: 'asc' }, { updatedAt: 'desc' }],
+        take: 3
       })
     ]);
 
     return JSON.stringify({
       streakDays: skill?.streakDays || 0,
-      currentLevel: skill?.currentLevel || 'A1',
       dueCardsToday: dueCards,
-      speakingSessionsThisWeek: recentSessions,
-      speakingScore: skill?.speakingScore || 0,
-      vocabularyScore: skill?.vocabularyScore || 0
+      weakestPaths: pathProgresses.map((progress) => ({
+        category: progress.path.categoryCode,
+        currentLevel: progress.currentLevel,
+        targetLevel: progress.path.targetLevel,
+        targetScore: progress.path.targetScore,
+        targetWordCount: progress.path.targetWordCount,
+        vocabularyScore: progress.vocabularyScore,
+        progressToTarget: progress.progressToTarget,
+        masteredWords: progress.masteredWords,
+        totalWords: progress.totalWords
+      }))
     });
   }
 };

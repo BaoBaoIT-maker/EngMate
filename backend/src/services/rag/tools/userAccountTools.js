@@ -19,7 +19,23 @@ Gọi khi user hỏi về thông tin tài khoản của họ, ví dụ: "tên t�
         email: true,
         createdAt: true,
         profile: { select: { username: true, bio: true } },
-        skill: { select: { currentLevel: true, totalExp: true, streakDays: true } }
+        skill: { select: { totalExp: true, streakDays: true } },
+        learningPaths: {
+          where: { isActive: true },
+          select: {
+            categoryCode: true,
+            targetLevel: true,
+            targetScore: true,
+            targetWordCount: true,
+            progress: {
+              select: {
+                currentLevel: true,
+                vocabularyScore: true,
+                progressToTarget: true
+              }
+            }
+          }
+        }
       }
     });
 
@@ -30,7 +46,7 @@ Gọi khi user hỏi về thông tin tài khoản của họ, ví dụ: "tên t�
       username: user.profile?.username || 'Chưa đặt tên',
       email: user.email,
       joinedDate,
-      currentLevel: user.skill?.currentLevel || 'A1',
+      learningPaths: user.learningPaths || [],
       totalExp: user.skill?.totalExp || 0,
       streakDays: user.skill?.streakDays || 0
     });

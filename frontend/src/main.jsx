@@ -4,9 +4,15 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App.jsx';
 import './index.css';
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+if (!googleClientId) {
+  console.warn('⚠️ THIẾU VITE_GOOGLE_CLIENT_ID TRONG FILE .ENV!');
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || '287455141948-5gvapclpnc01f7n4ec7tamd1v6bkoppv.apps.googleusercontent.com'}>
+    <GoogleOAuthProvider clientId={googleClientId}>
       <App />
     </GoogleOAuthProvider>
   </StrictMode>,

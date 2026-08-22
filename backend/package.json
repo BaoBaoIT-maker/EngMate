@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "progress:recalculate": "node src/scripts/recalculatePathProgress.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -39,6 +40,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.3",
+    "rate-limit-redis": "^6.0.1",
     "redis": "^6.1.0",
     "socket.io": "^4.8.3"
   }

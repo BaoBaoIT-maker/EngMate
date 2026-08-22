@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js';
+import { cacheGetJson, cacheSetJson } from '../config/redis.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -7,7 +8,7 @@ const defaultModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 export const checkAndUpdateAiLimit = async (userId) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { skill: true, subscription: { include: { plan: true } } }
+    include: { subscription: { include: { plan: true } } }
   });
 
   const isPremium = user.subscription && user.subscription.isValid && (!user.subscription.endDate || user.subscription.endDate > new Date());
@@ -18,32 +19,23 @@ export const checkAndUpdateAiLimit = async (userId) => {
     limit = user.subscription.plan.features.aiLimit;
   }
 
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const now = Date.now();
+  const midnight = new Date();
+  midnight.setHours(24, 0, 0, 0);
+  const ttl = Math.ceil((midnight.getTime() - now) / 1000);
+  const key = `engmate:ai-chat:daily:${userId}`;
 
-  let skill = user.skill;
-  if (!skill) {
-    skill = await prisma.userSkill.create({ data: { userId } });
+  const usage = await cacheGetJson(key);
+  const current = usage?.count || 0;
+
+  if (current >= limit) {
+    return { allowed: false, current, limit };
   }
 
-  if (!skill.lastAiChatDate || skill.lastAiChatDate < today) {
-    skill = await prisma.userSkill.update({
-      where: { userId },
-      data: { aiChatCountToday: 1, lastAiChatDate: now }
-    });
-    return { allowed: true, current: 1, limit };
-  }
+  const nextCount = current + 1;
+  await cacheSetJson(key, { count: nextCount, resetAt: midnight.getTime() }, ttl);
 
-  if (skill.aiChatCountToday >= limit) {
-    return { allowed: false, current: skill.aiChatCountToday, limit };
-  }
-
-  skill = await prisma.userSkill.update({
-    where: { userId },
-    data: { aiChatCountToday: skill.aiChatCountToday + 1, lastAiChatDate: now }
-  });
-
-  return { allowed: true, current: skill.aiChatCountToday, limit };
+  return { allowed: true, current: nextCount, limit };
 };
 
 export const createSession = async (userId, data) => {

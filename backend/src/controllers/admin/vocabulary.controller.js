@@ -1,6 +1,7 @@
 import prisma from '../../config/prisma.js';
 import { sendSuccess, sendError } from '../../utils/response.js';
 import { generateFlashcardContent } from '../../services/ai.service.js';
+import { validateTargetConfig } from '../../services/learningTarget.service.js';
 
 // ─── CATEGORIES ────────────────────────────────────────────────────────────────
 
@@ -17,11 +18,18 @@ export const listCategories = async (req, res) => {
 // POST /admin/categories
 export const createCategory = async (req, res) => {
   try {
-    const { code, name, description, sortOrder } = req.body;
+    const { code, name, description, sortOrder, targetConfig } = req.body;
     if (!code || !name) return sendError(res, 'code and name are required', 400);
 
+    const normalizedTargetConfig = validateTargetConfig(targetConfig);
     const category = await prisma.category.create({
-      data: { code: code.toUpperCase(), name, description, sortOrder: sortOrder || 0 },
+      data: {
+        code: code.toUpperCase(),
+        name,
+        description,
+        sortOrder: sortOrder || 0,
+        targetConfig: normalizedTargetConfig,
+      },
     });
     return sendSuccess(res, category, 'Category created');
   } catch (error) {
@@ -34,12 +42,13 @@ export const createCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { name, description, sortOrder, isActive } = req.body;
+    const { name, description, sortOrder, isActive, targetConfig } = req.body;
     const data = {};
     if (name != null) data.name = name;
     if (description != null) data.description = description;
     if (sortOrder != null) data.sortOrder = parseInt(sortOrder);
     if (isActive != null) data.isActive = Boolean(isActive);
+    if (targetConfig !== undefined) data.targetConfig = validateTargetConfig(targetConfig);
 
     const category = await prisma.category.update({ where: { id }, data });
     return sendSuccess(res, category, 'Category updated');

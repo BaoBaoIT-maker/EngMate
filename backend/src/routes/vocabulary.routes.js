@@ -4,6 +4,7 @@ import * as vocabularyController from '../controllers/vocabulary.controller.js';
 const router = express.Router();
 
 // Public routes - không cần auth
+router.get('/categories', vocabularyController.getCategories);
 router.get('/topics', vocabularyController.getTopics);
 router.get('/topics/:id', vocabularyController.getTopicDetail);
 
