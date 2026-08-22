@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useThemeStore from '../store/useThemeStore';
 import useAuthStore from '../store/useAuthStore';
@@ -263,6 +263,43 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
   );
 }
 
+function MobileHeader({ t, user, toggleDark, isDark, navigate }) {
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+      height: 60,
+      background: t.sidebar,
+      backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+      borderBottom: 1px solid ,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '0 1rem', paddingTop: 'env(safe-area-inset-top)'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
+        <div style={{ width: 32, height: 32, borderRadius: 10, background: linear-gradient(135deg, , ), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ color: '#fff', fontWeight: 800, fontSize: '1.2rem' }}>E</span>
+        </div>
+        <span style={{ fontFamily: "'Fraunces', serif", fontSize: '1.1rem', fontWeight: 600, color: t.text, letterSpacing: '-0.02em' }}>
+          EngMate
+        </span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <button onClick={toggleDark} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: t.textMuted }}>
+          {isDark ? <SunIcon color={t.textMuted} /> : <MoonIcon color={t.textMuted} />}
+        </button>
+        <div 
+          onClick={() => navigate('/dashboard/settings')}
+          style={{ width: 32, height: 32, borderRadius: '50%', background: linear-gradient(135deg, , ), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 800, color: '#fff', cursor: 'pointer', overflow: 'hidden' }}>
+          {user?.profile?.avatarUrl ? (
+            <img src={user?.profile?.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            user?.profile?.username?.[0]?.toUpperCase() || 'U'
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function BottomNav({ t, user }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -273,7 +310,7 @@ function BottomNav({ t, user }) {
       borderTop: `1px solid ${t.sidebarBorder}`,
       display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
-      {NAV.map(item => {
+      {NAV.filter(i => ['/dashboard', '/dashboard/flashcards', '/dashboard/games', '/dashboard/speaking'].includes(i.id)).map(item => {
         const active = location.pathname === item.id;
         return (
           <div key={item.id} className="bottom-nav-item" onClick={() => navigate(item.id)} style={{ color: active ? t.green : t.textMuted }}>
@@ -282,10 +319,6 @@ function BottomNav({ t, user }) {
           </div>
         );
       })}
-      <div className="bottom-nav-item" onClick={() => navigate('/dashboard/premium')} style={{ color: t.gold }}>
-        <span style={{ fontSize: '1.1rem' }}>🌱</span>
-        <span style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.65rem' }}>Gói cước</span>
-      </div>
     </div>
   );
 }
