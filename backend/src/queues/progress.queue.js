@@ -1,8 +1,8 @@
 ﻿import { Queue } from 'bullmq';
-import { getQueueRedisConnection } from '../config/queueRedis.js';
+import { connection } from '../config/queueRedis.js';
 
 const progressQueue = new Queue('progressQueue', {
-  connection: getQueueRedisConnection(),
+  connection,
 });
 
 /**

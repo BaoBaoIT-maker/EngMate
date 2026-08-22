@@ -1,5 +1,5 @@
 ﻿import { Worker } from 'bullmq';
-import { getQueueRedisConnection } from '../config/queueRedis.js';
+import { connection } from '../config/queueRedis.js';
 import { recalculatePathProgress } from '../services/learningProgress.service.js';
 
 /**
@@ -20,7 +20,7 @@ const progressWorker = new Worker(
     await recalculatePathProgress(userId, categoryCode);
   },
   {
-    connection: getQueueRedisConnection(),
+    connection,
     concurrency: 5,
   }
 );

@@ -3,7 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { RedisStore } from 'rate-limit-redis';
-import redisClient from './config/redis.js';
+import { connection as redisClient } from './config/queueRedis.js';
 import apiRoutes from './routes/index.js';
 import { errorHandler, notFound } from './middlewares/error.middleware.js';
 
