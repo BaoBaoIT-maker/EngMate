@@ -12,7 +12,12 @@ export default function SupportChatWidget() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [conversation, setConversation] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`support_cache_${user?.id}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [unread, setUnread] = useState(0);
@@ -30,15 +35,19 @@ export default function SupportChatWidget() {
         setConversation(conv);
         setUnread(conv.unreadByUser || 0);
 
-        const msgRes = await api.get(`/support/${conv.id}/messages`);
-        setMessages(msgRes.data?.data || msgRes.data || []);
-        setUnread(0);
+        if (conv.messages) {
+          setMessages(conv.messages);
+          setUnread(0);
+          try {
+            localStorage.setItem(`support_cache_${user?.id}`, JSON.stringify(conv.messages.slice(-30)));
+          } catch {}
+        }
       } catch (err) {
         console.error('Support chat error:', err);
       }
     };
     init();
-  }, [isOpen]);
+  }, [isOpen, conversation, user]);
 
   // Lắng nghe tin nhắn mới từ Admin qua Socket
   useEffect(() => {
@@ -48,12 +57,16 @@ export default function SupportChatWidget() {
         setUnread(prev => prev + 1);
         return;
       }
-      setMessages(prev => [...prev, message]);
+      setMessages(prev => {
+        const newMsgs = [...prev, message];
+        try { localStorage.setItem(`support_cache_${user?.id}`, JSON.stringify(newMsgs.slice(-30))); } catch {}
+        return newMsgs;
+      });
       if (!isOpen) setUnread(prev => prev + 1);
     };
     socket.on('SUPPORT_NEW_MESSAGE', handler);
     return () => socket.off('SUPPORT_NEW_MESSAGE', handler);
-  }, [socket, conversation, isOpen]);
+  }, [socket, conversation, isOpen, user]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -85,7 +98,11 @@ export default function SupportChatWidget() {
       const res = await api.post(`/support/${conv.id}/messages`, { content: text });
       const saved = res.data?.data || res.data;
       // Thay thế tin nhắn tạm bằng tin nhắn đã lưu
-      setMessages(prev => prev.map(m => m.id === tempMsg.id ? saved : m));
+      setMessages(prev => {
+        const newMsgs = prev.map(m => m.id === tempMsg.id ? saved : m);
+        try { localStorage.setItem(`support_cache_${user?.id}`, JSON.stringify(newMsgs.slice(-30))); } catch {}
+        return newMsgs;
+      });
     } catch (err) {
       console.error(err);
       setMessages(prev => prev.filter(m => m.id !== tempMsg.id));

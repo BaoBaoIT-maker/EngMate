@@ -7,7 +7,8 @@ export const getOrCreateConversation = async (userId) => {
   let conversation = await prisma.supportConversation.findUnique({
     where: { userId },
     include: {
-      user: { select: { id: true, profile: { select: { username: true, avatarUrl: true } } } }
+      user: { select: { id: true, profile: { select: { username: true, avatarUrl: true } } } },
+      messages: { orderBy: { createdAt: 'desc' }, take: 30 }
     }
   });
 
@@ -15,9 +16,13 @@ export const getOrCreateConversation = async (userId) => {
     conversation = await prisma.supportConversation.create({
       data: { userId },
       include: {
-        user: { select: { id: true, profile: { select: { username: true, avatarUrl: true } } } }
+        user: { select: { id: true, profile: { select: { username: true, avatarUrl: true } } } },
+        messages: true
       }
     });
+  } else {
+    // Reverse messages to chronological order (oldest first)
+    conversation.messages = conversation.messages.reverse();
   }
 
   return conversation;

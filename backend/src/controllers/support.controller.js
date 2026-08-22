@@ -7,6 +7,12 @@ import { sendSuccess, sendError } from '../utils/response.js';
 export const getMyConversation = async (req, res) => {
   try {
     const conversation = await supportService.getOrCreateConversation(req.user.id);
+    
+    // Mark as read by user when they open the chat
+    if (conversation && conversation.id) {
+      await supportService.markRead(conversation.id, 'USER');
+    }
+
     return sendSuccess(res, conversation);
   } catch (error) {
     console.error('[Support] getMyConversation error:', error.message, error.stack);
