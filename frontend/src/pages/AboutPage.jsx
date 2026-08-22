@@ -26,7 +26,7 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", background: '#FAFAF8', minHeight: '100vh', overflowX: 'hidden', color: '#1C1407' }}>
+    <div style={{ background: '#FAFAF8', minHeight: '100vh', overflowX: 'hidden', color: '#1C1407' }}>
       
       {/* ── NAV ── */}
       <nav style={{
@@ -67,7 +67,7 @@ export default function AboutPage() {
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <button
             onClick={() => navigate('/login')}
-            style={{ padding: '0.5rem 1.125rem', borderRadius: 10, border: '1.5px solid rgba(28,20,7,0.1)', background: 'transparent', color: '#1C1407', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit', transition: 'border-color 0.2s' }}>
+            style={{ padding: '0.5rem 1.125rem', borderRadius: 10, border: '1.5px solid rgba(28,20,7,0.1)', background: 'transparent', color: '#1C1407', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', transition: 'border-color 0.2s' }}>
             Đăng nhập
           </button>
         </div>

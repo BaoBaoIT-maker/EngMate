@@ -64,7 +64,7 @@ export default function TransactionsPage() {
       key: 'id',
       render: (id) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <code style={{ fontSize: 11, backgroundColor: '#f5f5f5', padding: '2px 6px', borderRadius: 4, color: '#0F1623', fontFamily: 'monospace' }}>
+          <code style={{ fontSize: 11, backgroundColor: '#f5f5f5', padding: '2px 6px', borderRadius: 4, color: '#0F1623', }}>
             {String(id).slice(-8)}
           </code>
           <Tooltip title="Copy ID">

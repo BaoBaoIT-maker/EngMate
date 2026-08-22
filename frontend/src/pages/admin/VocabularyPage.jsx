@@ -368,7 +368,7 @@ export default function VocabularyPage() {
     {
       title: "Phiên âm", dataIndex: "phonetic", key: "phonetic", width: 150,
       render: (text) => (
-        <Tag style={{ borderRadius: 20, background: "#f6ffed", border: "1px solid #95de64", color: "#389e0d", fontSize: 12, fontFamily: "monospace", padding: "2px 10px" }}>
+        <Tag style={{ borderRadius: 20, background: "#f6ffed", border: "1px solid #95de64", color: "#389e0d", fontSize: 12, padding: "2px 10px" }}>
           {text}
         </Tag>
       ),
@@ -401,7 +401,7 @@ export default function VocabularyPage() {
   ];
 
   return (
-    <div style={{ display: "flex", height: "calc(100vh - 64px)", overflow: "hidden", background: "#f5f5f5", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
+    <div style={{ display: "flex", height: "calc(100vh - 64px)", overflow: "hidden", background: "#f5f5f5", }}>
       {/* ---------------- LEFT SIDEBAR (Category List) ---------------- */}
       <div style={{ width: 320, minWidth: 320, height: "100%", background: "#ffffff", borderRight: "1px solid #f0f0f0", display: "flex", flexDirection: "column", boxShadow: "2px 0 8px rgba(0,0,0,0.04)" }}>
         <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
@@ -628,7 +628,7 @@ export default function VocabularyPage() {
         {!aiGenerated ? (
           <div>
             <div style={{ marginBottom: 8, color: '#555', fontSize: 13 }}>Nhập danh sách từ cách nhau bằng dấu phẩy hoặc xuống dòng (tối đa 30 từ)</div>
-            <Input.TextArea rows={6} placeholder="persevere, eloquent, ambiguous&#10;paramount, coherent, diligent&#10;meticulous, scrutinize, advocate" value={aiInputText} onChange={(e) => setAiInputText(e.target.value)} style={{ borderRadius: 8, fontFamily: 'Inter, monospace', fontSize: 13 }} />
+            <Input.TextArea rows={6} placeholder="persevere, eloquent, ambiguous&#10;paramount, coherent, diligent&#10;meticulous, scrutinize, advocate" value={aiInputText} onChange={(e) => setAiInputText(e.target.value)} style={{ borderRadius: 8, fontSize: 13 }} />
             <div style={{ marginTop: 16, textAlign: 'center' }}>
               <Button type="primary" size="large" icon={aiLoading ? <Spin size="small" /> : <ThunderboltOutlined />} onClick={handleAIGenerate} loading={aiLoading} style={{ borderRadius: 10, paddingInline: 32, height: 44 }}>{aiLoading ? 'Đang tạo...' : 'Tạo bằng AI ✨'}</Button>
             </div>

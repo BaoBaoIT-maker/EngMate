@@ -117,7 +117,7 @@ function Heatmap({ data, t, isDark }) {
   return (
     <div style={{ display: 'inline-flex', flexDirection: 'column', overflowX: 'auto', maxWidth: '100%' }}>
       <div style={{ display: 'flex' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', paddingRight: '8px', paddingTop: '20px', fontSize: '10px', color: t.textMuted, fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', paddingRight: '8px', paddingTop: '20px', fontSize: '10px', color: t.textMuted, }}>
           {[0,1,2,3,4,5,6].map(i => (
             <div key={i} style={{ height: 12, lineHeight: '12px' }}>
               {i === 1 ? 'T2' : i === 3 ? 'T4' : i === 5 ? 'T6' : ''}
@@ -127,7 +127,7 @@ function Heatmap({ data, t, isDark }) {
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ height: '20px', position: 'relative', width: '100%' }}>
             {monthLabels.map((ml, idx) => (
-              <span key={idx} style={{ position: 'absolute', left: ml.colIndex * 15, fontSize: '11px', color: t.textMuted, fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 500 }}>{ml.label}</span>
+              <span key={idx} style={{ position: 'absolute', left: ml.colIndex * 15, fontSize: '11px', color: t.textMuted, fontWeight: 500 }}>{ml.label}</span>
             ))}
           </div>
           <div style={{ display: 'flex', gap: '3px' }}>
@@ -151,7 +151,7 @@ function Heatmap({ data, t, isDark }) {
           </div>
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '12px', gap: '4px', fontSize: '11px', color: t.textMuted, fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '12px', gap: '4px', fontSize: '11px', color: t.textMuted, }}>
         <span style={{ marginRight: '4px' }}>Ít hơn</span>
         {[0,1,2,3,4].map(l => <div key={l} style={{ width: 12, height: 12, borderRadius: 3, background: getBg(l) }} />)}
         <span style={{ marginLeft: '4px' }}>Nhiều hơn</span>
@@ -358,7 +358,6 @@ export default function DashboardOverview() {
       {/* ── Hero Header ── */}
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{
-          fontFamily: "'Fraunces', Georgia, serif",
           fontWeight: 600, fontSize: 'clamp(28px, 4vw, 44px)',
           color: t.text, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em',
         }}>
@@ -366,7 +365,7 @@ export default function DashboardOverview() {
           <em style={{ color: t.green, fontStyle: 'italic', fontWeight: 600 }}>{usernameDisplay}</em>
           {' '}👋
         </h1>
-        <p style={{ fontFamily: "'Be Vietnam Pro', sans-serif", color: t.textMuted, marginTop: '0.5rem', fontSize: '1rem', fontWeight: 500 }}>
+        <p style={{ color: t.textMuted, marginTop: '0.5rem', fontSize: '1rem', fontWeight: 500 }}>
           {isGoalReached ? '🎉 Bạn đã hoàn thành mục tiêu hôm nay, tuyệt vời!' : 'Tiếp tục vun trồng khu vườn từ vựng của bạn nhé!'}
         </p>
       </div>
@@ -380,13 +379,13 @@ export default function DashboardOverview() {
             <SproutIcon streak={streak.current} />
           </div>
           <div>
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '2.5rem', fontWeight: 700, color: t.green, letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 700, color: t.green, letterSpacing: '-0.04em', lineHeight: 1 }}>
               {streak.current}
             </div>
-            <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.8rem', fontWeight: 600, color: t.textMuted, marginTop: 4 }}>Ngày liên tiếp</div>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: t.textMuted, marginTop: 4 }}>Ngày liên tiếp</div>
             <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: '0.9rem' }}>🏆</span>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', fontWeight: 500, color: t.gold }}>Kỷ lục: {streak.max}</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 500, color: t.gold }}>Kỷ lục: {streak.max}</span>
             </div>
           </div>
         </div>
@@ -395,10 +394,10 @@ export default function DashboardOverview() {
         <div style={{ ...card(t), padding: '1.5rem 1.75rem', display: 'flex', alignItems: 'center', gap: '1.25rem', border: `1px solid ${isDark ? 'rgba(242,167,59,0.2)' : '#FFE9B0'}`, minWidth: 160 }}>
           <div style={{ width: 52, height: 52, borderRadius: '50%', background: `linear-gradient(135deg, ${t.goldBg}, ${isDark ? 'rgba(242,167,59,0.2)' : '#FFD980'})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', flexShrink: 0 }}>⭐</div>
           <div>
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '2.5rem', fontWeight: 700, color: t.gold, letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 700, color: t.gold, letterSpacing: '-0.04em', lineHeight: 1 }}>
               {stats.totalExp || 0}
             </div>
-            <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.8rem', fontWeight: 600, color: t.textMuted, marginTop: 4 }}>XP đạt được</div>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: t.textMuted, marginTop: 4 }}>XP đạt được</div>
           </div>
         </div>
 
@@ -406,16 +405,16 @@ export default function DashboardOverview() {
         <div style={{ ...card(t), padding: '1.5rem 1.75rem', border: isGoalReached ? `1px solid ${t.green}` : `1px solid ${t.cardBorder}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
             <div>
-              <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.7rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Mục tiêu hôm nay</div>
-              <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '1rem', fontWeight: 700, color: isGoalReached ? t.green : t.text }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Mục tiêu hôm nay</div>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: isGoalReached ? t.green : t.text }}>
                 {isGoalReached ? '✅ Hoàn thành xuất sắc!' : 'Cố lên, sắp xong rồi!'}
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '1.5rem', fontWeight: 700, color: isGoalReached ? t.green : t.text, lineHeight: 1 }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: isGoalReached ? t.green : t.text, lineHeight: 1 }}>
                 {dailyGoal.completed}<span style={{ fontSize: '1rem', color: t.textMuted }}>/{dailyGoal.target}</span>
               </div>
-              <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.72rem', color: t.textMuted, marginTop: 3 }}>thẻ đã học</div>
+              <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: 3 }}>thẻ đã học</div>
             </div>
           </div>
           <div style={{ height: 10, borderRadius: 100, background: isDark ? 'rgba(255,255,255,0.06)' : '#F0EAD9', overflow: 'hidden' }}>
@@ -427,8 +426,8 @@ export default function DashboardOverview() {
             }} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-            <span style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.72rem', color: t.textMuted }}>Tiến độ: <b style={{ color: isGoalReached ? t.green : t.gold }}>{goalPerc}%</b></span>
-            <span style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.72rem', color: t.textMuted }}>Tổng kho: {memoryTotal} từ</span>
+            <span style={{ fontSize: '0.72rem', color: t.textMuted }}>Tiến độ: <b style={{ color: isGoalReached ? t.green : t.gold }}>{goalPerc}%</b></span>
+            <span style={{ fontSize: '0.72rem', color: t.textMuted }}>Tổng kho: {memoryTotal} từ</span>
           </div>
         </div>
       </div>
@@ -436,7 +435,7 @@ export default function DashboardOverview() {
       {/* ── Section Label ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem', marginTop: '0.5rem' }}>
         <LeafTag color={t.green} />
-        <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 600, fontSize: '1.1rem', color: t.text, fontStyle: 'italic' }}>Garden Growth</span>
+        <span style={{ fontWeight: 600, fontSize: '1.1rem', color: t.text, fontStyle: 'italic' }}>Khu vườn tri thức</span>
         <div style={{ flex: 1, height: 1, background: t.cardBorder }} />
       </div>
 
@@ -445,7 +444,7 @@ export default function DashboardOverview() {
 
         {/* Heatmap */}
         <div style={{ ...card(t), padding: '1.5rem' }}>
-          <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 6 }}>
             <span>📅</span> Mức độ chăm chỉ (6 tháng qua)
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -455,7 +454,7 @@ export default function DashboardOverview() {
 
         {/* Memory Retention */}
         <div style={{ ...card(t), padding: '1.5rem' }}>
-          <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 6 }}>
             <span>🧠</span> Phân bố trí nhớ
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
@@ -465,13 +464,13 @@ export default function DashboardOverview() {
                 <div key={s.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.625rem', flex: 1 }}>
                   <div style={{ position: 'relative' }}>
                     <RadialProgress value={perc} color={s.color} size={68} strokeW={6}/>
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'JetBrains Mono', monospace", fontSize: '1.15rem', fontWeight: 700, color: t.text }}>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', fontWeight: 700, color: t.text }}>
                       {s.count}
                     </div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.75rem', fontWeight: 700, color: s.color }}>{s.label}</div>
-                    <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.65rem', color: t.textMuted, marginTop: 2 }}>{s.desc}</div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: s.color }}>{s.label}</div>
+                    <div style={{ fontSize: '0.65rem', color: t.textMuted, marginTop: 2 }}>{s.desc}</div>
                   </div>
                 </div>
               );
@@ -482,14 +481,14 @@ export default function DashboardOverview() {
 
       {/* ── Recent Words ── */}
       <div style={{ ...card(t), padding: '1.5rem' }}>
-        <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span>🕒</span> Vừa ôn tập gần đây
         </div>
         {recent.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '2rem', color: t.textMuted }}>
             <div style={{ fontSize: '2.5rem', marginBottom: 8 }}>🌱</div>
-            <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.9rem' }}>Bạn chưa ôn tập từ vựng nào gần đây.<br/>Hãy bắt đầu vun trồng khu vườn của bạn!</div>
-            <button onClick={() => navigate('/dashboard/flashcards')} style={{ marginTop: '1rem', padding: '0.6rem 1.5rem', borderRadius: 100, background: `linear-gradient(135deg, ${t.gold}, ${t.green})`, color: '#fff', border: 'none', fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}>
+            <div style={{ fontSize: '0.9rem' }}>Bạn chưa ôn tập từ vựng nào gần đây.<br/>Hãy bắt đầu vun trồng khu vườn của bạn!</div>
+            <button onClick={() => navigate('/dashboard/flashcards')} style={{ marginTop: '1rem', padding: '0.6rem 1.5rem', borderRadius: 100, background: `linear-gradient(135deg, ${t.gold}, ${t.green})`, color: '#fff', border: 'none', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}>
               Bắt đầu học ngay →
             </button>
           </div>
@@ -504,12 +503,12 @@ export default function DashboardOverview() {
               >
                 <LeafTag color={r.correct ? t.green : t.gold} />
                 <div style={{ flex: 1 }}>
-                  <span style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, color: t.text, fontSize: '0.9rem' }}>{r.word}</span>
+                  <span style={{ fontWeight: 700, color: t.text, fontSize: '0.9rem' }}>{r.word}</span>
                 </div>
-                <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.7rem', color: t.textMuted }}>
+                <div style={{ fontSize: '0.7rem', color: t.textMuted }}>
                   {new Date(r.time).toLocaleString('vi-VN', { day: '2-digit', month: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </div>
-                <div style={{ padding: '0.25rem 0.65rem', borderRadius: 100, background: r.correct ? t.greenBg : t.goldBg, fontSize: '0.68rem', fontWeight: 700, color: r.correct ? t.greenDark : t.goldDark, fontFamily: "'Be Vietnam Pro', sans-serif", border: `1px solid ${r.correct ? '#C8E6C9' : '#FFE0A0'}` }}>
+                <div style={{ padding: '0.25rem 0.65rem', borderRadius: 100, background: r.correct ? t.greenBg : t.goldBg, fontSize: '0.68rem', fontWeight: 700, color: r.correct ? t.greenDark : t.goldDark, border: `1px solid ${r.correct ? '#C8E6C9' : '#FFE0A0'}` }}>
                   {r.correct ? '🌿 Thuộc' : '🌱 Ôn thêm'}
                 </div>
               </div>

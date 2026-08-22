@@ -88,7 +88,6 @@ export default function ResetPasswordPage() {
         <button type="submit" disabled={loading} className="btn-gold" style={{
           width: '100%', padding: '0.875rem', borderRadius: 12,
           fontSize: '0.95rem', marginTop: '0.5rem',
-          fontFamily: 'inherit',
           opacity: loading ? 0.7 : 1
         }}>
           {loading ? 'Đang xử lý...' : 'Xác nhận →'}

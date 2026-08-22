@@ -69,7 +69,6 @@ export default function ForgotPasswordPage() {
         <button type="submit" disabled={loading} className="btn-gold" style={{
           width: '100%', padding: '0.875rem', borderRadius: 12,
           fontSize: '0.95rem', marginTop: '0.5rem',
-          fontFamily: 'inherit',
           opacity: loading ? 0.7 : 1
         }}>
           {loading ? 'Đang gửi...' : 'Gửi mã OTP →'}
@@ -80,7 +79,7 @@ export default function ForgotPasswordPage() {
         <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
           <button 
             onClick={() => navigate('/reset-password')}
-            style={{ padding: '0.5rem 1rem', borderRadius: 8, background: 'transparent', border: '1px solid #1C1407', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.85rem', fontWeight: 600 }}
+            style={{ padding: '0.5rem 1rem', borderRadius: 8, background: 'transparent', border: '1px solid #1C1407', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
           >
             Đã có OTP? Đặt lại mật khẩu
           </button>

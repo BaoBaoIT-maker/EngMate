@@ -129,7 +129,6 @@ export default function RegisterPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
             transition: 'background 0.15s, box-shadow 0.15s',
             boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-            fontFamily: 'inherit',
             opacity: ggLoading ? 0.7 : 1,
           }}
           onMouseEnter={e => { if (!ggLoading) e.currentTarget.style.background = '#f8f8f8'; }}
@@ -246,8 +245,7 @@ export default function RegisterPage() {
           className="btn-gold"
           style={{
             width: '100%', padding: '0.875rem', borderRadius: 12,
-            fontSize: '0.95rem', marginTop: '0.25rem', fontFamily: 'inherit',
-            opacity: loading ? 0.7 : 1,
+            fontSize: '0.95rem', marginTop: '0.25rem', opacity: loading ? 0.7 : 1,
             cursor: loading ? 'not-allowed' : 'pointer',
           }}>
           {loading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản miễn phí →'}

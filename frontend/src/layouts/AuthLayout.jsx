@@ -5,7 +5,6 @@ const GOLD = '#F0B429';
 export default function AuthLayout({ children }) {
   return (
     <div style={{
-      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
       background: '#FAFAF8',
       minHeight: '100vh',
       display: 'flex',

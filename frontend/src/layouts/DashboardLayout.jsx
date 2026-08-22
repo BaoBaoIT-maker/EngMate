@@ -16,7 +16,7 @@ const NAV = [
     ),
   },
   {
-    id: '/dashboard/flashcards', label: 'Flashcards',
+    id: '/dashboard/flashcards', label: 'Thẻ từ vựng',
     icon: (color) => (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/>
@@ -24,7 +24,7 @@ const NAV = [
     ),
   },
   {
-    id: '/dashboard/games', label: 'Mini-games',
+    id: '/dashboard/games', label: 'Trò chơi',
     icon: (color) => (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/>
@@ -34,7 +34,7 @@ const NAV = [
     ),
   },
   {
-    id: '/dashboard/speaking', label: 'AI Conversation',
+    id: '/dashboard/speaking', label: 'Luyện giao tiếp',
     icon: (color) => (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
@@ -134,7 +134,7 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '1.1rem', flexShrink: 0, boxShadow: `0 4px 12px ${t.goldBg}`
             }}>✦</div>
-            <span style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 800, fontSize: '1.1rem', color: t.text, letterSpacing: '-0.02em' }}>
+            <span style={{ fontWeight: 800, fontSize: '1.1rem', color: t.text, letterSpacing: '-0.02em' }}>
               Eng<span style={{ color: t.green }}>Mate</span>
             </span>
           </div>
@@ -183,7 +183,7 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
         </div>
         {!collapsed && (
           <div style={{ overflow: 'hidden', flex: 1 }}>
-            <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, fontSize: '0.85rem', color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {user?.profile?.username || 'Người dùng'}
             </div>
             <div style={{ fontSize: '0.7rem', color: t.green, fontWeight: 600, whiteSpace: 'nowrap' }}>
@@ -207,7 +207,6 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
                 borderRadius: 12, cursor: 'pointer',
                 background: active ? (isDark ? t.greenBg : t.greenBg) : 'transparent',
                 color: active ? t.greenDark : t.textMuted,
-                fontFamily: "'Be Vietnam Pro', sans-serif",
                 fontWeight: active ? 700 : 500,
                 fontSize: '0.9rem',
                 justifyContent: collapsed ? 'center' : 'flex-start',
@@ -241,7 +240,7 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
             onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = `0 6px 20px rgba(47,158,86,0.25)`; }}
           >
             <div style={{ fontSize: '1.1rem', marginBottom: '0.2rem' }}>🌱</div>
-            <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 800, fontSize: '0.875rem', letterSpacing: '-0.01em' }}>Nâng cấp gói</div>
+            <div style={{ fontWeight: 800, fontSize: '0.875rem', letterSpacing: '-0.01em' }}>Nâng cấp gói</div>
             <div style={{ fontSize: '0.7rem', opacity: 0.88, marginTop: '0.2rem' }}>Mở khóa toàn bộ tính năng</div>
           </div>
         </div>
@@ -278,7 +277,7 @@ function MobileHeader({ t, user, toggleDark, isDark, navigate }) {
         <div style={{ width: 32, height: 32, borderRadius: 10, background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ color: '#fff', fontWeight: 800, fontSize: '1.2rem' }}>E</span>
         </div>
-        <span style={{ fontFamily: "'Fraunces', serif", fontSize: '1.1rem', fontWeight: 600, color: t.text, letterSpacing: '-0.02em' }}>
+        <span style={{ fontSize: '1.1rem', fontWeight: 600, color: t.text, letterSpacing: '-0.02em' }}>
           EngMate
         </span>
       </div>
@@ -315,7 +314,7 @@ function BottomNav({ t, user }) {
         return (
           <div key={item.id} className="bottom-nav-item" onClick={() => navigate(item.id)} style={{ color: active ? t.green : t.textMuted }}>
             <span style={{ display: 'flex' }}>{item.icon(active ? t.green : t.textMuted)}</span>
-            <span style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '0.65rem' }}>{item.label}</span>
+            <span style={{ fontSize: '0.65rem' }}>{item.label}</span>
           </div>
         );
       })}
@@ -345,7 +344,7 @@ export default function DashboardLayout() {
   }, []);
 
   return (
-    <div style={{ fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", display: 'flex', minHeight: '100vh', background: t.bg, color: t.text, transition: 'background 0.3s, color 0.3s' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: t.bg, color: t.text, transition: 'background 0.3s, color 0.3s' }}>
       {!isMobile && (
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} t={t} isDark={isDark} user={user} />
       )}
@@ -363,7 +362,6 @@ export default function DashboardLayout() {
               padding: '0.5rem 0.875rem', borderRadius: 100,
               border: `1.5px solid ${t.cardBorder}`,
               background: t.card, cursor: 'pointer',
-              fontFamily: "'Be Vietnam Pro', sans-serif",
               fontSize: '0.8rem', fontWeight: 600, color: t.textSub,
               transition: 'all 0.2s', boxShadow: `0 2px 8px ${t.shadow}`,
             }}

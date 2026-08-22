@@ -368,7 +368,7 @@ export default function PremiumPaywall() {
 
               {status === 'waiting_payment' && qrData && (
                 <>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: t.gold, background: t.goldBg, padding: '0.4rem 1rem', borderRadius: 99, marginBottom: '0.5rem', fontFamily: 'monospace' }}>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: t.gold, background: t.goldBg, padding: '0.4rem 1rem', borderRadius: 99, marginBottom: '0.5rem', }}>
                     {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
                   </div>
 
@@ -380,7 +380,7 @@ export default function PremiumPaywall() {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ color: t.textMuted, fontSize: '0.9rem' }}>Nội dung:</span>
-                      <strong style={{ color: t.text, fontSize: '1.05rem', fontFamily: 'monospace', background: t.bg, padding: '0.2rem 0.5rem', borderRadius: 6 }}>{qrData.memo}</strong>
+                      <strong style={{ color: t.text, fontSize: '1.05rem', background: t.bg, padding: '0.2rem 0.5rem', borderRadius: 6 }}>{qrData.memo}</strong>
                     </div>
                   </div>
 

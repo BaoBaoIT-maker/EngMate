@@ -414,7 +414,6 @@ export default function AdvisorChatWidget() {
                   background: isStreaming ? (isDark ? 'rgba(255,255,255,0.03)' : '#f9f9f9') : t.inputBg,
                   color: t.text,
                   outline: 'none',
-                  fontFamily: 'inherit',
                   lineHeight: 1.5,
                   maxHeight: 80,
                   overflowY: 'auto',

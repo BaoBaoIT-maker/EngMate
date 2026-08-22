@@ -104,8 +104,7 @@ export default function VerifyOtpPage() {
           className="btn-gold"
           style={{
             width: '100%', padding: '0.875rem', borderRadius: 12,
-            fontSize: '0.95rem', fontFamily: 'inherit',
-            opacity: loading ? 0.7 : 1,
+            fontSize: '0.95rem', opacity: loading ? 0.7 : 1,
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >
@@ -121,8 +120,7 @@ export default function VerifyOtpPage() {
           style={{
             background: 'none', border: 'none', cursor: resendLoading ? 'not-allowed' : 'pointer',
             color: GOLD_DARK, fontWeight: 700, fontSize: '0.85rem', textDecoration: 'underline',
-            opacity: resendLoading ? 0.6 : 1, fontFamily: 'inherit',
-          }}
+            opacity: resendLoading ? 0.6 : 1, }}
         >
           {resendLoading ? 'Đang gửi...' : 'Gửi lại OTP'}
         </button>

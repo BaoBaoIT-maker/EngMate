@@ -43,7 +43,7 @@ export default function LandingPage() {
   const tickerItems = ['Từ vựng TOEIC', 'Luyện thi IELTS', 'Giao tiếp văn phòng', 'AI Conversation', 'Spaced Repetition', 'Học qua Game', 'Thi thử mô phỏng', 'Học thích nghi AI'];
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", background: '#FAFAF8', minHeight: '100vh', overflowX: 'hidden', color: '#1C1407' }}>
+    <div style={{ background: '#FAFAF8', minHeight: '100vh', overflowX: 'hidden', color: '#1C1407' }}>
 
       {/* ── NAV ── */}
       <nav style={{
@@ -85,7 +85,7 @@ export default function LandingPage() {
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <button
             onClick={() => navigate('/login')}
-            style={{ padding: '0.5rem 1.125rem', borderRadius: 10, border: '1.5px solid rgba(28,20,7,0.1)', background: 'transparent', color: '#1C1407', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit', transition: 'border-color 0.2s' }}>
+            style={{ padding: '0.5rem 1.125rem', borderRadius: 10, border: '1.5px solid rgba(28,20,7,0.1)', background: 'transparent', color: '#1C1407', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', transition: 'border-color 0.2s' }}>
             Đăng nhập
           </button>
         </div>
@@ -118,15 +118,14 @@ export default function LandingPage() {
               <button
                 onClick={() => navigate('/register')}
                 className="btn-gold"
-                style={{ padding: '0.9rem 2rem', borderRadius: 14, fontSize: '1rem', fontFamily: 'inherit' }}>
+                style={{ padding: '0.9rem 2rem', borderRadius: 14, fontSize: '1rem', }}>
                 Bắt đầu miễn phí →
               </button>
               <button style={{
                 padding: '0.9rem 2rem', borderRadius: 14,
                 border: '1.5px solid rgba(28,20,7,0.1)',
                 background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)',
-                color: '#1C1407', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', fontFamily: 'inherit',
-                transition: 'transform 0.2s',
+                color: '#1C1407', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', transition: 'transform 0.2s',
               }}
                 onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
                 onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}>
@@ -183,7 +182,7 @@ export default function LandingPage() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
-            <button style={{ padding: '0.75rem 2rem', borderRadius: 12, border: `1.5px solid rgba(240,180,41,0.35)`, background: 'transparent', color: GOLD_DARK, fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.2s' }}
+            <button style={{ padding: '0.75rem 2rem', borderRadius: 12, border: `1.5px solid rgba(240,180,41,0.35)`, background: 'transparent', color: GOLD_DARK, fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', transition: 'background 0.2s' }}
               onMouseEnter={e => (e.currentTarget.style.background = GOLD_LIGHT)}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
               Xem tất cả khóa học →
@@ -258,8 +257,7 @@ export default function LandingPage() {
             style={{
               padding: '1rem 2.5rem', borderRadius: 14, border: 'none',
               background: '#1C1407', color: '#F0B429', fontWeight: 800, fontSize: '1.05rem',
-              cursor: 'pointer', fontFamily: 'inherit',
-              boxShadow: '0 8px 32px rgba(28,20,7,0.3)',
+              cursor: 'pointer', boxShadow: '0 8px 32px rgba(28,20,7,0.3)',
               transition: 'transform 0.2s, box-shadow 0.2s',
             }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(28,20,7,0.4)' }}

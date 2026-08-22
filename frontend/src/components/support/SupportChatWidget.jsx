@@ -226,7 +226,7 @@ export default function SupportChatWidget() {
                   flex: 1, resize: 'none', border: `1.5px solid ${t.inputBorder}`,
                   borderRadius: 12, padding: '8px 12px', fontSize: '0.9rem',
                   background: t.inputBg, color: t.text, outline: 'none',
-                  fontFamily: 'inherit', lineHeight: 1.5, maxHeight: 80, overflowY: 'auto',
+                  lineHeight: 1.5, maxHeight: 80, overflowY: 'auto',
                 }}
               />
               <button

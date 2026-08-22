@@ -20,7 +20,6 @@ const antdTheme = {
     colorError: '#ff4d4f',
     borderRadius: 8,
     borderRadiusLG: 12,
-    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
     colorBgContainer: '#ffffff',
     colorBorderSecondary: '#f0f0f0',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -274,7 +273,7 @@ export default function AdminLayout() {
 
   return (
     <ConfigProvider theme={antdTheme}>
-      <div style={{ fontFamily: 'Inter, sans-serif', display: 'flex', minHeight: '100vh', backgroundColor: '#f5f6fa' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f6fa' }}>
         <Sidebar currentPage={currentPage} onNavigate={handleNavigate} />
         <div style={{ marginLeft: 240, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Header currentPage={currentPage} user={user} />

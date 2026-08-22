@@ -461,7 +461,7 @@ export default function SpeakingCoachPage() {
         <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendText()}
           disabled={rateLimitCountdown > 0 || micState === 'thinking'}
           placeholder={rateLimitCountdown > 0 ? `Vui lòng chờ ${rateLimitCountdown}s để nhắn tiếp...` : "Nhập câu hoặc hỏi AI Coach..."}
-          style={{ flex: 1, background: rateLimitCountdown > 0 ? 'rgba(255,0,0,0.05)' : t.inputBg, border: `1.5px solid ${rateLimitCountdown > 0 ? '#ef4444' : t.inputBorder}`, borderRadius: 14, padding: '0.75rem 1.25rem', fontFamily: 'inherit', fontSize: '0.95rem', color: rateLimitCountdown > 0 ? '#ef4444' : t.text, outline: 'none', transition: 'border-color 0.2s' }} />
+          style={{ flex: 1, background: rateLimitCountdown > 0 ? 'rgba(255,0,0,0.05)' : t.inputBg, border: `1.5px solid ${rateLimitCountdown > 0 ? '#ef4444' : t.inputBorder}`, borderRadius: 14, padding: '0.75rem 1.25rem', fontSize: '0.95rem', color: rateLimitCountdown > 0 ? '#ef4444' : t.text, outline: 'none', transition: 'border-color 0.2s' }} />
 
         <button onClick={sendText} disabled={micState === 'thinking' || rateLimitCountdown > 0} style={{ width: 44, height: 44, borderRadius: 12, border: 'none', background: t.goldBg, cursor: (micState === 'thinking' || rateLimitCountdown > 0) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (micState === 'thinking' || rateLimitCountdown > 0) ? 0.5 : 1 }}>
           {Icon.send(t.gold)}

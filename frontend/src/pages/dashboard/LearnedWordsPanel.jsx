@@ -52,7 +52,6 @@ function EditDrawer({ word, onClose, onSaved, t }) {
     fontSize: '0.9rem',
     outline: 'none',
     boxSizing: 'border-box',
-    fontFamily: 'inherit',
     resize: 'vertical',
   };
 

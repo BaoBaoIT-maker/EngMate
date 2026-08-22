@@ -223,8 +223,7 @@ function StepTarget({ pathConfig, setPathConfig, selectedCourses }) {
                       border: `1.5px solid ${active ? course.accent : 'rgba(255,255,255,0.12)'}`,
                       background: active ? course.accentBg : 'rgba(255,255,255,0.04)',
                       color: active ? course.accent : 'rgba(255,255,255,0.6)',
-                      cursor: 'pointer', transition: 'all 0.15s', fontFamily: 'inherit',
-                    }}
+                      cursor: 'pointer', transition: 'all 0.15s', }}
                   >
                     {label}
                   </button>
@@ -381,8 +380,7 @@ export default function OnboardingPage() {
     <div style={{
       minHeight: '100vh', background: '#0F0D14',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '1.5rem', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-    }}>
+      padding: '1.5rem', }}>
       {/* Ambient glow */}
       <div style={{ position: 'fixed', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(240,180,41,0.08) 0%, transparent 65%)', pointerEvents: 'none' }} />
       <div style={{ position: 'fixed', bottom: -100, left: -80, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
@@ -441,7 +439,7 @@ export default function OnboardingPage() {
             {step > 0 && (
               <button
                 onClick={() => setStep((s) => s - 1)}
-                style={{ flex: 1, padding: '0.875rem', borderRadius: 12, border: '1.5px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'inherit', transition: 'border-color 0.2s' }}
+                style={{ flex: 1, padding: '0.875rem', borderRadius: 12, border: '1.5px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', transition: 'border-color 0.2s' }}
                 onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)')}
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
               >
@@ -456,7 +454,7 @@ export default function OnboardingPage() {
                 background: isStepValid() ? `linear-gradient(135deg, ${GOLD}, ${GOLD_DARK})` : 'rgba(255,255,255,0.08)',
                 color: isStepValid() ? '#1C1407' : 'rgba(255,255,255,0.25)',
                 fontWeight: 800, fontSize: '0.95rem', cursor: isStepValid() ? 'pointer' : 'not-allowed',
-                fontFamily: 'inherit', transition: 'all 0.2s',
+                transition: 'all 0.2s',
                 boxShadow: isStepValid() ? '0 6px 20px rgba(240,180,41,0.3)' : 'none',
               }}
             >
@@ -480,7 +478,7 @@ export default function OnboardingPage() {
                 navigate('/dashboard', { replace: true });
               }
             }}
-            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem', cursor: 'pointer', fontFamily: 'inherit' }}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem', cursor: 'pointer', }}
             onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.25)')}
           >

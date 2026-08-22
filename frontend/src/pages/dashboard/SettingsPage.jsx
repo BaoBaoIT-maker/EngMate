@@ -397,7 +397,7 @@ export default function SettingsPage() {
         <Row label="Mục tiêu hàng ngày" desc={`${goal} từ / ngày`} right={
           <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
             {[10, 20, 30, 50].map(v => (
-              <button key={v} onClick={() => setGoal(v)} style={{ padding: '0.3rem 0.625rem', borderRadius: 8, border: `1.5px solid ${goal === v ? t.gold : t.cardBorder}`, background: goal === v ? t.goldBg : 'transparent', color: goal === v ? t.gold : t.textMuted, fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button key={v} onClick={() => setGoal(v)} style={{ padding: '0.3rem 0.625rem', borderRadius: 8, border: `1.5px solid ${goal === v ? t.gold : t.cardBorder}`, background: goal === v ? t.goldBg : 'transparent', color: goal === v ? t.gold : t.textMuted, fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', }}>
                 {v}
               </button>
             ))}
@@ -406,7 +406,7 @@ export default function SettingsPage() {
               value={goal}
               onChange={e => setGoal(e.target.value ? parseInt(e.target.value) : '')}
               placeholder="Khác..."
-              style={{ width: 60, padding: '0.3rem 0.5rem', borderRadius: 8, border: `1.5px solid ${![10, 20, 30, 50].includes(goal) ? t.gold : t.cardBorder}`, background: t.bg, color: t.text, fontWeight: 700, fontSize: '0.75rem', outline: 'none', textAlign: 'center', fontFamily: 'inherit' }}
+              style={{ width: 60, padding: '0.3rem 0.5rem', borderRadius: 8, border: `1.5px solid ${![10, 20, 30, 50].includes(goal) ? t.gold : t.cardBorder}`, background: t.bg, color: t.text, fontWeight: 700, fontSize: '0.75rem', outline: 'none', textAlign: 'center', }}
             />
           </div>
         } />
@@ -442,7 +442,7 @@ export default function SettingsPage() {
           useAuthStore.getState().logout();
           window.location.href = '/login';
         }}
-        style={{ width: '100%', padding: '0.875rem', borderRadius: 12, border: `1.5px solid rgba(239,68,68,0.3)`, background: 'rgba(239,68,68,0.08)', color: '#EF4444', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.2s' }}
+        style={{ width: '100%', padding: '0.875rem', borderRadius: 12, border: `1.5px solid rgba(239,68,68,0.3)`, background: 'rgba(239,68,68,0.08)', color: '#EF4444', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', transition: 'background 0.2s' }}
         onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'}
         onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
       >
