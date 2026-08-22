@@ -82,7 +82,7 @@ function Heatmap({ data, t, isDark }) {
       const palette = ['#1A2B1E', '#1D6B3C', '#2F9E56', '#3DBE6A', '#52D68A'];
       return palette[level];
     } else {
-      const palette = ['#E9F5EA', '#B7DEC0', '#6EBF86', '#2F9E56', '#1D6B3C'];
+      const palette = ['#F3F9F4', '#C3E4CD', '#7DCD95', '#33A85C', '#1D753D'];
       return palette[level];
     }
   };
@@ -163,9 +163,9 @@ function Heatmap({ data, t, isDark }) {
 // ─── Card styles ───────────────────────────────────────────────────────
 const card = (t) => ({
   background: t.card,
-  border: `1px solid ${t.cardBorder}`,
-  borderRadius: 20,
-  boxShadow: `0 4px 24px ${t.shadow}`,
+  border: 1px solid ,
+  borderRadius: '24px',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
 });
 
 // ─── Greeting ──────────────────────────────────────────────────────────
@@ -207,7 +207,7 @@ function DashboardSkeleton({ t, isDark }) {
       {/* Top row: Streak + XP + Goal */}
       <div className="grid grid-cols-1 md:grid-cols-[auto_auto_1fr] gap-4 mb-4">
         {/* Streak card */}
-        <div style={{ ...card(t), padding: '1.5rem 1.75rem', minWidth: 200 }}>
+        <div style={{ ...card(t), padding: '2rem', minWidth: 200 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
             <Sk w={52} h={60} r={12} />
             <div style={{ flex: 1 }}>
@@ -219,7 +219,7 @@ function DashboardSkeleton({ t, isDark }) {
         </div>
 
         {/* XP card */}
-        <div style={{ ...card(t), padding: '1.5rem 1.75rem', minWidth: 160 }}>
+        <div style={{ ...card(t), padding: '2rem', minWidth: 160 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
             <Sk w={52} h={52} r={26} />
             <div style={{ flex: 1 }}>
@@ -230,7 +230,7 @@ function DashboardSkeleton({ t, isDark }) {
         </div>
 
         {/* Goal card */}
-        <div style={{ ...card(t), padding: '1.5rem 1.75rem' }}>
+        <div style={{ ...card(t), padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ flex: 1 }}>
               <Sk w={80} h={10} r={4} />
@@ -259,7 +259,7 @@ function DashboardSkeleton({ t, isDark }) {
       {/* Heatmap + Memory */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         {/* Heatmap */}
-        <div style={{ ...card(t), padding: '1.5rem' }}>
+        <div style={{ ...card(t), padding: '2rem' }}>
           <Sk w={180} h={12} r={5} style={{ marginBottom: 20 }} />
           {/* Grid dots */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -275,7 +275,7 @@ function DashboardSkeleton({ t, isDark }) {
         </div>
 
         {/* Memory */}
-        <div style={{ ...card(t), padding: '1.5rem' }}>
+        <div style={{ ...card(t), padding: '2rem' }}>
           <Sk w={180} h={12} r={5} style={{ marginBottom: 24 }} />
           <div style={{ display: 'flex', justifyContent: 'space-around' }}>
             {[0, 1, 2].map(i => (
@@ -290,7 +290,7 @@ function DashboardSkeleton({ t, isDark }) {
       </div>
 
       {/* Recent words */}
-      <div style={{ ...card(t), padding: '1.5rem' }}>
+      <div style={{ ...card(t), padding: '2rem' }}>
         <Sk w={160} h={12} r={5} style={{ marginBottom: 20 }} />
         {[0,1,2,3,4].map(i => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', padding: '0.625rem 0.875rem', marginBottom: 4 }}>
@@ -358,8 +358,8 @@ export default function DashboardOverview() {
       {/* ── Hero Header ── */}
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{
-          fontWeight: 600, fontSize: 'clamp(28px, 4vw, 44px)',
-          color: t.text, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em',
+          fontWeight: 600, fontSize: 'clamp(24px, 5vw, 36px)',
+          color: t.text, margin: 0, lineHeight: 1.2, letterSpacing: '-0.03em',
         }}>
           Chào {getGreeting()},{' '}
           <em style={{ color: t.green, fontStyle: 'italic', fontWeight: 600 }}>{usernameDisplay}</em>
@@ -374,7 +374,7 @@ export default function DashboardOverview() {
       <div className="grid grid-cols-1 md:grid-cols-[auto_auto_1fr] gap-4 mb-4">
 
         {/* Streak Card */}
-        <div style={{ ...card(t), padding: '1.5rem 1.75rem', display: 'flex', alignItems: 'center', gap: '1.25rem', border: `1px solid ${isDark ? 'rgba(47,158,86,0.25)' : '#C8E6C9'}`, minWidth: 200 }}>
+        <div style={{ ...card(t), padding: '2rem', display: 'flex', alignItems: 'center', gap: '1.25rem', border: `1px solid ${isDark ? 'rgba(47,158,86,0.25)' : '#C8E6C9'}`, minWidth: 200 }}>
           <div style={{ flexShrink: 0 }}>
             <SproutIcon streak={streak.current} />
           </div>
@@ -391,7 +391,7 @@ export default function DashboardOverview() {
         </div>
 
         {/* XP Card */}
-        <div style={{ ...card(t), padding: '1.5rem 1.75rem', display: 'flex', alignItems: 'center', gap: '1.25rem', border: `1px solid ${isDark ? 'rgba(242,167,59,0.2)' : '#FFE9B0'}`, minWidth: 160 }}>
+        <div style={{ ...card(t), padding: '2rem', display: 'flex', alignItems: 'center', gap: '1.25rem', border: `1px solid ${isDark ? 'rgba(242,167,59,0.2)' : '#FFE9B0'}`, minWidth: 160 }}>
           <div style={{ width: 52, height: 52, borderRadius: '50%', background: `linear-gradient(135deg, ${t.goldBg}, ${isDark ? 'rgba(242,167,59,0.2)' : '#FFD980'})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', flexShrink: 0 }}>⭐</div>
           <div>
             <div style={{ fontSize: '2.5rem', fontWeight: 700, color: t.gold, letterSpacing: '-0.04em', lineHeight: 1 }}>
@@ -402,7 +402,7 @@ export default function DashboardOverview() {
         </div>
 
         {/* Daily Goal Card */}
-        <div style={{ ...card(t), padding: '1.5rem 1.75rem', border: isGoalReached ? `1px solid ${t.green}` : `1px solid ${t.cardBorder}` }}>
+        <div style={{ ...card(t), padding: '2rem', border: isGoalReached ? `1px solid ${t.green}` : `1px solid ${t.cardBorder}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
             <div>
               <div style={{ fontSize: '0.7rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Mục tiêu hôm nay</div>
@@ -443,7 +443,7 @@ export default function DashboardOverview() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
 
         {/* Heatmap */}
-        <div style={{ ...card(t), padding: '1.5rem' }}>
+        <div style={{ ...card(t), padding: '2rem' }}>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 6 }}>
             <span>📅</span> Mức độ chăm chỉ (6 tháng qua)
           </div>
@@ -453,7 +453,7 @@ export default function DashboardOverview() {
         </div>
 
         {/* Memory Retention */}
-        <div style={{ ...card(t), padding: '1.5rem' }}>
+        <div style={{ ...card(t), padding: '2rem' }}>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 6 }}>
             <span>🧠</span> Phân bố trí nhớ
           </div>
@@ -480,7 +480,7 @@ export default function DashboardOverview() {
       </div>
 
       {/* ── Recent Words ── */}
-      <div style={{ ...card(t), padding: '1.5rem' }}>
+      <div style={{ ...card(t), padding: '2rem' }}>
         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span>🕒</span> Vừa ôn tập gần đây
         </div>
