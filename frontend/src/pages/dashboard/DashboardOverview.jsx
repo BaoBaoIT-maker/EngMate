@@ -163,7 +163,7 @@ function Heatmap({ data, t, isDark }) {
 // ─── Card styles ───────────────────────────────────────────────────────
 const card = (t) => ({
   background: t.card,
-  border: 1px solid ,
+  border: `1px solid ${t.cardBorder}`,
   borderRadius: '24px',
   boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
 });
