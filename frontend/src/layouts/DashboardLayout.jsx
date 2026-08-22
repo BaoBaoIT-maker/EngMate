@@ -270,12 +270,12 @@ function MobileHeader({ t, user, toggleDark, isDark, navigate }) {
       height: 60,
       background: t.sidebar,
       backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: 1px solid ,
+      borderBottom: `1px solid ${t.sidebarBorder}`,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 1rem', paddingTop: 'env(safe-area-inset-top)'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: linear-gradient(135deg, , ), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, borderRadius: 10, background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ color: '#fff', fontWeight: 800, fontSize: '1.2rem' }}>E</span>
         </div>
         <span style={{ fontFamily: "'Fraunces', serif", fontSize: '1.1rem', fontWeight: 600, color: t.text, letterSpacing: '-0.02em' }}>
@@ -288,7 +288,7 @@ function MobileHeader({ t, user, toggleDark, isDark, navigate }) {
         </button>
         <div 
           onClick={() => navigate('/dashboard/settings')}
-          style={{ width: 32, height: 32, borderRadius: '50%', background: linear-gradient(135deg, , ), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 800, color: '#fff', cursor: 'pointer', overflow: 'hidden' }}>
+          style={{ width: 32, height: 32, borderRadius: '50%', background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 800, color: '#fff', cursor: 'pointer', overflow: 'hidden' }}>
           {user?.profile?.avatarUrl ? (
             <img src={user?.profile?.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
@@ -349,9 +349,12 @@ export default function DashboardLayout() {
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} t={t} isDark={isDark} user={user} />
       )}
 
-      <main style={{ flex: 1, marginLeft: isMobile ? 0 : (collapsed ? 68 : 236), minHeight: '100vh', padding: isMobile ? '4rem 1rem 80px' : '2rem 2.5rem', display: 'flex', justifyContent: 'center', transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)', position: 'relative' }}>
-        {/* Theme Toggle */}
-        <div style={{ position: 'absolute', top: isMobile ? '1rem' : '1.5rem', right: isMobile ? '1rem' : '2.5rem', zIndex: 50 }}>
+      {isMobile && <MobileHeader t={t} user={user} toggleDark={toggleDark} isDark={isDark} navigate={navigate} />}
+
+      <main style={{ flex: 1, marginLeft: isMobile ? 0 : (collapsed ? 68 : 236), minHeight: '100vh', padding: isMobile ? 'calc(60px + 1rem) 1rem 80px' : '2rem 2.5rem', display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center', transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)', position: 'relative', overflowX: 'hidden' }}>
+        {/* Theme Toggle (Desktop only) */}
+        {!isMobile && (
+          <div style={{ position: 'absolute', top: 24, right: 32, zIndex: 10 }}>
           <button
             onClick={toggleDark}
             style={{
@@ -370,8 +373,9 @@ export default function DashboardLayout() {
             {!isMobile && (isDark ? 'Sáng' : 'Tối')}
           </button>
         </div>
+        )}
 
-        <div style={{ width: '100%' }}>
+        <div style={{ width: '100%', maxWidth: 1200, display: 'flex', flexDirection: 'column' }}>
           <Outlet />
         </div>
       </main>
