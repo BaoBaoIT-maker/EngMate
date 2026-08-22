@@ -1,69 +1,60 @@
+﻿import React, { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
-import AboutPage from './pages/AboutPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import VerifyOtpPage from './pages/VerifyOtpPage';
-import DashboardLayout from './layouts/DashboardLayout';
-import DashboardOverview from './pages/dashboard/DashboardOverview';
-import FlashcardsPage from './pages/dashboard/FlashcardsPage';
-import FlashcardsSessionPage from './pages/dashboard/FlashcardsSessionPage';
-import GamesPage from './pages/dashboard/GamesPage';
-import MatchingGame from './pages/dashboard/MatchingGame';
-import FillBlankGame from './pages/dashboard/FillBlankGame';
-import SpeakingCoachPage from './pages/dashboard/SpeakingCoachPage';
-import SettingsPage from './pages/dashboard/SettingsPage';
+import SplashScreen from './components/common/SplashScreen';
 import ProtectedRoute from './components/ProtectedRoute';
-import OnboardingPage from './pages/OnboardingPage';
-import PremiumPaywall from './pages/dashboard/PremiumPaywall';
-
 import AdminRoute from './components/AdminRoute';
-import AdminLayout from './layouts/AdminLayout';
-import AdminDashboardPage from './pages/admin/DashboardPage';
-import AdminUserManagementPage from './pages/admin/UserManagementPage';
-import AdminVocabularyPage from './pages/admin/VocabularyPage';
-import AdminPlansPage from './pages/admin/PlansPage';
-import AdminGamesPage from './pages/admin/GamesPage';
-import AdminTransactionsPage from './pages/admin/TransactionsPage';
-import AdminSupportChatPage from './pages/admin/SupportChatPage';
+
+// --- Lazy Load Public Pages ---
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const AboutPage = React.lazy(() => import('./pages/AboutPage'));
+const LoginPage = React.lazy(() => import('./pages/LoginPage'));
+const RegisterPage = React.lazy(() => import('./pages/RegisterPage'));
+const ForgotPasswordPage = React.lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = React.lazy(() => import('./pages/ResetPasswordPage'));
+const VerifyOtpPage = React.lazy(() => import('./pages/VerifyOtpPage'));
+
+// --- Lazy Load Dashboard Pages ---
+const OnboardingPage = React.lazy(() => import('./pages/OnboardingPage'));
+const DashboardLayout = React.lazy(() => import('./layouts/DashboardLayout'));
+const DashboardOverview = React.lazy(() => import('./pages/dashboard/DashboardOverview'));
+const FlashcardsPage = React.lazy(() => import('./pages/dashboard/FlashcardsPage'));
+const FlashcardsSessionPage = React.lazy(() => import('./pages/dashboard/FlashcardsSessionPage'));
+const GamesPage = React.lazy(() => import('./pages/dashboard/GamesPage'));
+const MatchingGame = React.lazy(() => import('./pages/dashboard/MatchingGame'));
+const FillBlankGame = React.lazy(() => import('./pages/dashboard/FillBlankGame'));
+const SpeakingCoachPage = React.lazy(() => import('./pages/dashboard/SpeakingCoachPage'));
+const SettingsPage = React.lazy(() => import('./pages/dashboard/SettingsPage'));
+const PremiumPaywall = React.lazy(() => import('./pages/dashboard/PremiumPaywall'));
+
+// --- Lazy Load Admin Pages ---
+const AdminLayout = React.lazy(() => import('./layouts/AdminLayout'));
+const AdminDashboardPage = React.lazy(() => import('./pages/admin/DashboardPage'));
+const AdminUserManagementPage = React.lazy(() => import('./pages/admin/UserManagementPage'));
+const AdminVocabularyPage = React.lazy(() => import('./pages/admin/VocabularyPage'));
+const AdminPlansPage = React.lazy(() => import('./pages/admin/PlansPage'));
+const AdminGamesPage = React.lazy(() => import('./pages/admin/GamesPage'));
+const AdminTransactionsPage = React.lazy(() => import('./pages/admin/TransactionsPage'));
+const AdminSupportChatPage = React.lazy(() => import('./pages/admin/SupportChatPage'));
+
+const SuspenseWrapper = ({ children }) => (
+  <Suspense fallback={<SplashScreen />}>
+    {children}
+  </Suspense>
+);
 
 const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <LandingPage />,
-  },
-  {
-    path: '/about',
-    element: <AboutPage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/register',
-    element: <RegisterPage />,
-  },
-  {
-    path: '/forgot-password',
-    element: <ForgotPasswordPage />,
-  },
-  {
-    path: '/reset-password',
-    element: <ResetPasswordPage />,
-  },
-  {
-    path: '/verify-otp',
-    element: <VerifyOtpPage />,
-  },
+  { path: '/', element: <SuspenseWrapper><LandingPage /></SuspenseWrapper> },
+  { path: '/about', element: <SuspenseWrapper><AboutPage /></SuspenseWrapper> },
+  { path: '/login', element: <SuspenseWrapper><LoginPage /></SuspenseWrapper> },
+  { path: '/register', element: <SuspenseWrapper><RegisterPage /></SuspenseWrapper> },
+  { path: '/forgot-password', element: <SuspenseWrapper><ForgotPasswordPage /></SuspenseWrapper> },
+  { path: '/reset-password', element: <SuspenseWrapper><ResetPasswordPage /></SuspenseWrapper> },
+  { path: '/verify-otp', element: <SuspenseWrapper><VerifyOtpPage /></SuspenseWrapper> },
   {
     path: '/onboarding',
     element: (
-      // requireOnboarding=false để tránh vòng lặp redirect
       <ProtectedRoute requireOnboarding={false}>
-        <OnboardingPage />
+        <SuspenseWrapper><OnboardingPage /></SuspenseWrapper>
       </ProtectedRoute>
     ),
   },
@@ -71,64 +62,37 @@ const router = createBrowserRouter([
     path: '/dashboard',
     element: (
       <ProtectedRoute>
-        <DashboardLayout />
+        <SuspenseWrapper><DashboardLayout /></SuspenseWrapper>
       </ProtectedRoute>
     ),
     children: [
-      {
-        index: true,
-        element: <DashboardOverview />,
-      },
-      {
-        path: 'flashcards',
-        element: <FlashcardsPage />,
-      },
-      {
-        path: 'flashcards/session',
-        element: <FlashcardsSessionPage />,
-      },
-      {
-        path: 'games',
-        element: <GamesPage />,
-      },
-      {
-        path: 'games/matching',
-        element: <MatchingGame />,
-      },
-      {
-        path: 'games/fill-blank',
-        element: <FillBlankGame />,
-      },
-      {
-        path: 'speaking',
-        element: <SpeakingCoachPage />,
-      },
-      {
-        path: 'settings',
-        element: <SettingsPage />,
-      },
-      {
-        path: 'premium',
-        element: <PremiumPaywall />,
-      },
+      { index: true, element: <SuspenseWrapper><DashboardOverview /></SuspenseWrapper> },
+      { path: 'flashcards', element: <SuspenseWrapper><FlashcardsPage /></SuspenseWrapper> },
+      { path: 'flashcards/session', element: <SuspenseWrapper><FlashcardsSessionPage /></SuspenseWrapper> },
+      { path: 'games', element: <SuspenseWrapper><GamesPage /></SuspenseWrapper> },
+      { path: 'games/matching', element: <SuspenseWrapper><MatchingGame /></SuspenseWrapper> },
+      { path: 'games/fill-blank', element: <SuspenseWrapper><FillBlankGame /></SuspenseWrapper> },
+      { path: 'speaking', element: <SuspenseWrapper><SpeakingCoachPage /></SuspenseWrapper> },
+      { path: 'settings', element: <SuspenseWrapper><SettingsPage /></SuspenseWrapper> },
+      { path: 'premium', element: <SuspenseWrapper><PremiumPaywall /></SuspenseWrapper> },
     ]
   },
   {
     path: '/admin',
     element: (
       <AdminRoute>
-        <AdminLayout />
+        <SuspenseWrapper><AdminLayout /></SuspenseWrapper>
       </AdminRoute>
     ),
     children: [
-      { index: true, element: <AdminDashboardPage /> },
-      { path: 'dashboard', element: <AdminDashboardPage /> },
-      { path: 'users', element: <AdminUserManagementPage /> },
-      { path: 'vocabulary', element: <AdminVocabularyPage /> },
-      { path: 'plans', element: <AdminPlansPage /> },
-      { path: 'games', element: <AdminGamesPage /> },
-      { path: 'transactions', element: <AdminTransactionsPage /> },
-      { path: 'support', element: <AdminSupportChatPage /> },
+      { index: true, element: <SuspenseWrapper><AdminDashboardPage /></SuspenseWrapper> },
+      { path: 'dashboard', element: <SuspenseWrapper><AdminDashboardPage /></SuspenseWrapper> },
+      { path: 'users', element: <SuspenseWrapper><AdminUserManagementPage /></SuspenseWrapper> },
+      { path: 'vocabulary', element: <SuspenseWrapper><AdminVocabularyPage /></SuspenseWrapper> },
+      { path: 'plans', element: <SuspenseWrapper><AdminPlansPage /></SuspenseWrapper> },
+      { path: 'games', element: <SuspenseWrapper><AdminGamesPage /></SuspenseWrapper> },
+      { path: 'transactions', element: <SuspenseWrapper><AdminTransactionsPage /></SuspenseWrapper> },
+      { path: 'support', element: <SuspenseWrapper><AdminSupportChatPage /></SuspenseWrapper> },
     ]
   }
 ]);
