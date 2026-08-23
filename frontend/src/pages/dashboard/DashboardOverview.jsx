@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import useThemeStore from '../../store/useThemeStore';
 import useAuthStore from '../../store/useAuthStore';
-import { getOverviewStats } from '../../services/statService';
 
 import HeroStrip from './overview/HeroStrip';
 import GoalCard from './overview/GoalCard';
@@ -15,16 +14,8 @@ export default function DashboardOverview() {
   const t = getTheme();
   const user = useAuthStore(s => s.user);
 
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getOverviewStats()
-      .then(data => setStats(data))
-      .catch(err => console.error('Failed to load stats', err))
-      .finally(() => setLoading(false));
-  }, []);
-
+  // Lấy stats và loading trực tiếp từ layout context
+  const { stats, loading } = useOutletContext();
 
   if (loading || !stats) {
     return <DashboardSkeleton t={t} isDark={isDark} />;
@@ -38,8 +29,7 @@ export default function DashboardOverview() {
 
   return (
     <div className="w-full max-w-5xl mx-auto screen-enter" style={{ color: t.text }}>
-
-      {/* Hero: Greeting + Streak/XP strip */}
+      {/* Lời chào: Greeting */}
       <HeroStrip
         t={t}
         isDark={isDark}
@@ -49,8 +39,9 @@ export default function DashboardOverview() {
         isGoalReached={isGoalReached}
       />
 
-      {/* Asymmetric grid: GoalCard (fixed 280px) | Heatmap + Memory (flex) */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 mb-4">
+      {/* Grid: GoalCard (cột trái) | Memory + Heatmap (cột phải) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[330px_1fr] gap-6 mb-6 items-start">
+        {/* Cột trái: GoalCard */}
         <GoalCard
           t={t}
           isDark={isDark}
@@ -59,13 +50,15 @@ export default function DashboardOverview() {
           goalPerc={goalPerc}
           memoryTotal={memoryTotal}
         />
-        <div className="flex flex-col gap-4">
-          <HeatmapCard t={t} isDark={isDark} heatmap={heatmap} />
+
+        {/* Cột phải: MemoryCard + HeatmapCard */}
+        <div className="flex flex-col gap-6">
           <MemoryCard t={t} memory={memory} />
+          <HeatmapCard t={t} isDark={isDark} heatmap={heatmap} />
         </div>
       </div>
 
-      {/* Recent Words — full width */}
+      {/* Hàng dưới: RecentWordsCard */}
       <RecentWordsCard t={t} recent={recent} />
     </div>
   );

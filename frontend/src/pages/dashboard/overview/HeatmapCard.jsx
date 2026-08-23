@@ -1,4 +1,4 @@
-﻿function Heatmap({ data, t, isDark }) {
+function Heatmap({ data, t, isDark }) {
   const cols = 26, rows = 7;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -91,10 +91,20 @@
 
 export default function HeatmapCard({ t, isDark, heatmap }) {
   return (
-    <div className="glass-panel p-6">
-      <div className="text-[11px] font-bold uppercase tracking-wider mb-5 flex items-center gap-2"
-        style={{ color: t.textMuted }}>
-        <span>📅</span> Mức độ chăm chỉ (6 tháng qua)
+    <div
+      className="glass-panel p-6 flex flex-col gap-4"
+      style={{
+        border: `1px solid ${t.cardBorder}`,
+        boxShadow: `0 10px 30px ${t.shadow}`,
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-extrabold" style={{ color: t.text }}>
+          Hoạt động học tập
+        </div>
+        <div className="text-[10px] font-bold tracking-wider opacity-60 uppercase" style={{ color: t.text }}>
+          6 THÁNG QUA
+        </div>
       </div>
       <Heatmap data={heatmap} t={t} isDark={isDark} />
     </div>

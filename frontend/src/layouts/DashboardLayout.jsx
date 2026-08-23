@@ -1,10 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useThemeStore from '../store/useThemeStore';
 import useAuthStore from '../store/useAuthStore';
 import useSplashStore from '../store/useSplashStore';
 import SupportChatWidget from '../components/support/SupportChatWidget';
 import AdvisorChatWidget from '../components/advisor/AdvisorChatWidget';
+import { getOverviewStats } from '../services/statService';
 
 const NAV = [
   {
@@ -73,10 +74,12 @@ function MoonIcon({ color }) {
 }
 
 // ─── Desktop Top Header Navigation ────────────────────────────────
-function TopHeader({ t, isDark, user, toggleDark, navigate, location }) {
+function TopHeader({ t, isDark, user, toggleDark, navigate, location, stats }) {
   const isPremium = user?.subscription?.isValid &&
     user?.subscription?.plan?.code !== 'FREE' &&
     (!user.subscription.endDate || new Date(user.subscription.endDate) > new Date());
+
+  const streakDays = stats?.streak?.current || 0;
 
   return (
     <header style={{
@@ -88,33 +91,33 @@ function TopHeader({ t, isDark, user, toggleDark, navigate, location }) {
       maxWidth: '1200px',
       height: '64px',
       zIndex: 100,
-      background: isDark ? 'rgba(18, 24, 19, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+      background: isDark ? 'rgba(12, 21, 15, 0.85)' : 'rgba(255, 255, 255, 0.85)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
-      border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
-      borderRadius: '20px',
+      border: `1px solid ${isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(0,102,51,0.06)'}`,
+      borderRadius: '24px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 1.5rem',
-      boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.3)' : '0 10px 30px rgba(47,158,86,0.03)',
+      padding: '0 1.75rem',
+      boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.35)' : '0 10px 30px rgba(4,120,87,0.03)',
       transition: 'all 0.3s ease',
     }}>
       {/* Left: Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
         <div style={{
           width: 32, height: 32, borderRadius: 10,
-          background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`,
+          background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '1.1rem', fontWeight: 800, color: '#fff', boxShadow: `0 4px 12px ${t.gold}30`
+          fontSize: '1.2rem', fontWeight: 900, color: '#fff', boxShadow: `0 4px 12px ${t.green}30`
         }}>✦</div>
-        <span style={{ fontWeight: 850, fontSize: '1.15rem', color: t.text, letterSpacing: '-0.03em' }}>
+        <span style={{ fontWeight: 850, fontSize: '1.2rem', color: t.text, letterSpacing: '-0.03em' }}>
           Eng<span style={{ color: t.green }}>Mate</span>
         </span>
       </div>
 
-      {/* Middle: Navigation Links */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      {/* Middle: Navigation Links (No icon, simple text capitalized with active underline) */}
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
         {NAV.map(item => {
           const active = location.pathname === item.id;
           return (
@@ -122,23 +125,19 @@ function TopHeader({ t, isDark, user, toggleDark, navigate, location }) {
               key={item.id}
               onClick={() => navigate(item.id)}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 0.875rem',
-                borderRadius: '12px',
+                padding: '0.5rem 0',
                 cursor: 'pointer',
-                background: active ? (isDark ? t.greenBg : t.greenBg) : 'transparent',
-                color: active ? t.greenDark : t.textMuted,
-                fontWeight: active ? 750 : 600,
-                fontSize: '0.875rem',
+                color: active ? t.green : t.textMuted,
+                fontWeight: active ? 800 : 600,
+                fontSize: '0.8rem',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
                 transition: 'all 0.2s ease',
-                border: active ? `1px solid ${isDark ? 'rgba(47,158,86,0.2)' : '#C8E6C9'}` : '1px solid transparent',
+                borderBottom: active ? `2px solid ${t.green}` : '2px solid transparent',
               }}
-              onMouseOver={e => { if (!active) { e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : t.bgSub; e.currentTarget.style.color = t.text; } }}
-              onMouseOut={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = t.textMuted; } }}
+              onMouseOver={e => { if (!active) { e.currentTarget.style.color = t.text; } }}
+              onMouseOut={e => { if (!active) { e.currentTarget.style.color = t.textMuted; } }}
             >
-              <span style={{ display: 'flex' }}>{item.icon(active ? t.green : t.textMuted)}</span>
               <span>{item.label}</span>
             </div>
           );
@@ -146,18 +145,35 @@ function TopHeader({ t, isDark, user, toggleDark, navigate, location }) {
       </nav>
 
       {/* Right: Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+        {/* Streak Info */}
+        {streakDays > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 800, color: t.gold }}>
+            <span>🔥</span>
+            <span style={{ letterSpacing: '0.04em', textTransform: 'uppercase' }}>{streakDays} DAYS</span>
+          </div>
+        )}
+
         {/* Upgrade Banner (Free only) */}
         {user && !isPremium && (
           <button
             onClick={() => navigate('/dashboard/premium')}
-            className="hidden lg:block px-4 py-1.5 rounded-full text-xs font-bold text-white transition-all duration-200 hover:-translate-y-0.5"
             style={{
-              background: `linear-gradient(135deg, ${t.gold} 0%, ${t.green} 100%)`,
-              boxShadow: `0 4px 12px rgba(47,158,86,0.2)`,
+              padding: '0.45rem 1.25rem',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              background: isDark ? 'rgba(16, 185, 129, 0.15)' : '#E8F5E9',
+              color: isDark ? '#10B981' : '#006633',
+              border: 'none',
+              cursor: 'pointer',
+              letterSpacing: '0.05em',
+              transition: 'all 0.2s',
             }}
+            onMouseOver={e => { e.currentTarget.style.opacity = '0.9'; }}
+            onMouseOut={e => { e.currentTarget.style.opacity = '1'; }}
           >
-            Upgrade 🌱
+            NÂNG CẤP
           </button>
         )}
 
@@ -283,6 +299,20 @@ export default function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  const fetchStats = () => {
+    getOverviewStats()
+      .then(data => setStats(data))
+      .catch(err => console.error('Failed to load stats in layout', err))
+      .finally(() => setLoadingStats(false));
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
   // Đồng bộ biến isDark sang thẻ html để kích hoạt class .dark của Tailwind CSS toàn cục
   useEffect(() => {
     if (isDark) {
@@ -315,6 +345,7 @@ export default function DashboardLayout() {
           toggleDark={toggleDark}
           navigate={navigate}
           location={location}
+          stats={stats}
         />
       )}
 
@@ -334,7 +365,7 @@ export default function DashboardLayout() {
         position: 'relative',
         overflowX: 'hidden'
       }}>
-        <Outlet />
+        <Outlet context={{ stats, setStats, loading: loadingStats, reloadStats: fetchStats }} />
       </main>
 
       {isMobile && <BottomNav t={t} user={user} isDark={isDark} />}

@@ -1,17 +1,12 @@
-﻿import { useNavigate } from 'react-router-dom';
-
-function LeafTag({ color }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill={color} aria-hidden="true">
-      <path d="M17 8C8 10 5.9 16.17 3.82 19.32c-.87 1.3.88 2.65 1.75 1.35C6.87 18.6 9.89 16 17 16c6 0 6-8 0-8z"/>
-    </svg>
-  );
-}
+import { useNavigate } from 'react-router-dom';
 
 export default function RecentWordsCard({ t, recent }) {
   const navigate = useNavigate();
 
-  if (recent.length === 0) {
+  // Chỉ lấy tối đa 4 từ gần đây để hiển thị đúng 4 cột ngang như mockup
+  const displayWords = (recent || []).slice(0, 4);
+
+  if (displayWords.length === 0) {
     return (
       <div className="glass-panel p-8 flex flex-col items-center justify-center text-center gap-4">
         <div className="text-4xl">🌱</div>
@@ -22,7 +17,7 @@ export default function RecentWordsCard({ t, recent }) {
         <button
           onClick={() => navigate('/dashboard/flashcards')}
           className="mt-1 px-6 py-3 rounded-full text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
-          style={{ background: 'linear-gradient(135deg, #F2A73B, #2F9E56)', boxShadow: '0 4px 12px rgba(242,167,59,0.3)' }}
+          style={{ background: t.green, boxShadow: `0 4px 12px ${t.green}30` }}
         >
           Bắt đầu học ngay →
         </button>
@@ -31,36 +26,64 @@ export default function RecentWordsCard({ t, recent }) {
   }
 
   return (
-    <div className="glass-panel p-6">
-      <div className="text-[11px] font-bold uppercase tracking-wider mb-4 flex items-center gap-2"
-        style={{ color: t.textMuted }}>
-        <span>🕒</span> Vừa ôn tập gần đây
+    <div
+      className="glass-panel p-6 flex flex-col gap-4"
+      style={{
+        border: `1px solid ${t.cardBorder}`,
+        boxShadow: `0 10px 30px ${t.shadow}`,
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-extrabold" style={{ color: t.text }}>
+          Từ vựng vừa ôn tập
+        </div>
+        <button
+          onClick={() => navigate('/dashboard/flashcards')}
+          className="text-xs font-extrabold tracking-wider bg-none border-none cursor-pointer focus:outline-none transition-colors duration-200"
+          style={{ color: t.green }}
+          onMouseOver={e => e.currentTarget.style.opacity = 0.8}
+          onMouseOut={e => e.currentTarget.style.opacity = 1}
+        >
+          XEM TẤT CẢ
+        </button>
       </div>
-      <div className="flex flex-col gap-1.5">
-        {recent.map((r, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200 cursor-default"
-            onMouseOver={e => e.currentTarget.style.background = t.goldBg}
-            onMouseOut={e => e.currentTarget.style.background = 'transparent'}
-          >
-            <LeafTag color={r.correct ? '#2F9E56' : '#F2A73B'} />
-            <span className="flex-1 text-sm font-bold" style={{ color: t.text }}>{r.word}</span>
-            <span className="text-xs font-500" style={{ color: t.textMuted }}>
-              {new Date(r.time).toLocaleString('vi-VN', { day: '2-digit', month: 'numeric', hour: '2-digit', minute: '2-digit' })}
-            </span>
-            <span
-              className="px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wide"
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {displayWords.map((r, i) => {
+          const isCorrect = r.correct;
+          return (
+            <div
+              key={i}
+              className="flex items-center justify-between p-4.5 rounded-2xl border transition-all duration-200 cursor-default"
               style={{
-                background: r.correct ? t.greenBg : t.goldBg,
-                color: r.correct ? t.greenDark : t.goldDark,
-                border: `1px solid ${r.correct ? 'rgba(47,158,86,0.15)' : 'rgba(240,180,41,0.15)'}`,
+                background: isCorrect ? '#FFFFFF' : 'rgba(239, 68, 68, 0.04)',
+                borderColor: isCorrect ? t.cardBorder : 'rgba(239, 68, 68, 0.15)',
               }}
             >
-              {r.correct ? '🌿 Thuộc' : '🌱 Ôn thêm'}
-            </span>
-          </div>
-        ))}
+              <div className="flex flex-col gap-1 pr-2">
+                <span className="text-base font-extrabold tracking-tight truncate max-w-[120px]" style={{ color: t.text }} title={r.word}>
+                  {r.word}
+                </span>
+                <span className="text-xs font-semibold opacity-60 truncate max-w-[140px]" style={{ color: t.text }} title={r.meaning || 'Chưa có nghĩa'}>
+                  {r.meaning || 'Đang cập nhật...'}
+                </span>
+              </div>
+
+              {/* Status Circle Icon */}
+              <div className="flex-shrink-0">
+                {isCorrect ? (
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white text-xs font-bold">
+                    ✓
+                  </div>
+                ) : (
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center bg-red-500 text-white text-[10px] font-bold">
+                    ✕
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

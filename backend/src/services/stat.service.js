@@ -104,6 +104,7 @@ export const getOverviewStats = async (userId) => {
 
   const formattedRecent = recentActivities.map(log => ({
     word: log.flashcard.systemVocabulary?.word || log.flashcard.customWord || "Unknown",
+    meaning: log.flashcard.systemVocabulary?.vietnameseMeaning || log.flashcard.customMeaning || "",
     correct: log.isCorrect,
     time: log.createdAt
   }));
