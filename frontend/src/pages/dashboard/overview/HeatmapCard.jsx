@@ -11,8 +11,8 @@
 
   const getLevel = (count) => !count ? 0 : count < 5 ? 1 : count < 15 ? 2 : count < 30 ? 3 : 4;
   const getBg = (level) => isDark
-    ? ['#1A2B1E','#1D6B3C','#2F9E56','#3DBE6A','#52D68A'][level]
-    : ['#F3F9F4','#C3E4CD','#7DCD95','#33A85C','#1D753D'][level];
+    ? ['rgba(255,255,255,0.03)', '#165B33', '#1B8A4C', '#24B662', '#34D37A'][level]
+    : ['rgba(0,0,0,0.03)', '#C8E6C9', '#81C784', '#4CAF50', '#2E7D32'][level];
 
   const grid = [], monthLabels = [];
   const monthNames = ['Thg 1','Thg 2','Thg 3','Thg 4','Thg 5','Thg 6','Thg 7','Thg 8','Thg 9','Thg 10','Thg 11','Thg 12'];
@@ -42,34 +42,34 @@
     <div className="overflow-x-auto">
       <div className="inline-flex flex-col min-w-max">
         <div className="flex">
-          <div className="flex flex-col gap-0.5 pr-2 pt-5">
+          <div className="flex flex-col gap-1 pr-2.5 pt-5">
             {[0,1,2,3,4,5,6].map(i => (
-              <div key={i} className="h-3 text-xs leading-3" style={{ color: t.textMuted }}>
+              <div key={i} className="h-3 text-[10px] font-bold leading-3" style={{ color: t.textMuted }}>
                 {i === 1 ? 'T2' : i === 3 ? 'T4' : i === 5 ? 'T6' : ''}
               </div>
             ))}
           </div>
           <div className="flex flex-col">
-            <div className="h-5 relative w-full">
+            <div className="h-5 relative w-full mb-1">
               {monthLabels.map((ml, idx) => (
-                <span key={idx} className="absolute text-xs font-medium"
-                  style={{ left: ml.colIndex * 15, color: t.textMuted }}>
+                <span key={idx} className="absolute text-[10px] font-bold"
+                  style={{ left: ml.colIndex * 16, color: t.textMuted }}>
                   {ml.label}
                 </span>
               ))}
             </div>
-            <div className="flex gap-0.5">
+            <div className="flex gap-1">
               {grid.map((col, cIdx) => (
-                <div key={cIdx} className="flex flex-col gap-0.5">
+                <div key={cIdx} className="flex flex-col gap-1">
                   {col.map((cell, rIdx) => {
-                    if (!cell) return <div key={rIdx} className="w-3 h-3 rounded-sm" />;
+                    if (!cell) return <div key={rIdx} className="w-3.5 h-3.5 rounded-sm" />;
                     const level = getLevel(cell.count);
                     const dateObj = new Date(cell.date);
                     return (
                       <div
                         key={rIdx}
                         title={`${dateObj.toLocaleDateString('vi-VN')}: ${cell.count} từ`}
-                        className="w-3 h-3 rounded-sm cursor-default transition-transform duration-150 hover:scale-125"
+                        className="w-3.5 h-3.5 rounded-[3px] cursor-default transition-all duration-150 hover:scale-125"
                         style={{ background: getBg(level) }}
                       />
                     );
@@ -79,9 +79,9 @@
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-1 mt-3 text-xs" style={{ color: t.textMuted }}>
+        <div className="flex items-center justify-end gap-1.5 mt-4 text-[10px] font-bold" style={{ color: t.textMuted }}>
           <span className="mr-1">Ít hơn</span>
-          {[0,1,2,3,4].map(l => <div key={l} className="w-3 h-3 rounded-sm" style={{ background: getBg(l) }} />)}
+          {[0,1,2,3,4].map(l => <div key={l} className="w-3.5 h-3.5 rounded-[3px]" style={{ background: getBg(l) }} />)}
           <span className="ml-1">Nhiều hơn</span>
         </div>
       </div>
@@ -91,12 +91,9 @@
 
 export default function HeatmapCard({ t, isDark, heatmap }) {
   return (
-    <div
-      className="rounded-2xl p-6"
-      style={{ background: t.card, border: `1px solid ${t.cardBorder}`, boxShadow: `0 4px 20px ${t.shadow}` }}
-    >
-      <div className="text-xs font-bold uppercase mb-5 flex items-center gap-2"
-        style={{ color: t.textMuted, letterSpacing: '0.1em' }}>
+    <div className="glass-panel p-6">
+      <div className="text-[11px] font-bold uppercase tracking-wider mb-5 flex items-center gap-2"
+        style={{ color: t.textMuted }}>
         <span>📅</span> Mức độ chăm chỉ (6 tháng qua)
       </div>
       <Heatmap data={heatmap} t={t} isDark={isDark} />

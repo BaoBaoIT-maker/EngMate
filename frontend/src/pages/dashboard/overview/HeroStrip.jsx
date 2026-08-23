@@ -23,58 +23,56 @@ function getGreeting() {
 
 export default function HeroStrip({ t, isDark, username, streak, totalExp, isGoalReached }) {
   return (
-    <div className="mb-6 anim-slide-up">
-      <div className="mb-4">
+    <div className="mb-8 anim-slide-up">
+      <div className="mb-5">
         <h1
-          className="m-0 leading-tight"
-          style={{ fontWeight: 800, fontSize: 'clamp(22px, 4vw, 32px)', color: t.text, letterSpacing: '-0.03em' }}
+          className="m-0 leading-tight tracking-tight"
+          style={{ fontWeight: 800, fontSize: 'clamp(24px, 4.5vw, 34px)', color: t.text, letterSpacing: '-0.03em' }}
         >
           Chào {getGreeting()},{' '}
-          <em style={{ color: t.green, fontStyle: 'normal' }}>{username}</em> 👋
+          <span style={{ color: t.green }}>{username}</span> 👋
         </h1>
-        <p className="mt-1 text-sm font-medium" style={{ color: t.textMuted }}>
+        <p className="mt-1.5 text-sm font-medium" style={{ color: t.textMuted }}>
           {isGoalReached
-            ? '🎉 Bạn đã hoàn thành mục tiêu hôm nay — xuất sắc!'
-            : 'Tiếp tục vun trồng khu vườn từ vựng của bạn nhé!'}
+            ? '🎉 Bạn đã hoàn thành mục tiêu hôm nay — thật tuyệt vời!'
+            : 'Hãy tiếp tục gieo mầm kiến thức hôm nay nhé!'}
         </p>
       </div>
 
       {/* ─── Metric Strip: Streak | XP ─── */}
       <div
-        className="inline-flex items-stretch rounded-2xl overflow-hidden"
+        className="inline-flex items-stretch rounded-3xl overflow-hidden glass-panel"
         style={{
-          background: t.card,
-          border: `1px solid ${isDark ? 'rgba(47,158,86,0.2)' : '#E4F0E7'}`,
-          boxShadow: `0 2px 16px ${t.shadow}`,
+          boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.3)' : '0 10px 30px rgba(47,158,86,0.03)',
         }}
       >
         {/* Streak */}
-        <div className="flex items-center gap-3 px-5 py-4">
+        <div className="flex items-center gap-4 px-6 py-4.5">
           <SproutIcon streak={streak.current} />
           <div>
-            <div className="leading-none" style={{ fontSize: '2rem', fontWeight: 800, color: t.green, letterSpacing: '-0.04em', fontVariantNumeric: 'tabular-nums' }}>
+            <div className="leading-none" style={{ fontSize: '2.2rem', fontWeight: 800, color: t.green, letterSpacing: '-0.04em', fontVariantNumeric: 'tabular-nums' }}>
               {streak.current}
             </div>
             <div className="text-xs mt-1" style={{ fontWeight: 600, color: t.textMuted }}>Ngày liên tiếp</div>
-            <div className="flex items-center gap-1 mt-1">
-              <span className="text-xs">🏆</span>
-              <span className="text-xs" style={{ fontWeight: 500, color: t.gold }}>Kỷ lục: {streak.max}</span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="text-[10px]">🏆</span>
+              <span className="text-[11px]" style={{ fontWeight: 500, color: t.gold }}>Kỷ lục: {streak.max}</span>
             </div>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="w-px self-stretch" style={{ background: isDark ? 'rgba(255,255,255,0.07)' : '#EDE8DC' }} />
+        <div className="w-px self-stretch" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
 
         {/* XP */}
-        <div className="flex items-center gap-3 px-5 py-4">
+        <div className="flex items-center gap-4 px-6 py-4.5">
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"
-            style={{ background: isDark ? 'rgba(242,167,59,0.15)' : '#FFF1CE' }}
+            className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"
+            style={{ background: isDark ? 'rgba(242,167,59,0.12)' : '#FFF3D6' }}
             aria-hidden="true"
           >⭐</div>
           <div>
-            <div className="leading-none" style={{ fontSize: '2rem', fontWeight: 800, color: t.gold, letterSpacing: '-0.04em', fontVariantNumeric: 'tabular-nums' }}>
+            <div className="leading-none" style={{ fontSize: '2.2rem', fontWeight: 800, color: t.gold, letterSpacing: '-0.04em', fontVariantNumeric: 'tabular-nums' }}>
               {(totalExp || 0).toLocaleString()}
             </div>
             <div className="text-xs mt-1" style={{ fontWeight: 600, color: t.textMuted }}>Tổng XP</div>

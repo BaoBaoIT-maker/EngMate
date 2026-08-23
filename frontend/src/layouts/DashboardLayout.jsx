@@ -111,16 +111,28 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
 
   return (
     <div style={{
-      width: W, height: '100vh', flexShrink: 0,
-      position: 'fixed', left: 0, top: 0, bottom: 0,
-      background: t.sidebar,
-      borderRight: `1px solid ${t.sidebarBorder}`,
-      display: 'flex', flexDirection: 'column', padding: '1.25rem 0.875rem',
-      transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1)',
-      overflowY: 'auto', overflowX: 'hidden', zIndex: 50,
-      boxShadow: isDark ? `2px 0 32px rgba(0,0,0,0.4)` : `2px 0 20px rgba(47,158,86,0.06)`,
+      width: W,
+      height: 'calc(100vh - 2.5rem)',
+      flexShrink: 0,
       position: 'fixed',
+      left: '1.25rem',
+      top: '1.25rem',
+      bottom: '1.25rem',
+      background: isDark ? 'rgba(18, 24, 19, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+      backdropFilter: 'blur(24px)',
+      WebkitBackdropFilter: 'blur(24px)',
+      border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
+      borderRadius: '24px',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '1.25rem 0.875rem',
+      transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      zIndex: 50,
+      boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.3)' : '0 10px 30px rgba(47,158,86,0.04)',
     }}>
+
       {/* Vine decoration */}
       {!collapsed && <VineDecoration color={isDark ? t.green : t.green} />}
 
@@ -267,9 +279,9 @@ function MobileHeader({ t, user, toggleDark, isDark, navigate }) {
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
       height: 60,
-      background: t.sidebar,
-      backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: `1px solid ${t.sidebarBorder}`,
+      background: isDark ? 'rgba(18, 24, 19, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+      backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+      borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 1rem', paddingTop: 'env(safe-area-inset-top)'
     }}>
@@ -299,16 +311,18 @@ function MobileHeader({ t, user, toggleDark, isDark, navigate }) {
   );
 }
 
-function BottomNav({ t, user }) {
+function BottomNav({ t, user, isDark }) {
   const location = useLocation();
   const navigate = useNavigate();
   return (
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
-      background: t.sidebar, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-      borderTop: `1px solid ${t.sidebarBorder}`,
+      background: isDark ? 'rgba(18, 24, 19, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+      backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+      borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
       display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
+
       {NAV.filter(i => ['/dashboard', '/dashboard/flashcards', '/dashboard/games', '/dashboard/speaking'].includes(i.id)).map(item => {
         const active = location.pathname === item.id;
         return (
@@ -344,14 +358,15 @@ export default function DashboardLayout() {
   }, []);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: t.bg, color: t.text, transition: 'background 0.3s, color 0.3s' }}>
+    <div className="dashboard-bg" style={{ display: 'flex', minHeight: '100vh', color: t.text, transition: 'background 0.3s, color 0.3s' }}>
       {!isMobile && (
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} t={t} isDark={isDark} user={user} />
       )}
 
       {isMobile && <MobileHeader t={t} user={user} toggleDark={toggleDark} isDark={isDark} navigate={navigate} />}
 
-      <main style={{ flex: 1, marginLeft: isMobile ? 0 : (collapsed ? 68 : 236), minHeight: '100vh', padding: isMobile ? 'calc(60px + 1rem) 1rem 80px' : '2rem 2.5rem', display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center', transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)', position: 'relative', overflowX: 'hidden' }}>
+      <main className="dashboard-content-container" style={{ flex: 1, marginLeft: isMobile ? 0 : (collapsed ? 108 : 276), minHeight: '100vh', padding: isMobile ? 'calc(60px + 1rem) 1rem 80px' : '2.5rem 3rem', display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center', transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)', position: 'relative', overflowX: 'hidden' }}>
+
         {/* Theme Toggle (Desktop only) */}
         {!isMobile && (
           <div style={{ position: 'absolute', top: 24, right: 32, zIndex: 10 }}>
@@ -379,7 +394,7 @@ export default function DashboardLayout() {
         </div>
       </main>
 
-      {isMobile && <BottomNav t={t} user={user} />}
+      {isMobile && <BottomNav t={t} user={user} isDark={isDark} />}
       <AdvisorChatWidget />
       <SupportChatWidget />
     </div>
