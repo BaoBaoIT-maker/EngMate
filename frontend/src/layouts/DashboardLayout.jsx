@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useThemeStore from '../store/useThemeStore';
 import useAuthStore from '../store/useAuthStore';
@@ -53,34 +53,6 @@ const NAV = [
   },
 ];
 
-// SVG Vine decoration — đường dây lá mỏng chạy dọc sidebar
-function VineDecoration({ color }) {
-  return (
-    <svg
-      width="18" height="320" viewBox="0 0 18 320" fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ position: 'absolute', right: 0, top: 80, pointerEvents: 'none', opacity: 0.55 }}
-    >
-      <path d="M9 0 C9 40, 14 55, 9 80 C4 105, 9 130, 9 160 C9 190, 14 210, 9 240 C4 270, 9 295, 9 320"
-        stroke={color} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-      {/* Leaf 1 */}
-      <path d="M9 65 C14 55, 18 48, 16 40 C14 48, 10 55, 9 65Z" fill={color}/>
-      {/* Leaf 2 */}
-      <path d="M9 65 C4 55, 0 48, 2 40 C4 48, 8 55, 9 65Z" fill={color} opacity="0.6"/>
-      {/* Leaf 3 */}
-      <path d="M9 145 C14 135, 18 128, 16 120 C14 128, 10 135, 9 145Z" fill={color}/>
-      {/* Leaf 4 */}
-      <path d="M9 145 C4 135, 0 128, 2 120 C4 128, 8 135, 9 145Z" fill={color} opacity="0.6"/>
-      {/* Leaf 5 */}
-      <path d="M9 225 C14 215, 18 208, 16 200 C14 208, 10 215, 9 225Z" fill={color}/>
-      {/* Leaf 6 */}
-      <path d="M9 225 C4 215, 0 208, 2 200 C4 208, 8 215, 9 225Z" fill={color} opacity="0.6"/>
-      {/* Leaf 7 */}
-      <path d="M9 305 C14 295, 18 288, 16 280 C14 288, 10 295, 9 305Z" fill={color}/>
-    </svg>
-  );
-}
-
 function SunIcon({ color }) {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -100,113 +72,49 @@ function MoonIcon({ color }) {
   );
 }
 
-function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
-  const W = collapsed ? 68 : 236;
-  const location = useLocation();
-  const navigate = useNavigate();
-
+// ─── Desktop Top Header Navigation ────────────────────────────────
+function TopHeader({ t, isDark, user, toggleDark, navigate, location }) {
   const isPremium = user?.subscription?.isValid &&
     user?.subscription?.plan?.code !== 'FREE' &&
     (!user.subscription.endDate || new Date(user.subscription.endDate) > new Date());
 
   return (
-    <div style={{
-      width: W,
-      height: 'calc(100vh - 2.5rem)',
-      flexShrink: 0,
+    <header style={{
       position: 'fixed',
-      left: '1.25rem',
       top: '1.25rem',
-      bottom: '1.25rem',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: 'calc(100% - 2.5rem)',
+      maxWidth: '1200px',
+      height: '64px',
+      zIndex: 100,
       background: isDark ? 'rgba(18, 24, 19, 0.75)' : 'rgba(255, 255, 255, 0.75)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
       border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
-      borderRadius: '24px',
+      borderRadius: '20px',
       display: 'flex',
-      flexDirection: 'column',
-      padding: '1.25rem 0.875rem',
-      transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      zIndex: 50,
-      boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.3)' : '0 10px 30px rgba(47,158,86,0.04)',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '0 1.5rem',
+      boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.3)' : '0 10px 30px rgba(47,158,86,0.03)',
+      transition: 'all 0.3s ease',
     }}>
-
-      {/* Vine decoration */}
-      {!collapsed && <VineDecoration color={isDark ? t.green : t.green} />}
-
-      {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between', marginBottom: '1.5rem', padding: '0 0.25rem' }}>
-        {!collapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: 10,
-              background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.1rem', flexShrink: 0, boxShadow: `0 4px 12px ${t.goldBg}`
-            }}>✦</div>
-            <span style={{ fontWeight: 800, fontSize: '1.1rem', color: t.text, letterSpacing: '-0.02em' }}>
-              Eng<span style={{ color: t.green }}>Mate</span>
-            </span>
-          </div>
-        )}
-        {collapsed && (
-          <div style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem',
-          }}>✦</div>
-        )}
-        {!collapsed && (
-          <button
-            onClick={() => setCollapsed(true)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, display: 'flex', color: t.textMuted, transition: 'background 0.2s' }}
-            onMouseOver={e => e.currentTarget.style.background = t.greenBg}
-            onMouseOut={e => e.currentTarget.style.background = 'none'}
-          >
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-        )}
+      {/* Left: Logo */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 10,
+          background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '1.1rem', fontWeight: 800, color: '#fff', boxShadow: `0 4px 12px ${t.gold}30`
+        }}>✦</div>
+        <span style={{ fontWeight: 850, fontSize: '1.15rem', color: t.text, letterSpacing: '-0.03em' }}>
+          Eng<span style={{ color: t.green }}>Mate</span>
+        </span>
       </div>
 
-      {/* User Info */}
-      <div
-        onClick={() => navigate('/dashboard/settings')}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '0.75rem',
-          padding: collapsed ? '0.5rem 0' : '0.625rem 0.75rem',
-          marginBottom: '1.25rem', borderRadius: 14,
-          cursor: 'pointer',
-          background: isDark ? 'rgba(47,158,86,0.06)' : t.greenBg,
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          transition: 'background 0.2s, transform 0.15s',
-          border: `1px solid ${isDark ? 'rgba(47,158,86,0.1)' : '#DFF0E1'}`,
-        }}
-        onMouseOver={e => { e.currentTarget.style.background = isDark ? 'rgba(47,158,86,0.12)' : '#D1EBCF'; e.currentTarget.style.transform = 'scale(1.01)'; }}
-        onMouseOut={e => { e.currentTarget.style.background = isDark ? 'rgba(47,158,86,0.06)' : t.greenBg; e.currentTarget.style.transform = 'scale(1)'; }}
-      >
-        <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 800, color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
-          {user?.profile?.avatarUrl ? (
-            <img src={user.profile.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            user?.profile?.username?.[0]?.toUpperCase() || 'U'
-          )}
-        </div>
-        {!collapsed && (
-          <div style={{ overflow: 'hidden', flex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {user?.profile?.username || 'Người dùng'}
-            </div>
-            <div style={{ fontSize: '0.7rem', color: t.green, fontWeight: 600, whiteSpace: 'nowrap' }}>
-              {isPremium ? '✦ Premium' : 'Tài khoản Free'}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Nav items */}
-      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+      {/* Middle: Navigation Links */}
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         {NAV.map(item => {
           const active = location.pathname === item.id;
           return (
@@ -214,63 +122,94 @@ function Sidebar({ collapsed, setCollapsed, t, isDark, user }) {
               key={item.id}
               onClick={() => navigate(item.id)}
               style={{
-                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                padding: collapsed ? '0.7rem 0' : '0.65rem 0.875rem',
-                borderRadius: 12, cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 0.875rem',
+                borderRadius: '12px',
+                cursor: 'pointer',
                 background: active ? (isDark ? t.greenBg : t.greenBg) : 'transparent',
                 color: active ? t.greenDark : t.textMuted,
-                fontWeight: active ? 700 : 500,
-                fontSize: '0.9rem',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                transition: 'all 0.2s',
+                fontWeight: active ? 750 : 600,
+                fontSize: '0.875rem',
+                transition: 'all 0.2s ease',
                 border: active ? `1px solid ${isDark ? 'rgba(47,158,86,0.2)' : '#C8E6C9'}` : '1px solid transparent',
               }}
               onMouseOver={e => { if (!active) { e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : t.bgSub; e.currentTarget.style.color = t.text; } }}
               onMouseOut={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = t.textMuted; } }}
             >
-              <span style={{ flexShrink: 0, display: 'flex' }}>{item.icon(active ? t.green : t.textMuted)}</span>
-              {!collapsed && <span>{item.label}</span>}
-              {active && !collapsed && <div style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: t.green }} />}
+              <span style={{ display: 'flex' }}>{item.icon(active ? t.green : t.textMuted)}</span>
+              <span>{item.label}</span>
             </div>
           );
         })}
       </nav>
 
-      {/* Upgrade Banner */}
-      {user && !collapsed && (
-        <div style={{ marginTop: '0.75rem' }}>
-          <div
+      {/* Right: Actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        {/* Upgrade Banner (Free only) */}
+        {user && !isPremium && (
+          <button
             onClick={() => navigate('/dashboard/premium')}
+            className="hidden lg:block px-4 py-1.5 rounded-full text-xs font-bold text-white transition-all duration-200 hover:-translate-y-0.5"
             style={{
               background: `linear-gradient(135deg, ${t.gold} 0%, ${t.green} 100%)`,
-              borderRadius: 16, padding: '1rem 0.875rem',
-              color: '#fff', textAlign: 'center', cursor: 'pointer',
-              boxShadow: `0 6px 20px rgba(47,158,86,0.25)`,
-              transition: 'transform 0.15s, box-shadow 0.15s',
+              boxShadow: `0 4px 12px rgba(47,158,86,0.2)`,
             }}
-            onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = `0 10px 28px rgba(47,158,86,0.35)`; }}
-            onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = `0 6px 20px rgba(47,158,86,0.25)`; }}
           >
-            <div style={{ fontSize: '1.1rem', marginBottom: '0.2rem' }}>🌱</div>
-            <div style={{ fontWeight: 800, fontSize: '0.875rem', letterSpacing: '-0.01em' }}>Nâng cấp gói</div>
-            <div style={{ fontSize: '0.7rem', opacity: 0.88, marginTop: '0.2rem' }}>Mở khóa toàn bộ tính năng</div>
-          </div>
-        </div>
-      )}
-
-      {/* Collapsed: Upgrade icon + Expand */}
-      {collapsed && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
-          <div
-            onClick={() => navigate('/dashboard/premium')}
-            style={{ width: 38, height: 38, borderRadius: 12, background: `linear-gradient(135deg, ${t.gold}, ${t.green})`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1.1rem' }}
-          >🌱</div>
-          <button onClick={() => setCollapsed(false)} style={{ background: t.greenBg, border: 'none', borderRadius: 10, width: 38, height: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" fill="none" stroke={t.green} strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            Upgrade 🌱
           </button>
+        )}
+
+        {/* Theme Toggle */}
+        <button
+          onClick={toggleDark}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 8,
+            borderRadius: '50%', color: t.textMuted, transition: 'background 0.2s',
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`
+          }}
+          onMouseOver={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : t.bgSub}
+          onMouseOut={e => e.currentTarget.style.background = 'none'}
+        >
+          {isDark ? <SunIcon color={t.gold} /> : <MoonIcon color={t.textMuted} />}
+        </button>
+
+        {/* User Profile */}
+        <div
+          onClick={() => navigate('/dashboard/settings')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            cursor: 'pointer',
+            padding: '4px 10px 4px 4px',
+            borderRadius: '30px',
+            background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}`,
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}
+          onMouseOut={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}
+        >
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '0.8rem', fontWeight: 800, color: '#fff', overflow: 'hidden'
+          }}>
+            {user?.profile?.avatarUrl ? (
+              <img src={user.profile.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              user?.profile?.username?.[0]?.toUpperCase() || 'U'
+            )}
+          </div>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: t.text }}>
+            {isPremium ? '👑' : ''} {user?.profile?.username || 'User'}
+          </span>
         </div>
-      )}
-    </div>
+      </div>
+    </header>
   );
 }
 
@@ -322,7 +261,6 @@ function BottomNav({ t, user, isDark }) {
       borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
       display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
-
       {NAV.filter(i => ['/dashboard', '/dashboard/flashcards', '/dashboard/games', '/dashboard/speaking'].includes(i.id)).map(item => {
         const active = location.pathname === item.id;
         return (
@@ -339,12 +277,22 @@ function BottomNav({ t, user, isDark }) {
 export default function DashboardLayout() {
   const { isDark, toggleDark, getTheme } = useThemeStore();
   const t = getTheme();
-  const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const user = useAuthStore(s => s.user);
   const pulseSplash = useSplashStore(s => s.pulse);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Đồng bộ biến isDark sang thẻ html để kích hoạt class .dark của Tailwind CSS toàn cục
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
   useEffect(() => {
     pulseSplash(700);
@@ -358,40 +306,35 @@ export default function DashboardLayout() {
   }, []);
 
   return (
-    <div className="dashboard-bg" style={{ display: 'flex', minHeight: '100vh', color: t.text, transition: 'background 0.3s, color 0.3s' }}>
+    <div className="dashboard-bg" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', color: t.text, transition: 'background 0.3s, color 0.3s' }}>
       {!isMobile && (
-        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} t={t} isDark={isDark} user={user} />
+        <TopHeader
+          t={t}
+          isDark={isDark}
+          user={user}
+          toggleDark={toggleDark}
+          navigate={navigate}
+          location={location}
+        />
       )}
 
       {isMobile && <MobileHeader t={t} user={user} toggleDark={toggleDark} isDark={isDark} navigate={navigate} />}
 
-      <main className="dashboard-content-container" style={{ flex: 1, marginLeft: isMobile ? 0 : (collapsed ? 108 : 276), minHeight: '100vh', padding: isMobile ? 'calc(60px + 1rem) 1rem 80px' : '2.5rem 3rem', display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center', transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)', position: 'relative', overflowX: 'hidden' }}>
-
-        {/* Theme Toggle (Desktop only) */}
-        {!isMobile && (
-          <div style={{ position: 'absolute', top: 24, right: 32, zIndex: 10 }}>
-          <button
-            onClick={toggleDark}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              padding: '0.5rem 0.875rem', borderRadius: 100,
-              border: `1.5px solid ${t.cardBorder}`,
-              background: t.card, cursor: 'pointer',
-              fontSize: '0.8rem', fontWeight: 600, color: t.textSub,
-              transition: 'all 0.2s', boxShadow: `0 2px 8px ${t.shadow}`,
-            }}
-            onMouseOver={e => e.currentTarget.style.borderColor = isDark ? t.green : t.gold}
-            onMouseOut={e => e.currentTarget.style.borderColor = t.cardBorder}
-          >
-            {isDark ? <SunIcon color={t.gold} /> : <MoonIcon color={t.textSub} />}
-            {!isMobile && (isDark ? 'Sáng' : 'Tối')}
-          </button>
-        </div>
-        )}
-
-        <div style={{ width: '100%', maxWidth: 1200, display: 'flex', flexDirection: 'column' }}>
-          <Outlet />
-        </div>
+      <main className="dashboard-content-container" style={{
+        flex: 1,
+        width: '100%',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: isMobile
+          ? 'calc(60px + 1rem) 1rem 80px'
+          : 'calc(64px + 3rem) 2rem 3rem',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'padding 0.3s ease',
+        position: 'relative',
+        overflowX: 'hidden'
+      }}>
+        <Outlet />
       </main>
 
       {isMobile && <BottomNav t={t} user={user} isDark={isDark} />}
