@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Header from '../../components/dashboard/Header';
-import useThemeStore from '../../store/useThemeStore';
-import { Icon } from '../../components/icons';
-import api from '../../services/api';
+import Header from '../../../components/dashboard/Header';
+import useThemeStore from '../../../store/useThemeStore';
+import { Icon } from '../../../components/icons';
+import api from '../../../services/api';
 
 const card = (t, extra) => ({
   background: t.card,

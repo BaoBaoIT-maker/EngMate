@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import useThemeStore from '../../store/useThemeStore';
-import api from '../../services/api';
+import useThemeStore from '../../../store/useThemeStore';
+import { getLearnedWords, updateCustomWord, deleteFlashcard } from '../../../services/flashcardService';
 
 // ─── Edit Drawer ──────────────────────────────────────────────────────────────
 function EditDrawer({ word, onClose, onSaved, t }) {
@@ -26,7 +26,7 @@ function EditDrawer({ word, onClose, onSaved, t }) {
 
     try {
       setLoading(true);
-      await api.patch(`/flashcards/custom/${word.id}`, {
+      await updateCustomWord(word.id, {
         word: form.word.trim(),
         phonetic: form.phonetic.trim(),
         meaning: form.meaning.trim(),
@@ -162,8 +162,8 @@ export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, cour
       const params = { type };
       if (type === 'topic') params.topicId = topicId;
       if (type === 'course') params.course = courseTitle;
-      const res = await api.get('/flashcards/learned', { params });
-      setWords(res.data || []);
+      const data = await getLearnedWords(params);
+      setWords(data || []);
     } catch (error) {
       console.error('Failed to fetch learned words:', error);
     } finally {
@@ -182,7 +182,7 @@ export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, cour
   const handleDelete = async (id) => {
     try {
       setDeletingId(id);
-      await api.delete(`/flashcards/${id}`);
+      await deleteFlashcard(id);
       setWords(prev => prev.filter(w => w.id !== id));
       setConfirmDeleteId(null);
     } catch (err) {

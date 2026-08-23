@@ -1,4 +1,4 @@
-﻿import React, { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import SplashScreen from './components/common/SplashScreen';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -17,14 +17,14 @@ const VerifyOtpPage = React.lazy(() => import('./pages/VerifyOtpPage'));
 const OnboardingPage = React.lazy(() => import('./pages/OnboardingPage'));
 const DashboardLayout = React.lazy(() => import('./layouts/DashboardLayout'));
 const DashboardOverview = React.lazy(() => import('./pages/dashboard/DashboardOverview'));
-const FlashcardsPage = React.lazy(() => import('./pages/dashboard/FlashcardsPage'));
-const FlashcardsSessionPage = React.lazy(() => import('./pages/dashboard/FlashcardsSessionPage'));
-const GamesPage = React.lazy(() => import('./pages/dashboard/GamesPage'));
-const MatchingGame = React.lazy(() => import('./pages/dashboard/MatchingGame'));
-const FillBlankGame = React.lazy(() => import('./pages/dashboard/FillBlankGame'));
-const SpeakingCoachPage = React.lazy(() => import('./pages/dashboard/SpeakingCoachPage'));
-const SettingsPage = React.lazy(() => import('./pages/dashboard/SettingsPage'));
-const PremiumPaywall = React.lazy(() => import('./pages/dashboard/PremiumPaywall'));
+const FlashcardsPage = React.lazy(() => import('./pages/dashboard/flashcards/FlashcardsPage'));
+const FlashcardsSessionPage = React.lazy(() => import('./pages/dashboard/flashcards/FlashcardsSessionPage'));
+const GamesPage = React.lazy(() => import('./pages/dashboard/games/GamesPage'));
+const MatchingGame = React.lazy(() => import('./pages/dashboard/games/MatchingGame'));
+const FillBlankGame = React.lazy(() => import('./pages/dashboard/games/FillBlankGame'));
+const SpeakingCoachPage = React.lazy(() => import('./pages/dashboard/speaking/SpeakingCoachPage'));
+const SettingsPage = React.lazy(() => import('./pages/dashboard/settings/SettingsPage'));
+const PremiumPaywall = React.lazy(() => import('./pages/dashboard/premium/PremiumPaywall'));
 
 // --- Lazy Load Admin Pages ---
 const AdminLayout = React.lazy(() => import('./layouts/AdminLayout'));

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useThemeStore from '../../store/useThemeStore';
-import api from '../../services/api';
+import useThemeStore from '../../../store/useThemeStore';
+import api from '../../../services/api';
 
 export default function FillBlankGame() {
   const { isDark, getTheme } = useThemeStore();

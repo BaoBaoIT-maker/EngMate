@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useThemeStore from '../../store/useThemeStore';
-import useAuthStore from '../../store/useAuthStore';
-import api from '../../services/api';
+import useThemeStore from '../../../store/useThemeStore';
+import useAuthStore from '../../../store/useAuthStore';
+import api from '../../../services/api';
 
 // ─── Modal xác nhận đổi gói ────────────────────────────────────────────────
 function ConfirmChangeModal({ t, currentPlanName, endDate, newPlanName, onConfirm, onCancel }) {

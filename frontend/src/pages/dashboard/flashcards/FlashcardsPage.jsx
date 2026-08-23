@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../../components/dashboard/Header';
-import useThemeStore from '../../store/useThemeStore';
-import { Icon } from '../../components/icons';
-import api from '../../services/api';
+import Header from '../../../components/dashboard/Header';
+import useThemeStore from '../../../store/useThemeStore';
+import { Icon } from '../../../components/icons';
+import { getTopics } from '../../../services/flashcardService';
 import AddFlashcardModal from './AddFlashcardModal';
 import LearnedWordsPanel from './LearnedWordsPanel';
 
@@ -145,8 +145,7 @@ export default function FlashcardsPage() {
   const fetchTopics = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/flashcards/topics');
-      const data = res.data || [];
+      const data = await getTopics() || [];
       setTopics(data);
 
       const uniqueCategories = [...new Set(data.map(t => t.category))];

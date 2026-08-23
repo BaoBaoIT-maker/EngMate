@@ -1,7 +1,7 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import useThemeStore from '../../store/useThemeStore';
 import useAuthStore from '../../store/useAuthStore';
-import api from '../../services/api';
+import { getOverviewStats } from '../../services/statService';
 
 import HeroStrip from './overview/HeroStrip';
 import GoalCard from './overview/GoalCard';
@@ -19,11 +19,12 @@ export default function DashboardOverview() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/stats/overview')
-      .then(res => setStats(res.data))
+    getOverviewStats()
+      .then(data => setStats(data))
       .catch(err => console.error('Failed to load stats', err))
       .finally(() => setLoading(false));
   }, []);
+
 
   if (loading || !stats) {
     return <DashboardSkeleton t={t} isDark={isDark} />;

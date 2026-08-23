@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import useThemeStore from '../../store/useThemeStore';
-import api from '../../services/api';
+import useThemeStore from '../../../store/useThemeStore';
+import { generateAiFlashcard, createCustomFlashcard } from '../../../services/flashcardService';
 
 export default function AddFlashcardModal({ onClose }) {
   const { isDark, getTheme } = useThemeStore();
@@ -26,8 +26,7 @@ export default function AddFlashcardModal({ onClose }) {
     
     try {
       setGenerating(true);
-      const res = await api.post('/flashcards/ai-generate', { word: formData.word });
-      const aiData = res.data; // expect: phonetic, definition, meaning, examples (array)
+      const aiData = await generateAiFlashcard(formData.word);
       
       setFormData({
         word: aiData.word || formData.word,
@@ -49,7 +48,7 @@ export default function AddFlashcardModal({ onClose }) {
 
     try {
       setLoading(true);
-      await api.post('/flashcards/custom', {
+      await createCustomFlashcard({
         ...formData,
         examples: formData.examples.split('\n').filter(e => e.trim() !== '')
       });

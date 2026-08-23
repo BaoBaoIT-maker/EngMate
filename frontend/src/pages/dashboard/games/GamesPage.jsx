@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../../components/dashboard/Header';
-import useThemeStore from '../../store/useThemeStore';
+import Header from '../../../components/dashboard/Header';
+import useThemeStore from '../../../store/useThemeStore';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import api from '../../../services/api';
 
 const STATIC_GAMES_META = [
   { gameType: 'MATCHING', link: '/dashboard/games/matching', emoji: '🧩', desc: 'Tìm cặp từ tiếng Anh - Việt tương ứng', tag: 'Từ vựng' },

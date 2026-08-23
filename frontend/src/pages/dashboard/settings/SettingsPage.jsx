@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Header from '../../components/dashboard/Header';
-import useThemeStore from '../../store/useThemeStore';
-import useAuthStore from '../../store/useAuthStore';
-import api from '../../services/api';
+import Header from '../../../components/dashboard/Header';
+import useThemeStore from '../../../store/useThemeStore';
+import useAuthStore from '../../../store/useAuthStore';
+import api from '../../../services/api';
 
 const card = (t, extra) => ({
   background: t.card,

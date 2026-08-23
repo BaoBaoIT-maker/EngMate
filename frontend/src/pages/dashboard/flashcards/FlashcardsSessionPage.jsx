@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import Header from '../../components/dashboard/Header';
-import useThemeStore from '../../store/useThemeStore';
-import { Icon } from '../../components/icons';
-import api from '../../services/api';
+import Header from '../../../components/dashboard/Header';
+import useThemeStore from '../../../store/useThemeStore';
+import { Icon } from '../../../components/icons';
+import { getSessionCards, reviewCard } from '../../../services/flashcardService';
 
 const card = (t, extra) => ({
   background: t.card,
@@ -41,12 +41,8 @@ export default function FlashcardsSessionPage() {
   const fetchSession = async () => {
     try {
       setLoading(true);
-      let url = `/flashcards/session?type=${type}`;
-      if (topicId) url += `&topicId=${topicId}`;
-      if (course) url += `&course=${course}`;
-      if (mode) url += `&mode=${mode}`;
-      const res = await api.get(url);
-      setCards(res.data || []);
+      const data = await getSessionCards({ type, topicId, course, mode });
+      setCards(data || []);
     } catch (err) {
       alert("Lỗi tải bài học: " + (err.response?.data?.message || err.message));
     } finally {
@@ -72,7 +68,7 @@ export default function FlashcardsSessionPage() {
     
     // Gọi API nền
     try {
-      await api.post(`/flashcards/${currentCard.id}/review`, { quality });
+      await reviewCard(currentCard.id, quality);
     } catch (err) {
       console.error("Lỗi lưu kết quả", err);
     }
