@@ -13,26 +13,12 @@ function createEmbeddingModel() {
   });
 }
 
-/**
- * Đẩy các chunks đã cắt nhỏ lên Qdrant Cloud
- * Hàm này sẽ:
- *   1. Lấy text từ từng chunk
- *   2. Gọi Gemini Embedding API để chuyển text → vector số
- *   3. Lưu vector + metadata vào Qdrant Cloud Collection
- *
- * @param {Array<any>} chunks Mảng các Document (Langchain format) từ markdownSplitter
- * @returns {Promise<QdrantVectorStore>} Instance VectorStore đã được populated
- */
 export async function ingestChunksToQdrant(chunks) {
   const embeddings = createEmbeddingModel();
 
   console.log(`=> Đang embed ${chunks.length} chunks và đẩy lên Qdrant Cloud...`);
   console.log(`=> Collection: "${process.env.QDRANT_COLLECTION_NAME}"`);
 
-  // QdrantVectorStore.fromDocuments sẽ tự động:
-  // - Tạo collection nếu chưa tồn tại
-  // - Gọi Embedding API cho từng chunk
-  // - Lưu vector + metadata lên Qdrant Cloud
   const vectorStore = await QdrantVectorStore.fromDocuments(chunks, embeddings, {
     url: process.env.QDRANT_URL,
     apiKey: process.env.QDRANT_API_KEY,

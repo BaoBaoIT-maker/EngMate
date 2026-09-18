@@ -154,28 +154,30 @@ function TopHeader({ t, isDark, user, toggleDark, navigate, location, stats }) {
           </div>
         )}
 
-        {/* Upgrade Banner (Free only) */}
-        {user && !isPremium && (
-          <button
-            onClick={() => navigate('/dashboard/premium')}
-            style={{
-              padding: '0.45rem 1.25rem',
-              borderRadius: '9999px',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              background: isDark ? 'rgba(16, 185, 129, 0.15)' : '#E8F5E9',
-              color: isDark ? '#10B981' : '#006633',
-              border: 'none',
-              cursor: 'pointer',
-              letterSpacing: '0.05em',
-              transition: 'all 0.2s',
-            }}
-            onMouseOver={e => { e.currentTarget.style.opacity = '0.9'; }}
-            onMouseOut={e => { e.currentTarget.style.opacity = '1'; }}
-          >
-            NÂNG CẤP
-          </button>
-        )}
+        {/* Upgrade / Premium Button (Always visible) */}
+        <button
+          onClick={() => navigate('/dashboard/premium')}
+          style={{
+            padding: '0.45rem 1.25rem',
+            borderRadius: '9999px',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            background: isPremium
+              ? (isDark ? 'rgba(245, 158, 11, 0.18)' : '#FEF3C7')
+              : (isDark ? 'rgba(16, 185, 129, 0.15)' : '#E8F5E9'),
+            color: isPremium
+              ? (isDark ? '#FBBF24' : '#D97706')
+              : (isDark ? '#10B981' : '#006633'),
+            border: 'none',
+            cursor: 'pointer',
+            letterSpacing: '0.05em',
+            transition: 'all 0.2s',
+          }}
+          onMouseOver={e => { e.currentTarget.style.opacity = '0.9'; }}
+          onMouseOut={e => { e.currentTarget.style.opacity = '1'; }}
+        >
+          {isPremium ? '👑 PREMIUM' : 'NÂNG CẤP'}
+        </button>
 
         {/* Theme Toggle */}
         <button
@@ -230,6 +232,10 @@ function TopHeader({ t, isDark, user, toggleDark, navigate, location, stats }) {
 }
 
 function MobileHeader({ t, user, toggleDark, isDark, navigate }) {
+  const isPremium = user?.subscription?.isValid &&
+    user?.subscription?.plan?.code !== 'FREE' &&
+    (!user.subscription.endDate || new Date(user.subscription.endDate) > new Date());
+
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
@@ -248,7 +254,27 @@ function MobileHeader({ t, user, toggleDark, isDark, navigate }) {
           EngMate
         </span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <button
+          onClick={() => navigate('/dashboard/premium')}
+          style={{
+            padding: '0.35rem 0.85rem',
+            borderRadius: '9999px',
+            fontSize: '0.7rem',
+            fontWeight: 800,
+            background: isPremium
+              ? (isDark ? 'rgba(245, 158, 11, 0.18)' : '#FEF3C7')
+              : (isDark ? 'rgba(16, 185, 129, 0.15)' : '#E8F5E9'),
+            color: isPremium
+              ? (isDark ? '#FBBF24' : '#D97706')
+              : (isDark ? '#10B981' : '#006633'),
+            border: 'none',
+            cursor: 'pointer',
+            letterSpacing: '0.04em',
+          }}
+        >
+          {isPremium ? '👑 PREMIUM' : 'NÂNG CẤP'}
+        </button>
         <button onClick={toggleDark} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: t.textMuted }}>
           {isDark ? <SunIcon color={t.textMuted} /> : <MoonIcon color={t.textMuted} />}
         </button>
