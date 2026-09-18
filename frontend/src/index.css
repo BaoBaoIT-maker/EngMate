@@ -1,7 +1,63 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400;1,600&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fraunces:ital,wght@0,400;0,600;1,400;1,600&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Plus Jakarta Sans & Design System Variables from Figma ── */
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --bg: #FAFAF8;
+  --fg: #1C1407;
+  --fg-2: #6B6047;
+  --fg-3: #9D8E6F;
+  --card-bg: rgba(255, 255, 255, 0.88);
+  --card-border: rgba(240, 180, 41, 0.18);
+  --card-highlight: rgba(255, 255, 255, 0.9);
+  --nav-shadow: 0 8px 40px rgba(28, 20, 7, 0.10), 0 2px 8px rgba(240, 180, 41, 0.08);
+
+  /* Nav height offsets so body never hides under the fixed nav */
+  --nav-h: 64px;
+  --nav-offset: calc(var(--nav-h) + 28px); /* floating island: 20px top + 64px + 8px gap */
+  --bottom-offset: 0px;
+}
+
+/* ── Dark mode ── */
+html.dark {
+  --bg: #120D04;
+  --fg: #FFFDF7;
+  --fg-2: rgba(255, 255, 255, 0.72);
+  --fg-3: rgba(255, 255, 255, 0.45);
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --card-border: rgba(240, 180, 41, 0.20);
+  --card-highlight: rgba(255, 255, 255, 0.05);
+  --nav-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(240, 180, 41, 0.12);
+}
+
+/* ── Mobile: bottom tab bar offset ── */
+@media (max-width: 767px) {
+  :root {
+    --nav-offset: 68px;   /* top bar height */
+    --bottom-offset: 96px; /* bottom tab bar + gap */
+  }
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.gold-text {
+  background: linear-gradient(135deg, #F5BE36 0%, #D4960A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dropdown-item-hover:hover {
+  background: rgba(240, 180, 41, 0.1) !important;
+  color: #D4960A !important;
+}
 
 * {
   scrollbar-width: none;
