@@ -16,7 +16,7 @@ function CircularProgress({ value, target, color, size = 180, strokeW = 12, isDa
           cy={c}
           r={r}
           fill="none"
-          stroke={isDark ? 'rgba(255, 255, 255, 0.05)' : '#EAF2EC'}
+          stroke={isDark ? 'rgba(255, 255, 255, 0.08)' : '#EAF2EC'}
           strokeWidth={strokeW}
         />
         {/* Progress circle */}
@@ -34,10 +34,10 @@ function CircularProgress({ value, target, color, size = 180, strokeW = 12, isDa
         />
       </svg>
       <div className="absolute flex flex-col items-center justify-center text-center">
-        <span className="text-4xl font-extrabold tracking-tight" style={{ color: isDark ? '#ECFDF5' : '#111814' }}>
+        <span className="text-4xl font-extrabold tracking-tight" style={{ color: isDark ? '#F8FAFC' : '#111814' }}>
           {value}
         </span>
-        <span className="text-[10px] font-bold tracking-wider mt-1 opacity-60" style={{ color: isDark ? '#A7F3D0' : '#687F70' }}>
+        <span className="text-[11px] font-bold tracking-wider mt-1" style={{ color: isDark ? '#94A3B8' : '#5C7164' }}>
           /{target} WORDS
         </span>
       </div>
@@ -53,8 +53,8 @@ export default function GoalCard({ t, isDark, dailyGoal, isGoalReached, goalPerc
     <div
       className="glass-panel p-6 flex flex-col items-center gap-6 h-[420px] justify-between text-center"
       style={{
-        border: `1px solid ${isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(0,102,51,0.06)'}`,
-        background: isDark ? 'rgba(15,26,19,0.5)' : '#FFFFFF',
+        border: `1px solid ${t.cardBorder}`,
+        background: t.card,
         boxShadow: `0 10px 30px ${t.shadow}`,
       }}
     >
@@ -77,9 +77,9 @@ export default function GoalCard({ t, isDark, dailyGoal, isGoalReached, goalPerc
 
       {/* Info text */}
       <div className="px-2">
-        <p className="text-xs font-semibold leading-relaxed" style={{ color: t.textMuted }}>
+        <p className="text-xs font-semibold leading-relaxed" style={{ color: isDark ? '#CBD5E1' : t.textMuted }}>
           {isGoalReached
-            ? 'Bạn đã hoàn thành mục tiêu ngày hôm nay! Thật tuyệt vời!'
+            ? '🎉 Bạn đã hoàn thành mục tiêu ngày hôm nay! Thật xuất sắc!'
             : `Chỉ còn ${leftCount} từ nữa để hoàn thành mục tiêu!`}
         </p>
       </div>
@@ -90,7 +90,7 @@ export default function GoalCard({ t, isDark, dailyGoal, isGoalReached, goalPerc
         className="w-full rounded-full py-3.5 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none"
         style={{
           background: t.green,
-          boxShadow: isDark ? '0 4px 14px rgba(16,185,129,0.2)' : '0 4px 14px rgba(0,102,51,0.15)',
+          boxShadow: isDark ? '0 4px 16px rgba(16,185,129,0.3)' : '0 4px 14px rgba(0,102,51,0.2)',
         }}
       >
         {isGoalReached ? 'Xem lại từ vựng' : 'Bắt đầu học'}

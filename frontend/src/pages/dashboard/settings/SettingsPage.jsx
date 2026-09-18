@@ -166,8 +166,8 @@ export default function SettingsPage() {
   };
 
   const Toggle = ({ on, setOn }) => (
-    <div onClick={() => setOn(!on)} style={{ width: 44, height: 24, borderRadius: 100, background: on ? t.gold : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)'), cursor: 'pointer', position: 'relative', transition: 'background 0.25s', flexShrink: 0 }}>
-      <div style={{ position: 'absolute', top: 3, left: on ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.25s', boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }} />
+    <div onClick={() => setOn(!on)} style={{ width: 44, height: 24, borderRadius: 100, background: on ? (isDark ? '#10B981' : t.green) : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'), cursor: 'pointer', position: 'relative', transition: 'background 0.25s', flexShrink: 0 }}>
+      <div style={{ position: 'absolute', top: 3, left: on ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.25s', boxShadow: '0 2px 6px rgba(0,0,0,0.25)' }} />
     </div>
   );
 
@@ -175,7 +175,7 @@ export default function SettingsPage() {
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.875rem 0', borderBottom: `1px solid ${t.cardBorder}` }}>
       <div>
         <div style={{ fontWeight: 600, color: t.text, fontSize: '0.9rem' }}>{label}</div>
-        {desc && <div style={{ fontSize: '0.75rem', color: t.textMuted, marginTop: 2 }}>{desc}</div>}
+        {desc && <div style={{ fontSize: '0.78rem', color: t.textMuted, marginTop: 2 }}>{desc}</div>}
       </div>
       {right}
     </div>
@@ -186,12 +186,12 @@ export default function SettingsPage() {
       <Header title="Cài đặt" />
 
       {/* Profile */}
-      <div style={{ ...card(t), padding: '1.25rem', marginBottom: '1rem' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.875rem' }}>Tài khoản</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+      <div style={{ ...card(t), padding: '1.5rem', marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '1rem' }}>Tài khoản</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
           {/* Avatar Area */}
           <div style={{ position: 'relative' }}>
-            <div style={{ width: 80, height: 80, borderRadius: '50%', background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 800, color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 800, color: '#fff', flexShrink: 0, overflow: 'hidden', boxShadow: isDark ? '0 4px 16px rgba(16,185,129,0.3)' : '0 4px 16px rgba(0,102,51,0.2)' }}>
               {isUploading ? (
                 <div style={{ width: 24, height: 24, border: '3px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
               ) : user?.profile?.avatarUrl ? (
@@ -204,7 +204,7 @@ export default function SettingsPage() {
             <button 
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: '50%', background: t.goldBg, border: `2px solid ${t.card}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.gold }}
+              style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: '50%', background: isDark ? 'rgba(16,185,129,0.2)' : 'rgba(0,102,51,0.1)', border: `2px solid ${t.card}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: isDark ? '#34D399' : t.green }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
             </button>
@@ -214,7 +214,7 @@ export default function SettingsPage() {
           <div style={{ flex: 1, minWidth: 200 }}>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: 4 }}>
               {isEditingName ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: t.bg, borderRadius: 8, padding: '4px 8px', border: `1px solid ${t.gold}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: t.inputBg, borderRadius: 8, padding: '4px 8px', border: `1.5px solid ${isDark ? '#34D399' : t.green}` }}>
                   <input 
                     ref={nameInputRef}
                     type="text" 
@@ -236,7 +236,7 @@ export default function SettingsPage() {
                   <button 
                     onClick={handleUpdateUsername}
                     disabled={isSavingProfile}
-                    style={{ background: t.goldBg, color: t.gold, border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                    style={{ background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
                   >
                     {isSavingProfile ? '...' : 'Lưu'}
                   </button>
@@ -249,7 +249,7 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div style={{ fontWeight: 800, color: t.text, fontSize: '1.2rem' }}>
+                  <div style={{ fontWeight: 800, color: t.text, fontSize: '1.25rem' }}>
                     {user?.profile?.username || 'Người dùng'}
                   </div>
                   <button 
@@ -264,19 +264,19 @@ export default function SettingsPage() {
                 </div>
               )}
             </div>
-            <div style={{ fontSize: '0.85rem', color: t.textMuted }}>{user?.email || 'user@example.com'}</div>
-            <div style={{ marginTop: 6, display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
+            <div style={{ fontSize: '0.88rem', color: t.textMuted }}>{user?.email || 'user@example.com'}</div>
+            <div style={{ marginTop: 8, display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {user?.subscription?.isValid && user?.subscription?.plan?.code !== 'FREE' ? (
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: t.goldBg, color: t.gold }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.6rem', borderRadius: 6, background: isDark ? 'rgba(16,185,129,0.18)' : 'rgba(0,102,51,0.1)', color: isDark ? '#34D399' : t.green, border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : 'rgba(0,102,51,0.2)'}` }}>
                   {user.subscription.plan.name} ✦
                 </span>
               ) : (
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6', color: t.textMuted }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.6rem', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6', color: t.textMuted }}>
                   Miễn phí
                 </span>
               )}
               {user?.learningPaths?.map((path, idx) => (
-                <span key={idx} style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>
+                <span key={idx} style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.6rem', borderRadius: 6, background: isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.1)', color: '#A78BFA', border: `1px solid ${isDark ? 'rgba(139,92,246,0.3)' : 'rgba(139,92,246,0.2)'}` }}>
                   {path.category} · {path.progress?.currentLevel || 'A1'} → {getPathTargetValue(path)}
                 </span>
               ))}
@@ -318,11 +318,11 @@ export default function SettingsPage() {
                 });
               }
             }}
-            style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: `1px solid ${t.cardBorder}`, background: t.bg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
+            style={{ padding: '0.45rem 0.85rem', borderRadius: 8, border: `1.5px solid ${t.inputBorder}`, background: t.inputBg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
           >
-            <option value="GENERAL">Tiếng Anh Giao Tiếp</option>
-            <option value="TOEIC">Luyện thi TOEIC</option>
-            <option value="IELTS">Luyện thi IELTS</option>
+            <option value="GENERAL" style={{ background: t.card, color: t.text }}>Tiếng Anh Giao Tiếp</option>
+            <option value="TOEIC" style={{ background: t.card, color: t.text }}>Luyện thi TOEIC</option>
+            <option value="IELTS" style={{ background: t.card, color: t.text }}>Luyện thi IELTS</option>
           </select>
         } />
         
@@ -330,10 +330,10 @@ export default function SettingsPage() {
           <select 
             value={currentPathProgress?.currentLevel || 'A1'}
             disabled
-            style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: `1px solid ${t.cardBorder}`, background: t.bg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
+            style={{ padding: '0.45rem 0.85rem', borderRadius: 8, border: `1.5px solid ${t.cardBorder}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6', color: t.textMuted, fontSize: '0.85rem', outline: 'none', cursor: 'not-allowed', fontWeight: 600 }}
           >
             {LEVEL_OPTIONS.map(l => (
-              <option key={l} value={l}>{l}</option>
+              <option key={l} value={l} style={{ background: t.card, color: t.text }}>{l}</option>
             ))}
           </select>
         } />
@@ -346,10 +346,10 @@ export default function SettingsPage() {
               targetLevel: usesScoreTarget(pathForm.category) ? null : e.target.value,
               targetScore: usesScoreTarget(pathForm.category) ? e.target.value : null,
             })}
-            style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: `1px solid ${t.cardBorder}`, background: t.bg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
+            style={{ padding: '0.45rem 0.85rem', borderRadius: 8, border: `1.5px solid ${t.inputBorder}`, background: t.inputBg, color: t.text, fontSize: '0.85rem', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
           >
             {getTargetOptions(pathForm.category).map(l => (
-              <option key={l} value={l}>{l}</option>
+              <option key={l} value={l} style={{ background: t.card, color: t.text }}>{l}</option>
             ))}
           </select>
         } />
@@ -361,14 +361,15 @@ export default function SettingsPage() {
               onClick={handleSavePath}
               disabled={isSavingPath}
               style={{ 
-                padding: '0.625rem 1.5rem', 
+                padding: '0.65rem 1.5rem', 
                 borderRadius: 10, 
                 border: 'none', 
-                background: isSavingPath ? t.textMuted : t.goldBg, 
-                color: isSavingPath ? '#fff' : t.gold, 
+                background: isSavingPath ? t.textMuted : `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, 
+                color: '#fff', 
                 fontWeight: 700, 
                 fontSize: '0.85rem', 
                 cursor: isSavingPath ? 'not-allowed' : 'pointer',
+                boxShadow: isDark ? '0 4px 14px rgba(16,185,129,0.3)' : '0 4px 14px rgba(0,102,51,0.25)',
                 transition: 'all 0.2s'
               }}
             >
@@ -389,15 +390,15 @@ export default function SettingsPage() {
       `}</style>
 
       {/* Preferences */}
-      <div style={{ ...card(t), padding: '1rem 1.25rem', marginBottom: '1rem' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.25rem' }}>Tuỳ chọn</div>
-        <Row label="Chế độ tối" desc="Giao diện tối cho mắt" right={<Toggle on={isDark} setOn={toggleDark} />} />
+      <div style={{ ...card(t), padding: '1.25rem', marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.5rem' }}>Tuỳ chọn</div>
+        <Row label="Chế độ tối" desc="Giao diện tối giúp dịu mắt khi học lâu" right={<Toggle on={isDark} setOn={toggleDark} />} />
         <Row label="Thông báo nhắc nhở" desc="Nhận email nhắc nhở học từ hệ thống" right={<Toggle on={notif} setOn={setNotif} />} />
         
         <Row label="Mục tiêu hàng ngày" desc={`${goal} từ / ngày`} right={
-          <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             {[10, 20, 30, 50].map(v => (
-              <button key={v} onClick={() => setGoal(v)} style={{ padding: '0.3rem 0.625rem', borderRadius: 8, border: `1.5px solid ${goal === v ? t.gold : t.cardBorder}`, background: goal === v ? t.goldBg : 'transparent', color: goal === v ? t.gold : t.textMuted, fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', }}>
+              <button key={v} onClick={() => setGoal(v)} style={{ padding: '0.35rem 0.75rem', borderRadius: 8, border: `1.5px solid ${goal === v ? (isDark ? '#34D399' : t.green) : t.cardBorder}`, background: goal === v ? (isDark ? 'rgba(16,185,129,0.18)' : 'rgba(0,102,51,0.08)') : 'transparent', color: goal === v ? (isDark ? '#34D399' : t.green) : t.textSub, fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>
                 {v}
               </button>
             ))}
@@ -406,7 +407,7 @@ export default function SettingsPage() {
               value={goal}
               onChange={e => setGoal(e.target.value ? parseInt(e.target.value) : '')}
               placeholder="Khác..."
-              style={{ width: 60, padding: '0.3rem 0.5rem', borderRadius: 8, border: `1.5px solid ${![10, 20, 30, 50].includes(goal) ? t.gold : t.cardBorder}`, background: t.bg, color: t.text, fontWeight: 700, fontSize: '0.75rem', outline: 'none', textAlign: 'center', }}
+              style={{ width: 65, padding: '0.35rem 0.5rem', borderRadius: 8, border: `1.5px solid ${![10, 20, 30, 50].includes(goal) ? (isDark ? '#34D399' : t.green) : t.inputBorder}`, background: t.inputBg, color: t.text, fontWeight: 700, fontSize: '0.8rem', outline: 'none', textAlign: 'center' }}
             />
           </div>
         } />
@@ -417,14 +418,15 @@ export default function SettingsPage() {
               onClick={handleSavePref}
               disabled={isSavingPref}
               style={{ 
-                padding: '0.625rem 1.5rem', 
+                padding: '0.65rem 1.5rem', 
                 borderRadius: 10, 
                 border: 'none', 
-                background: isSavingPref ? t.textMuted : t.goldBg, 
-                color: isSavingPref ? '#fff' : t.gold, 
+                background: isSavingPref ? t.textMuted : `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, 
+                color: '#fff', 
                 fontWeight: 700, 
                 fontSize: '0.85rem', 
                 cursor: isSavingPref ? 'not-allowed' : 'pointer',
+                boxShadow: isDark ? '0 4px 14px rgba(16,185,129,0.3)' : '0 4px 14px rgba(0,102,51,0.25)',
                 transition: 'all 0.2s'
               }}
             >

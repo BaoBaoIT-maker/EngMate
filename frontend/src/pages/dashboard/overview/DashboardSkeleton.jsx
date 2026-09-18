@@ -16,7 +16,7 @@ export default function DashboardSkeleton({ t, isDark }) {
   const skTo   = isDark ? 'rgba(16,185,129,0.14)' : '#D5E6DB';
 
   const cardStyle = {
-    background: isDark ? 'rgba(15,26,19,0.5)' : '#FFFFFF',
+    background: t.card,
     border: `1px solid ${t.cardBorder}`,
     borderRadius: '24px',
     padding: '1.5rem',

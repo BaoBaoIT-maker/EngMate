@@ -11,7 +11,7 @@ function Heatmap({ data, t, isDark }) {
 
   const getLevel = (count) => !count ? 0 : count < 5 ? 1 : count < 15 ? 2 : count < 30 ? 3 : 4;
   const getBg = (level) => isDark
-    ? ['rgba(255,255,255,0.03)', '#165B33', '#1B8A4C', '#24B662', '#34D37A'][level]
+    ? ['rgba(255,255,255,0.06)', '#065F46', '#047857', '#059669', '#10B981'][level]
     : ['rgba(0,0,0,0.03)', '#C8E6C9', '#81C784', '#4CAF50', '#2E7D32'][level];
 
   const grid = [], monthLabels = [];
@@ -44,7 +44,7 @@ function Heatmap({ data, t, isDark }) {
         <div className="flex">
           <div className="flex flex-col gap-1 pr-2.5 pt-5">
             {[0,1,2,3,4,5,6].map(i => (
-              <div key={i} className="h-3 text-[10px] font-bold leading-3" style={{ color: t.textMuted }}>
+              <div key={i} className="h-3 text-[10px] font-bold leading-3" style={{ color: isDark ? '#94A3B8' : t.textMuted }}>
                 {i === 1 ? 'T2' : i === 3 ? 'T4' : i === 5 ? 'T6' : ''}
               </div>
             ))}
@@ -53,7 +53,7 @@ function Heatmap({ data, t, isDark }) {
             <div className="h-5 relative w-full mb-1">
               {monthLabels.map((ml, idx) => (
                 <span key={idx} className="absolute text-[10px] font-bold"
-                  style={{ left: ml.colIndex * 16, color: t.textMuted }}>
+                  style={{ left: ml.colIndex * 16, color: isDark ? '#94A3B8' : t.textMuted }}>
                   {ml.label}
                 </span>
               ))}
@@ -79,7 +79,7 @@ function Heatmap({ data, t, isDark }) {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-1.5 mt-4 text-[10px] font-bold" style={{ color: t.textMuted }}>
+        <div className="flex items-center justify-end gap-1.5 mt-4 text-[10px] font-bold" style={{ color: isDark ? '#94A3B8' : t.textMuted }}>
           <span className="mr-1">Ít hơn</span>
           {[0,1,2,3,4].map(l => <div key={l} className="w-3.5 h-3.5 rounded-[3px]" style={{ background: getBg(l) }} />)}
           <span className="ml-1">Nhiều hơn</span>
@@ -95,6 +95,7 @@ export default function HeatmapCard({ t, isDark, heatmap }) {
       className="glass-panel p-6 flex flex-col gap-4"
       style={{
         border: `1px solid ${t.cardBorder}`,
+        background: t.card,
         boxShadow: `0 10px 30px ${t.shadow}`,
       }}
     >
@@ -102,7 +103,7 @@ export default function HeatmapCard({ t, isDark, heatmap }) {
         <div className="text-sm font-extrabold" style={{ color: t.text }}>
           Hoạt động học tập
         </div>
-        <div className="text-[10px] font-bold tracking-wider opacity-60 uppercase" style={{ color: t.text }}>
+        <div className="text-[11px] font-bold tracking-wider uppercase" style={{ color: isDark ? '#A7F3D0' : t.greenDark }}>
           6 THÁNG QUA
         </div>
       </div>

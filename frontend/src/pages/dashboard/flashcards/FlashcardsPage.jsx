@@ -191,15 +191,19 @@ export default function FlashcardsPage() {
 
   const actionButtonStyle = (isPrimary) => ({
     flex: 1,
-    padding: '0.6rem 0',
-    borderRadius: 8,
-    border: 'none',
+    padding: '0.65rem 0',
+    borderRadius: 10,
+    border: isPrimary ? 'none' : `1px solid ${t.cardBorder}`,
     fontWeight: 700,
     fontSize: '0.85rem',
     cursor: 'pointer',
     textAlign: 'center',
-    background: isPrimary ? `linear-gradient(135deg, ${t.gold}, ${t.goldDark})` : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    background: isPrimary 
+      ? `linear-gradient(135deg, ${t.green}, ${t.greenDark})` 
+      : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
     color: isPrimary ? '#fff' : t.text,
+    boxShadow: isPrimary ? (isDark ? '0 4px 14px rgba(16,185,129,0.25)' : '0 4px 14px rgba(0,102,51,0.2)') : 'none',
+    transition: 'all 0.2s ease',
   });
 
   return (
@@ -213,12 +217,18 @@ export default function FlashcardsPage() {
               value={activeCourse || ''} 
               onChange={(e) => setActiveCourse(e.target.value)}
               style={{
-                background: t.card, color: t.text, border: `1px solid ${t.cardBorder}`,
-                padding: '0.65rem 1rem', borderRadius: 10, fontWeight: 700, outline: 'none', cursor: 'pointer'
+                background: t.card, 
+                color: t.text, 
+                border: `1.5px solid ${t.cardBorder}`,
+                padding: '0.65rem 1rem', 
+                borderRadius: 10, 
+                fontWeight: 700, 
+                outline: 'none', 
+                cursor: 'pointer'
               }}
             >
               {uniqueCategories.map(cat => (
-                <option key={cat} value={cat}>Khóa học {cat}</option>
+                <option key={cat} value={cat} style={{ background: t.card, color: t.text }}>Khóa học {cat}</option>
               ))}
             </select>
           )}
@@ -226,9 +236,18 @@ export default function FlashcardsPage() {
           <button 
             onClick={() => setShowAddModal(true)}
             style={{ 
-              background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`, 
-              color: '#fff', border: 'none', borderRadius: 10, padding: '0.65rem 1.25rem',
-              fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem'
+              background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, 
+              color: '#fff', 
+              border: 'none', 
+              borderRadius: 10, 
+              padding: '0.65rem 1.25rem',
+              fontWeight: 700, 
+              fontSize: '0.9rem', 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              boxShadow: isDark ? '0 4px 14px rgba(16,185,129,0.3)' : '0 4px 14px rgba(0,102,51,0.25)'
             }}
           >
             <span style={{ fontSize: '1.2rem' }}>+</span> Thêm từ vựng
@@ -247,12 +266,12 @@ export default function FlashcardsPage() {
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: t.text, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 🌟 Ôn tập tổng hợp
               </h2>
-              <div style={{ ...cardStyle, background: isDark ? 'linear-gradient(135deg, rgba(240,180,41,0.1), rgba(240,180,41,0.02))' : 'linear-gradient(135deg, rgba(240,180,41,0.15), rgba(240,180,41,0.05))', border: `1px solid rgba(240,180,41,0.3)` }}>
+              <div style={{ ...cardStyle, background: isDark ? 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02))' : 'linear-gradient(135deg, rgba(0,102,51,0.06), rgba(0,102,51,0.01))', border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : 'rgba(0,102,51,0.2)'}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: t.gold }}>Khóa học {activeCourse} & Từ tự thêm</div>
-                  <div style={{ background: t.goldBg, color: t.gold, padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.7rem', fontWeight: 700 }}>SM-2 Optimized</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: isDark ? '#34D399' : t.greenDark }}>Khóa học {activeCourse} & Từ tự thêm</div>
+                  <div style={{ background: isDark ? 'rgba(16,185,129,0.18)' : 'rgba(0,102,51,0.1)', color: isDark ? '#34D399' : t.green, padding: '0.25rem 0.6rem', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : 'rgba(0,102,51,0.2)'}` }}>SM-2 Optimized</div>
                 </div>
-                <div style={{ fontSize: '0.9rem', color: t.textMuted, lineHeight: 1.5, marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.9rem', color: t.textSub, lineHeight: 1.5, marginBottom: '1.5rem' }}>
                   Hệ thống sẽ tự động trộn các từ vựng đến hạn ôn tập của khóa học {activeCourse} và các từ vựng cá nhân mà bạn đã thêm. Học theo cách này giúp tối ưu hóa thuật toán ghi nhớ dài hạn.
                 </div>
                 

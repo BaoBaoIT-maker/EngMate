@@ -53,7 +53,7 @@ export default function DashboardOverview() {
 
         {/* Cột phải: MemoryCard + HeatmapCard */}
         <div className="flex flex-col gap-6">
-          <MemoryCard t={t} memory={memory} />
+          <MemoryCard t={t} memory={memory} isDark={isDark} />
           <HeatmapCard t={t} isDark={isDark} heatmap={heatmap} />
         </div>
       </div>

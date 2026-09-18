@@ -124,18 +124,28 @@ export default function GamesPage() {
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
               
               {g.coming && (
-                <div style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.6rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 6, background: t.goldBg, color: t.gold }}>
+                <div style={{ position: 'absolute', top: 12, right: 12, fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: isDark ? 'rgba(245,158,11,0.15)' : '#FEF3C7', color: isDark ? '#FBBF24' : '#B45309', border: `1px solid ${isDark ? 'rgba(245,158,11,0.3)' : 'rgba(217,119,6,0.2)'}` }}>
                   Sắp ra mắt
                 </div>
               )}
               
-              <div style={{ fontSize: '1.75rem', marginBottom: '0.625rem' }}>{g.emoji || '🎮'}</div>
-              <div style={{ fontWeight: 700, color: t.text, fontSize: '0.9rem', marginBottom: '0.25rem' }}>{g.name || g.gameType}</div>
-              <div style={{ fontSize: '0.75rem', color: t.textMuted, marginBottom: '0.75rem', lineHeight: 1.5 }}>{g.desc || 'Trải nghiệm học tập thú vị'}</div>
+              <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{g.emoji || '🎮'}</div>
+              <div style={{ fontWeight: 800, color: t.text, fontSize: '0.95rem', marginBottom: '0.35rem' }}>{g.name || g.gameType}</div>
+              <div style={{ fontSize: '0.8rem', color: t.textSub, marginBottom: '0.875rem', lineHeight: 1.5, flex: 1 }}>{g.desc || 'Trải nghiệm học tập thú vị'}</div>
               
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 6, background: t.goldBg, color: t.gold }}>
-                {g.tag || 'Mini-game'}
-              </span>
+              <div style={{ marginTop: 'auto' }}>
+                <span style={{ 
+                  fontSize: '0.7rem', 
+                  fontWeight: 700, 
+                  padding: '0.25rem 0.6rem', 
+                  borderRadius: 8, 
+                  background: g.coming ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)') : (isDark ? 'rgba(16,185,129,0.15)' : 'rgba(0,102,51,0.08)'), 
+                  color: g.coming ? t.textMuted : (isDark ? '#34D399' : t.green),
+                  border: `1px solid ${g.coming ? 'transparent' : (isDark ? 'rgba(16,185,129,0.3)' : 'rgba(0,102,51,0.15)')}`
+                }}>
+                  {g.tag || 'Mini-game'}
+                </span>
+              </div>
             </div>
           ))}
         </div>

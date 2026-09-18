@@ -135,8 +135,8 @@ export default function MatchingGame() {
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.5rem', color: t.text, background: t.bg, padding: '2rem' }}>
         <div style={{ fontSize: '3rem' }}>😔</div>
         <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{error}</div>
-        <button onClick={() => navigate('/dashboard/games')} style={{ padding: '0.75rem 2rem', borderRadius: 12, border: 'none', background: t.goldBg, color: t.gold, fontWeight: 700, cursor: 'pointer' }}>
-          Quay lại
+        <button onClick={() => navigate('/dashboard/games')} style={{ padding: '0.8rem 2.2rem', borderRadius: 12, border: 'none', background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, color: '#fff', fontWeight: 700, cursor: 'pointer', boxShadow: isDark ? '0 4px 16px rgba(16,185,129,0.3)' : '0 4px 16px rgba(0,102,51,0.25)' }}>
+          Quay lại Hub
         </button>
       </div>
     );
@@ -145,28 +145,28 @@ export default function MatchingGame() {
   if (isFinished) {
     return (
       <div style={{ minHeight: '100vh', background: t.bg, color: t.text, display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '1rem', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ background: t.card, border: `1px solid ${t.cardBorder}`, borderRadius: 24, padding: '2.5rem 2rem', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: `0 20px 40px ${t.shadow}` }}>
+        <div style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 24, padding: '2.5rem 2rem', maxWidth: 420, width: '100%', textAlign: 'center', boxShadow: `0 24px 48px ${t.shadow}` }}>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎉</div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem', color: t.text }}>Tuyệt vời!</h2>
-          <p style={{ color: t.textMuted, fontSize: '0.9rem', marginBottom: '2rem' }}>Bạn đã hoàn thành bài tập Nối từ.</p>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '0.5rem', color: t.text }}>Tuyệt vời!</h2>
+          <p style={{ color: t.textSub, fontSize: '0.92rem', marginBottom: '2rem' }}>Bạn đã hoàn thành bài tập Nối từ.</p>
           
           {resultData ? (
-            <div style={{ background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)', borderRadius: 16, padding: '1.5rem', marginBottom: '2rem' }}>
+            <div style={{ background: isDark ? 'rgba(16,185,129,0.08)' : 'rgba(0,102,51,0.04)', border: `1px solid ${t.cardBorder}`, borderRadius: 16, padding: '1.5rem', marginBottom: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <span style={{ color: t.textSub, fontSize: '0.85rem' }}>Độ chính xác</span>
-                <span style={{ fontWeight: 700, color: t.text }}>{resultData.correctCount} / {resultData.totalPlayed}</span>
+                <span style={{ color: t.textSub, fontSize: '0.9rem' }}>Độ chính xác</span>
+                <span style={{ fontWeight: 800, color: t.text, fontSize: '1rem' }}>{resultData.correctCount} / {resultData.totalPlayed}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: t.textSub, fontSize: '0.85rem' }}>Điểm kinh nghiệm nhận được</span>
-                <span style={{ fontWeight: 800, color: t.gold }}>+{resultData.totalXP} XP</span>
+                <span style={{ color: t.textSub, fontSize: '0.9rem' }}>Điểm kinh nghiệm</span>
+                <span style={{ fontWeight: 800, color: isDark ? '#34D399' : t.green, fontSize: '1.1rem' }}>+{resultData.totalXP} XP</span>
               </div>
             </div>
           ) : (
-             <div style={{ padding: '1rem' }}>Đang lưu kết quả...</div>
+             <div style={{ padding: '1rem', color: t.textMuted }}>Đang lưu kết quả...</div>
           )}
           
-          <button onClick={() => navigate('/dashboard/games')} style={{ width: '100%', padding: '0.875rem', borderRadius: 12, border: 'none', background: t.goldBg, color: t.gold, fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer' }}>
-            Quay lại Hub
+          <button onClick={() => navigate('/dashboard/games')} style={{ width: '100%', padding: '0.875rem', borderRadius: 12, border: 'none', background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', boxShadow: isDark ? '0 4px 16px rgba(16,185,129,0.3)' : '0 4px 16px rgba(0,102,51,0.25)' }}>
+            Quay lại Hub trò chơi
           </button>
         </div>
       </div>
@@ -200,14 +200,15 @@ export default function MatchingGame() {
                   ...cardStyle(t),
                   opacity: isMatched ? 0 : 1,
                   pointerEvents: isMatched ? 'none' : 'auto',
-                  background: isSelected ? t.goldBg : t.card,
-                  borderColor: isSelected ? t.gold : isWrong ? '#EF4444' : t.cardBorder,
+                  background: isSelected ? (isDark ? 'rgba(16,185,129,0.18)' : 'rgba(0,102,51,0.08)') : t.card,
+                  borderColor: isSelected ? (isDark ? '#34D399' : t.green) : isWrong ? '#EF4444' : t.cardBorder,
                   transform: isWrong ? 'translateX(5px)' : isSelected ? 'scale(1.02)' : 'none',
-                  animation: isWrong ? 'shake 0.4s ease-in-out' : 'none'
+                  animation: isWrong ? 'shake 0.4s ease-in-out' : 'none',
+                  boxShadow: isSelected ? `0 0 0 1.5px ${isDark ? '#34D399' : t.green}, 0 4px 16px ${t.shadow}` : `0 4px 12px ${t.shadow}`
                 }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '1.05rem', color: isSelected ? t.gold : t.text }}>{c.text}</span>
-                  {c.phonetic && <span style={{ fontSize: '0.7rem', color: t.textMuted, marginTop: '2px', fontWeight: 400 }}>{c.phonetic}</span>}
+                  <span style={{ fontSize: '1.05rem', fontWeight: 700, color: isSelected ? (isDark ? '#34D399' : t.greenDark) : t.text }}>{c.text}</span>
+                  {c.phonetic && <span style={{ fontSize: '0.75rem', color: t.textMuted, marginTop: '2px', fontWeight: 400 }}>{c.phonetic}</span>}
                 </div>
               </div>
             );
@@ -228,12 +229,13 @@ export default function MatchingGame() {
                   ...cardStyle(t),
                   opacity: isMatched ? 0 : 1,
                   pointerEvents: isMatched ? 'none' : 'auto',
-                  background: isSelected ? 'rgba(56, 189, 248, 0.1)' : t.card,
+                  background: isSelected ? (isDark ? 'rgba(56,189,248,0.18)' : 'rgba(14,165,233,0.08)') : t.card,
                   borderColor: isSelected ? '#38BDF8' : isWrong ? '#EF4444' : t.cardBorder,
                   transform: isWrong ? 'translateX(-5px)' : isSelected ? 'scale(1.02)' : 'none',
-                  animation: isWrong ? 'shake 0.4s ease-in-out' : 'none'
+                  animation: isWrong ? 'shake 0.4s ease-in-out' : 'none',
+                  boxShadow: isSelected ? `0 0 0 1.5px #38BDF8, 0 4px 16px ${t.shadow}` : `0 4px 12px ${t.shadow}`
                 }}>
-                <span style={{ fontSize: '1.05rem', color: isSelected ? '#38BDF8' : t.text }}>{c.text}</span>
+                <span style={{ fontSize: '1.05rem', fontWeight: 700, color: isSelected ? '#38BDF8' : t.text }}>{c.text}</span>
               </div>
             );
           })}

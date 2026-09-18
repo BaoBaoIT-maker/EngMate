@@ -91,16 +91,16 @@ function TopHeader({ t, isDark, user, toggleDark, navigate, location, stats }) {
       maxWidth: '1200px',
       height: '64px',
       zIndex: 100,
-      background: isDark ? 'rgba(12, 21, 15, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+      background: isDark ? 'rgba(18, 31, 22, 0.85)' : 'rgba(255, 255, 255, 0.85)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
-      border: `1px solid ${isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(0,102,51,0.06)'}`,
+      border: `1.5px solid ${t.cardBorder}`,
       borderRadius: '24px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: '0 1.75rem',
-      boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.35)' : '0 10px 30px rgba(4,120,87,0.03)',
+      boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 30px rgba(0,102,51,0.04)',
       transition: 'all 0.3s ease',
     }}>
       {/* Left: Logo */}
@@ -240,9 +240,9 @@ function MobileHeader({ t, user, toggleDark, isDark, navigate }) {
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
       height: 60,
-      background: isDark ? 'rgba(18, 24, 19, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+      background: isDark ? 'rgba(8, 15, 10, 0.88)' : 'rgba(247, 250, 248, 0.88)',
       backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-      borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
+      borderBottom: `1px solid ${t.cardBorder}`,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 1rem', paddingTop: 'env(safe-area-inset-top)'
     }}>
@@ -298,9 +298,9 @@ function BottomNav({ t, user, isDark }) {
   return (
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
-      background: isDark ? 'rgba(18, 24, 19, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+      background: isDark ? 'rgba(8, 15, 10, 0.92)' : 'rgba(247, 250, 248, 0.92)',
       backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-      borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
+      borderTop: `1px solid ${t.cardBorder}`,
       display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
       {NAV.filter(i => ['/dashboard', '/dashboard/flashcards', '/dashboard/games', '/dashboard/speaking'].includes(i.id)).map(item => {

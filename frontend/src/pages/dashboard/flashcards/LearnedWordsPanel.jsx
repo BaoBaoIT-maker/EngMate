@@ -130,7 +130,7 @@ function EditDrawer({ word, onClose, onSaved, t }) {
             <button
               type="submit"
               disabled={loading}
-              style={{ flex: 1, padding: '0.75rem', borderRadius: 8, border: 'none', background: `linear-gradient(135deg, #F0B429, #D4920A)`, color: '#1a1a2e', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', fontSize: '0.9rem', opacity: loading ? 0.7 : 1 }}
+              style={{ flex: 1, padding: '0.75rem', borderRadius: 8, border: 'none', background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, color: '#fff', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', fontSize: '0.9rem', opacity: loading ? 0.7 : 1, boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}
             >
               {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
             </button>
@@ -219,8 +219,8 @@ export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, cour
       {/* Side Panel */}
       <div
         style={{
-          position: 'absolute', right: 0, top: 0, bottom: 0, width: '100%', maxWidth: 420,
-          background: t.bg, borderLeft: `1px solid ${t.cardBorder}`, boxShadow: `-4px 0 32px rgba(0,0,0,0.3)`,
+          position: 'absolute', right: 0, top: 0, bottom: 0, width: '100%', maxWidth: 440,
+          background: t.card, borderLeft: `1px solid ${t.cardBorder}`, boxShadow: `-8px 0 32px rgba(0,0,0,0.45)`,
           display: 'flex', flexDirection: 'column', animation: 'slideInRight 0.3s ease',
           overflow: 'hidden',
         }}
@@ -235,7 +235,7 @@ export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, cour
               </span>
             )}
           </h2>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: t.textMuted, cursor: 'pointer', padding: '0.5rem', fontSize: '1rem' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: t.textMuted, cursor: 'pointer', padding: '0.5rem', fontSize: '1.1rem' }}>✕</button>
         </div>
 
         {/* Content */}
@@ -249,20 +249,20 @@ export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, cour
               {words.map((w) => (
                 <div
                   key={w.id || w.word}
-                  style={{ padding: '1rem', background: t.card, border: `1px solid ${t.cardBorder}`, borderRadius: 12, transition: 'border-color 0.2s' }}
+                  style={{ padding: '1.1rem', background: t.bg, border: `1.5px solid ${t.cardBorder}`, borderRadius: 14, transition: 'border-color 0.2s' }}
                 >
                   {/* Top row: word + actions */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '1.05rem', fontWeight: 700, color: t.text }}>{w.word}</div>
-                      {w.phonetic && <div style={{ fontSize: '0.8rem', color: t.textMuted }}>{w.phonetic}</div>}
+                      {w.phonetic && <div style={{ fontSize: '0.8rem', color: t.textMuted, marginTop: 2 }}>{w.phonetic}</div>}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
                       {/* Play */}
                       <button
                         onClick={() => playAudio(w.word)}
                         title="Phát âm"
-                        style={iconBtnStyle(t.gold)}
+                        style={iconBtnStyle(t.green)}
                       >🔊</button>
 
                       {/* Edit & Delete — chỉ cho custom */}

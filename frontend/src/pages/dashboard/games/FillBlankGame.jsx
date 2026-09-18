@@ -160,8 +160,8 @@ export default function FillBlankGame() {
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.5rem', color: t.text, background: t.bg, padding: '2rem' }}>
         <div style={{ fontSize: '3rem' }}>😔</div>
         <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{error}</div>
-        <button onClick={() => navigate('/dashboard/games')} style={{ padding: '0.75rem 2rem', borderRadius: 12, border: 'none', background: t.goldBg, color: t.gold, fontWeight: 700, cursor: 'pointer' }}>
-          Quay lại
+        <button onClick={() => navigate('/dashboard/games')} style={{ padding: '0.8rem 2.2rem', borderRadius: 12, border: 'none', background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, color: '#fff', fontWeight: 700, cursor: 'pointer', boxShadow: isDark ? '0 4px 16px rgba(16,185,129,0.3)' : '0 4px 16px rgba(0,102,51,0.25)' }}>
+          Quay lại Hub
         </button>
       </div>
     );
@@ -173,48 +173,48 @@ export default function FillBlankGame() {
     const accuracy = Math.round((correct / results.length) * 100);
     return (
       <div style={{ minHeight: '100vh', background: t.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-        <div style={{ background: t.card, border: `1px solid ${t.cardBorder}`, borderRadius: 24, padding: '2.5rem 2rem', maxWidth: 480, width: '100%', textAlign: 'center', boxShadow: `0 20px 60px ${t.shadow}` }}>
+        <div style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 24, padding: '2.5rem 2rem', maxWidth: 480, width: '100%', textAlign: 'center', boxShadow: `0 24px 60px ${t.shadow}` }}>
           <div style={{ fontSize: '4rem', marginBottom: '0.75rem' }}>
             {accuracy >= 80 ? '🏆' : accuracy >= 50 ? '👍' : '💪'}
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: t.text, margin: '0 0 0.25rem' }}>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: t.text, margin: '0 0 0.25rem' }}>
             {accuracy >= 80 ? 'Xuất sắc!' : accuracy >= 50 ? 'Tốt lắm!' : 'Cố gắng hơn nhé!'}
           </h2>
-          <p style={{ color: t.textMuted, fontSize: '0.85rem', margin: '0 0 2rem' }}>Bạn đã hoàn thành bài tập Điền từ.</p>
+          <p style={{ color: t.textSub, fontSize: '0.9rem', margin: '0 0 2rem' }}>Bạn đã hoàn thành bài tập Điền từ.</p>
 
           {/* Stats grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
             {[
               { label: 'Đúng', value: `${correct}/${results.length}`, color: '#22C55E' },
-              { label: 'Độ chính xác', value: `${accuracy}%`, color: t.gold },
+              { label: 'Độ chính xác', value: `${accuracy}%`, color: isDark ? '#34D399' : t.green },
               { label: 'Thời gian', value: formatTime(totalElapsed), color: '#38BDF8' },
             ].map((s, i) => (
-              <div key={i} style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', borderRadius: 12, padding: '1rem 0.5rem' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: s.color }}>{s.value}</div>
-                <div style={{ fontSize: '0.7rem', color: t.textMuted, marginTop: '0.25rem' }}>{s.label}</div>
+              <div key={i} style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', border: `1px solid ${t.cardBorder}`, borderRadius: 14, padding: '1rem 0.5rem' }}>
+                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: s.color }}>{s.value}</div>
+                <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: '0.25rem', fontWeight: 600 }}>{s.label}</div>
               </div>
             ))}
           </div>
 
           {/* XP earned */}
-          <div style={{ background: t.goldBg, borderRadius: 12, padding: '1rem', marginBottom: '2rem', border: `1px solid ${t.cardBorder}` }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: t.gold }}>
+          <div style={{ background: isDark ? 'rgba(16,185,129,0.12)' : 'rgba(0,102,51,0.06)', borderRadius: 14, padding: '1.25rem', marginBottom: '1.75rem', border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : 'rgba(0,102,51,0.2)'}` }}>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: isDark ? '#34D399' : t.greenDark }}>
               +{finalResult?.totalXP ?? results.reduce((sum, r) => sum + getXP(r.isCorrect, r.timeTaken), 0)} XP
             </div>
-            <div style={{ fontSize: '0.75rem', color: t.textMuted, marginTop: '0.25rem' }}>Điểm kinh nghiệm nhận được</div>
+            <div style={{ fontSize: '0.78rem', color: t.textSub, marginTop: '0.25rem', fontWeight: 500 }}>Điểm kinh nghiệm nhận được</div>
           </div>
 
           {/* Per-question breakdown */}
-          <div style={{ textAlign: 'left', marginBottom: '2rem' }}>
+          <div style={{ textAlign: 'left', marginBottom: '2rem', maxHeight: 180, overflowY: 'auto' }}>
             {results.map((r, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: i < results.length - 1 ? `1px solid ${t.cardBorder}` : 'none' }}>
-                <span style={{ fontSize: '0.8rem', color: t.text }}>Câu {i + 1}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.75rem', color: t.textMuted }}>{formatTime(r.timeTaken)}</span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: r.isCorrect ? '#22C55E' : '#EF4444' }}>
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.25rem', borderBottom: i < results.length - 1 ? `1px solid ${t.cardBorder}` : 'none' }}>
+                <span style={{ fontSize: '0.85rem', color: t.text, fontWeight: 600 }}>Câu {i + 1}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '0.78rem', color: t.textMuted }}>{formatTime(r.timeTaken)}</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: r.isCorrect ? '#22C55E' : '#EF4444' }}>
                     {r.isCorrect ? '✓' : '✗'}
                   </span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: getXPColor(r.timeTaken), minWidth: 40, textAlign: 'right' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: getXPColor(r.timeTaken), minWidth: 44, textAlign: 'right' }}>
                     +{getXP(r.isCorrect, r.timeTaken)} XP
                   </span>
                 </div>
@@ -223,12 +223,10 @@ export default function FillBlankGame() {
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={fetchData} style={{ flex: 1, padding: '0.875rem', borderRadius: 12, border: `1px solid ${t.cardBorder}`, background: 'transparent', color: t.text, fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
-              onMouseEnter={e => { e.currentTarget.style.background = t.goldBg; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
+            <button onClick={fetchData} style={{ flex: 1, padding: '0.875rem', borderRadius: 12, border: `1.5px solid ${t.cardBorder}`, background: 'transparent', color: t.text, fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}>
               Chơi lại
             </button>
-            <button onClick={() => navigate('/dashboard/games')} style={{ flex: 1, padding: '0.875rem', borderRadius: 12, border: 'none', background: t.goldBg, color: t.gold, fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}>
+            <button onClick={() => navigate('/dashboard/games')} style={{ flex: 1.2, padding: '0.875rem', borderRadius: 12, border: 'none', background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', boxShadow: isDark ? '0 4px 16px rgba(16,185,129,0.3)' : '0 4px 16px rgba(0,102,51,0.25)' }}>
               Quay lại Hub
             </button>
           </div>
@@ -279,8 +277,8 @@ export default function FillBlankGame() {
       </div>
 
       {/* Progress bar */}
-      <div style={{ height: 4, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
-        <div style={{ height: '100%', width: `${progress}%`, background: `linear-gradient(90deg, ${t.gold}, #F97316)`, transition: 'width 0.4s ease', borderRadius: '0 4px 4px 0' }} />
+      <div style={{ height: 6, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
+        <div style={{ height: '100%', width: `${progress}%`, background: `linear-gradient(90deg, #10B981, #059669)`, transition: 'width 0.4s ease', borderRadius: '0 4px 4px 0' }} />
       </div>
 
       {/* Main content */}
@@ -288,19 +286,19 @@ export default function FillBlankGame() {
         <div style={{ maxWidth: 640, width: '100%' }}>
 
           {/* Question counter */}
-          <div style={{ textAlign: 'center', fontSize: '0.8rem', color: t.textMuted, marginBottom: '1.5rem', fontWeight: 600 }}>
+          <div style={{ textAlign: 'center', fontSize: '0.85rem', color: t.textMuted, marginBottom: '1.25rem', fontWeight: 700 }}>
             Câu {currentIdx + 1} / {questions.length}
           </div>
 
           {/* Meaning hint */}
-          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '0.8rem', color: t.textMuted, background: t.goldBg, padding: '0.3rem 0.75rem', borderRadius: 20, border: `1px solid ${t.cardBorder}` }}>
-              💡 Nghĩa: {q.meaning}
+          <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+            <span style={{ fontSize: '0.85rem', color: isDark ? '#34D399' : t.greenDark, background: isDark ? 'rgba(16,185,129,0.12)' : 'rgba(0,102,51,0.06)', padding: '0.35rem 0.875rem', borderRadius: 20, border: `1px solid ${isDark ? 'rgba(16,185,129,0.25)' : 'rgba(0,102,51,0.15)'}`, fontWeight: 600 }}>
+              💡 Gợi ý: {q.meaning}
             </span>
           </div>
 
           {/* Sentence card */}
-          <div style={{ background: t.card, border: `1px solid ${t.cardBorder}`, borderRadius: 20, padding: '2.5rem 2rem', marginBottom: '2rem', textAlign: 'center', boxShadow: `0 8px 32px ${t.shadow}` }}>
+          <div style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 20, padding: '2.5rem 2rem', marginBottom: '2rem', textAlign: 'center', boxShadow: `0 8px 32px ${t.shadow}` }}>
             <p style={{ fontSize: '1.35rem', lineHeight: 1.8, color: t.text, margin: 0, fontStyle: 'italic' }}>
               {q.sentence.split('______').map((part, i, arr) => (
                 <React.Fragment key={i}>
@@ -311,8 +309,8 @@ export default function FillBlankGame() {
                       minWidth: 100,
                       borderBottom: answered
                         ? `3px solid ${isCorrect ? '#22C55E' : '#EF4444'}`
-                        : `3px solid ${t.gold}`,
-                      color: answered ? (isCorrect ? '#22C55E' : '#EF4444') : t.gold,
+                        : `3px solid ${isDark ? '#34D399' : t.green}`,
+                      color: answered ? (isCorrect ? '#22C55E' : '#EF4444') : (isDark ? '#34D399' : t.green),
                       fontWeight: 800,
                       fontStyle: 'normal',
                       padding: '0 8px',
@@ -330,9 +328,9 @@ export default function FillBlankGame() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
             {q.options.map((option, i) => (
               <button key={i} onClick={() => handleSelect(option)} style={getOptionStyle(option)}
-                onMouseEnter={e => { if (!answered) e.currentTarget.style.borderColor = t.gold; }}
+                onMouseEnter={e => { if (!answered) e.currentTarget.style.borderColor = isDark ? '#34D399' : t.green; }}
                 onMouseLeave={e => { if (!answered) e.currentTarget.style.borderColor = t.cardBorder; }}>
-                <span style={{ marginRight: '0.5rem', fontSize: '0.8rem', opacity: 0.5 }}>{['A', 'B', 'C', 'D'][i]}</span>
+                <span style={{ marginRight: '0.5rem', fontSize: '0.85rem', opacity: 0.6, fontWeight: 700 }}>{['A', 'B', 'C', 'D'][i]}</span>
                 {option}
               </button>
             ))}
@@ -341,13 +339,13 @@ export default function FillBlankGame() {
           {/* Skip button */}
           {!answered && (
             <button onClick={handleSkip} style={{ width: '100%', padding: '0.75rem', borderRadius: 10, border: `1px solid ${t.cardBorder}`, background: 'transparent', color: t.textMuted, fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>
-              Bỏ qua →
+              Bỏ qua câu này →
             </button>
           )}
 
           {/* XP preview khi đã trả lời */}
           {answered && (
-            <div style={{ textAlign: 'center', padding: '0.75rem', borderRadius: 10, background: t.goldBg, color: isCorrect ? getXPColor(elapsed) : '#EF4444', fontWeight: 700, fontSize: '0.95rem', animation: 'fadeIn 0.3s ease' }}>
+            <div style={{ textAlign: 'center', padding: '0.85rem', borderRadius: 12, background: isDark ? 'rgba(16,185,129,0.12)' : 'rgba(0,102,51,0.08)', border: `1px solid ${isDark ? 'rgba(16,185,129,0.25)' : 'rgba(0,102,51,0.15)'}`, color: isCorrect ? getXPColor(elapsed) : '#EF4444', fontWeight: 800, fontSize: '0.95rem', animation: 'fadeIn 0.3s ease' }}>
               {isCorrect
                 ? `+${getXP(true, elapsed)} XP · ${elapsed < 5 ? '⚡ Siêu nhanh!' : elapsed < 10 ? '🔥 Nhanh!' : elapsed < 20 ? '👍 Tốt!' : '✓ Đúng!'}`
                 : selected === '__skip__' ? '⏭ Đã bỏ qua — 0 XP' : '❌ Sai rồi — 0 XP'}

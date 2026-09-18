@@ -18,10 +18,10 @@ function ConfirmChangeModal({ t, currentPlanName, endDate, newPlanName, onConfir
           Nếu mua <strong style={{ color: t.text }}>{newPlanName}</strong>, gói mới sẽ bắt đầu <strong>ngay hôm nay</strong>. Mọi ưu đãi và thời gian còn lại của gói cũ <strong style={{ color: '#ef4444' }}>sẽ bị hủy và không được cộng dồn</strong>.
         </p>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button onClick={onCancel} style={{ flex: 1, padding: '0.9rem', borderRadius: 12, background: t.hover, color: t.textMuted, border: `1px solid ${t.cardBorder}`, cursor: 'pointer', fontWeight: 700, fontSize: '0.95rem' }}>
+          <button onClick={onCancel} style={{ flex: 1, padding: '0.9rem', borderRadius: 12, background: t.hover, color: t.textMuted, border: `1.5px solid ${t.cardBorder}`, cursor: 'pointer', fontWeight: 700, fontSize: '0.95rem' }}>
             Hủy bỏ
           </button>
-          <button onClick={onConfirm} style={{ flex: 1, padding: '0.9rem', borderRadius: 12, background: 'linear-gradient(135deg, #EAB308, #B45309)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '0.95rem' }}>
+          <button onClick={onConfirm} style={{ flex: 1, padding: '0.9rem', borderRadius: 12, background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '0.95rem', boxShadow: '0 4px 14px rgba(16,185,129,0.3)' }}>
             Đồng ý mua
           </button>
         </div>
@@ -33,19 +33,19 @@ function ConfirmChangeModal({ t, currentPlanName, endDate, newPlanName, onConfir
 // ─── Modal Thanh toán thành công ──────────────────────────────────────────
 function SuccessModal({ t, onClose }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: t.card, border: `1px solid ${t.cardBorder}`, borderRadius: 24, padding: '2.5rem 2rem', maxWidth: 360, width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.3)', animation: 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
-        <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(34, 197, 94, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-          <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#22C55E', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '2rem' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
+      <div style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 24, padding: '2.5rem 2rem', maxWidth: 380, width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.4)', animation: 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+        <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(34, 197, 94, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#22C55E', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '2rem', boxShadow: '0 4px 14px rgba(34,197,94,0.35)' }}>
             ✓
           </div>
         </div>
         <h3 style={{ fontSize: '1.4rem', fontWeight: 800, textAlign: 'center', marginBottom: '0.5rem', color: t.text }}>Thanh toán thành công!</h3>
-        <p style={{ color: t.textMuted, fontSize: '0.95rem', lineHeight: 1.5, textAlign: 'center', marginBottom: '2rem' }}>
+        <p style={{ color: t.textSub, fontSize: '0.92rem', lineHeight: 1.5, textAlign: 'center', marginBottom: '2rem' }}>
           Gói cước của bạn đã được kích hoạt. Hãy tận hưởng các đặc quyền Premium ngay bây giờ.
         </p>
-        <button onClick={onClose} style={{ width: '100%', padding: '1rem', borderRadius: 14, background: 'linear-gradient(135deg, #EAB308, #B45309)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '1rem', boxShadow: '0 4px 14px rgba(234,179,8,0.3)' }}>
-          Đóng
+        <button onClick={onClose} style={{ width: '100%', padding: '1rem', borderRadius: 14, background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '1rem', boxShadow: '0 4px 14px rgba(16,185,129,0.3)' }}>
+          Bắt đầu học ngay
         </button>
       </div>
     </div>
@@ -60,16 +60,17 @@ function PlanCard({ plan, isSelected, isOwned, isDisabled, isDark, t, onClick })
       : isDisabled 
         ? (isDark ? 'rgba(255,255,255,0.02)' : '#f9fafb')
         : isSelected
-          ? (isDark ? 'rgba(245,158,11,0.12)' : '#FEF3C7')
+          ? (isDark ? 'rgba(16,185,129,0.12)' : 'rgba(0,102,51,0.06)')
           : t.card,
-    border: `2px solid ${isOwned ? t.cardBorder : isSelected ? t.gold : t.cardBorder}`,
+    border: `2px solid ${isOwned ? t.cardBorder : isSelected ? (isDark ? '#34D399' : t.green) : t.cardBorder}`,
     borderRadius: 20,
     padding: '1.5rem',
     cursor: (isOwned || isDisabled) ? 'not-allowed' : 'pointer',
-    transition: 'all 0.2s',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     position: 'relative',
     opacity: (isOwned || isDisabled) ? 0.6 : 1,
     filter: (isOwned || isDisabled) ? 'grayscale(1)' : 'none',
+    boxShadow: isSelected ? (isDark ? '0 0 0 1px #34D399, 0 8px 24px rgba(16,185,129,0.25)' : '0 0 0 1px #006633, 0 8px 24px rgba(0,102,51,0.15)') : 'none',
   };
 
   return (
@@ -289,17 +290,17 @@ export default function PremiumPaywall() {
 
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: t.goldBg, padding: '0.45rem 1rem', borderRadius: 99, color: t.gold, fontWeight: 700, marginBottom: '1.25rem', border: `1px solid ${t.cardBorder}`, fontSize: '0.9rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: isDark ? 'rgba(16,185,129,0.15)' : 'rgba(0,102,51,0.08)', padding: '0.45rem 1.1rem', borderRadius: 99, color: isDark ? '#34D399' : t.green, fontWeight: 700, marginBottom: '1.25rem', border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : 'rgba(0,102,51,0.15)'}`, fontSize: '0.9rem' }}>
           ✦ Nâng tầm tiếng Anh của bạn
         </div>
         <h1 style={{ fontSize: '2.6rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '0.75rem', lineHeight: 1.2 }}>
-          Mở khóa <span style={{ color: t.gold }}>EngMate Premium</span>
+          Mở khóa <span style={{ color: isDark ? '#34D399' : t.greenDark }}>EngMate Premium</span>
         </h1>
-        <p style={{ fontSize: '1rem', color: t.textMuted, maxWidth: 560, margin: '0 auto', lineHeight: 1.6 }}>
-          Tận hưởng toàn quyền truy cập AI Coach, tính năng chữa chuỗi học và phân tích lộ trình không giới hạn.
+        <p style={{ fontSize: '1.05rem', color: t.textMuted, maxWidth: 560, margin: '0 auto', lineHeight: 1.6 }}>
+          Tận hưởng toàn quyền truy cập AI Coach, tính năng đóng băng chuỗi học và phân tích lộ trình không giới hạn.
         </p>
         {isActivePremium && (
-          <div style={{ marginTop: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6', border: `1px solid ${t.cardBorder}`, borderRadius: 99, padding: '0.5rem 1rem', color: t.text, fontSize: '0.88rem', fontWeight: 600 }}>
+          <div style={{ marginTop: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: isDark ? 'rgba(16,185,129,0.12)' : 'rgba(0,102,51,0.06)', border: `1px solid ${isDark ? 'rgba(16,185,129,0.25)' : 'rgba(0,102,51,0.15)'}`, borderRadius: 99, padding: '0.5rem 1.25rem', color: t.text, fontSize: '0.88rem', fontWeight: 600 }}>
             <span style={{ color: '#22C55E' }}>✓</span> Bạn đang sử dụng <strong>{currentPlan?.name}</strong> (còn hạn đến {new Date(currentSub.endDate).toLocaleDateString('vi-VN')})
           </div>
         )}
@@ -338,10 +339,10 @@ export default function PremiumPaywall() {
                 disabled={loading || !selectedPlan || plans.find(p => p.id === selectedPlan)?.price === 0}
                 style={{
                   width: '100%', padding: '1.2rem', borderRadius: 16,
-                  background: 'linear-gradient(135deg, #EAB308, #B45309)',
+                  background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`,
                   color: '#fff', fontWeight: 800, fontSize: '1.1rem', border: 'none',
                   cursor: (loading || !selectedPlan || plans.find(p => p.id === selectedPlan)?.price === 0) ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 8px 24px rgba(234,179,8,0.3)',
+                  boxShadow: isDark ? '0 8px 24px rgba(16,185,129,0.35)' : '0 8px 24px rgba(0,102,51,0.25)',
                   transition: 'transform 0.15s, opacity 0.15s',
                   opacity: (loading || plans.find(p => p.id === selectedPlan)?.price === 0) ? 0.6 : 1,
                 }}
@@ -353,34 +354,34 @@ export default function PremiumPaywall() {
 
           {/* Màn hình QR */}
           {(status === 'loading_qr' || status === 'waiting_payment') && (
-            <div style={{ background: t.card, border: `1px solid ${t.cardBorder}`, borderRadius: 24, padding: '2.5rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Quét mã để thanh toán</h3>
+            <div style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 24, padding: '2.5rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', boxShadow: `0 20px 48px ${t.shadow}` }}>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: t.text }}>Quét mã để thanh toán</h3>
 
               {status === 'loading_qr' ? (
-                <div style={{ width: 240, height: 240, background: t.hover, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.textMuted, animation: 'pulse 1.5s infinite' }}>
+                <div style={{ width: 240, height: 240, background: isDark ? 'rgba(255,255,255,0.04)' : '#f3f4f6', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.textMuted, animation: 'pulse 1.5s infinite' }}>
                   Đang tạo mã...
                 </div>
               ) : (
-                <div style={{ background: '#fff', borderRadius: 16, padding: '0.75rem', width: 240, height: 240 }}>
+                <div style={{ background: '#fff', borderRadius: 16, padding: '0.75rem', width: 240, height: 240, boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
                   <img src={qrData.qrUrl} alt="VietQR" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                 </div>
               )}
 
               {status === 'waiting_payment' && qrData && (
                 <>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: t.gold, background: t.goldBg, padding: '0.4rem 1rem', borderRadius: 99, marginBottom: '0.5rem', }}>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: isDark ? '#34D399' : t.green, background: isDark ? 'rgba(16,185,129,0.15)' : 'rgba(0,102,51,0.08)', border: `1px solid ${isDark ? 'rgba(16,185,129,0.25)' : 'rgba(0,102,51,0.15)'}`, padding: '0.4rem 1.25rem', borderRadius: 99, marginBottom: '0.5rem' }}>
                     {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
                   </div>
 
                   {/* Số tiền + nội dung — constrained width */}
-                  <div style={{ background: t.hover, borderRadius: 12, padding: '1.25rem', width: '100%', maxWidth: 320, textAlign: 'left', border: `1px solid ${t.cardBorder}` }}>
+                  <div style={{ background: isDark ? 'rgba(255,255,255,0.04)' : '#f8faf9', borderRadius: 14, padding: '1.25rem', width: '100%', maxWidth: 340, textAlign: 'left', border: `1px solid ${t.cardBorder}` }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', alignItems: 'center' }}>
                       <span style={{ color: t.textMuted, fontSize: '0.9rem' }}>Số tiền:</span>
-                      <strong style={{ color: t.gold, fontSize: '1.15rem' }}>{qrData.amount?.toLocaleString('vi-VN')} VNĐ</strong>
+                      <strong style={{ color: isDark ? '#34D399' : t.green, fontSize: '1.2rem', fontWeight: 800 }}>{qrData.amount?.toLocaleString('vi-VN')} VNĐ</strong>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ color: t.textMuted, fontSize: '0.9rem' }}>Nội dung:</span>
-                      <strong style={{ color: t.text, fontSize: '1.05rem', background: t.bg, padding: '0.2rem 0.5rem', borderRadius: 6 }}>{qrData.memo}</strong>
+                      <strong style={{ color: t.text, fontSize: '1.05rem', background: t.inputBg, border: `1px solid ${t.inputBorder}`, padding: '0.2rem 0.5rem', borderRadius: 6 }}>{qrData.memo}</strong>
                     </div>
                   </div>
 

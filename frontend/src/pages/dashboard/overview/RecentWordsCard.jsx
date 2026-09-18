@@ -30,6 +30,7 @@ export default function RecentWordsCard({ t, recent }) {
       className="glass-panel p-6 flex flex-col gap-4"
       style={{
         border: `1px solid ${t.cardBorder}`,
+        background: t.card,
         boxShadow: `0 10px 30px ${t.shadow}`,
       }}
     >
@@ -39,7 +40,7 @@ export default function RecentWordsCard({ t, recent }) {
         </div>
         <button
           onClick={() => navigate('/dashboard/flashcards')}
-          className="text-xs font-extrabold tracking-wider bg-none border-none cursor-pointer focus:outline-none transition-colors duration-200"
+          className="text-xs font-extrabold tracking-wider bg-none border-none cursor-pointer focus:outline-none transition-opacity duration-200"
           style={{ color: t.green }}
           onMouseOver={e => e.currentTarget.style.opacity = 0.8}
           onMouseOut={e => e.currentTarget.style.opacity = 1}
@@ -56,15 +57,17 @@ export default function RecentWordsCard({ t, recent }) {
               key={i}
               className="flex items-center justify-between p-4.5 rounded-2xl border transition-all duration-200 cursor-default"
               style={{
-                background: isCorrect ? '#FFFFFF' : 'rgba(239, 68, 68, 0.04)',
-                borderColor: isCorrect ? t.cardBorder : 'rgba(239, 68, 68, 0.15)',
+                background: isCorrect 
+                  ? t.card 
+                  : (t.text === '#F8FAFC' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)'),
+                borderColor: isCorrect ? t.cardBorder : 'rgba(239, 68, 68, 0.25)',
               }}
             >
               <div className="flex flex-col gap-1 pr-2">
                 <span className="text-base font-extrabold tracking-tight truncate max-w-[120px]" style={{ color: t.text }} title={r.word}>
                   {r.word}
                 </span>
-                <span className="text-xs font-semibold opacity-60 truncate max-w-[140px]" style={{ color: t.text }} title={r.meaning || 'Chưa có nghĩa'}>
+                <span className="text-xs font-semibold truncate max-w-[140px]" style={{ color: t.text === '#F8FAFC' ? '#CBD5E1' : t.textMuted }} title={r.meaning || 'Chưa có nghĩa'}>
                   {r.meaning || 'Đang cập nhật...'}
                 </span>
               </div>
@@ -72,11 +75,11 @@ export default function RecentWordsCard({ t, recent }) {
               {/* Status Circle Icon */}
               <div className="flex-shrink-0">
                 {isCorrect ? (
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white text-xs font-bold">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white text-xs font-bold shadow-sm">
                     ✓
                   </div>
                 ) : (
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center bg-red-500 text-white text-[10px] font-bold">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center bg-red-500 text-white text-[10px] font-bold shadow-sm">
                     ✕
                   </div>
                 )}

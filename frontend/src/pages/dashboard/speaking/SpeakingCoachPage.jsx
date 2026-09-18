@@ -382,24 +382,25 @@ export default function SpeakingCoachPage() {
               value={currentSessionId || ''} 
               onChange={(e) => setCurrentSessionId(parseInt(e.target.value))}
               style={{
-                background: t.card, color: t.text, border: `1px solid ${t.cardBorder}`,
-                padding: '0.6rem 1rem', borderRadius: 8, outline: 'none',
-                maxWidth: '45vw', textOverflow: 'ellipsis'
+                background: t.card, color: t.text, border: `1.5px solid ${t.cardBorder}`,
+                padding: '0.6rem 1rem', borderRadius: 10, outline: 'none',
+                maxWidth: '45vw', textOverflow: 'ellipsis', fontWeight: 600, cursor: 'pointer'
               }}
             >
-              {sessions.map(s => <option key={s.id} value={s.id}>{s.topic}</option>)}
+              {sessions.map(s => <option key={s.id} value={s.id} style={{ background: t.card, color: t.text }}>{s.topic}</option>)}
             </select>
           )}
           <button 
             onClick={() => setIsModalOpen(true)}
             style={{
-              padding: '0.6rem 1rem', borderRadius: 8, border: 'none',
-              background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`,
-              color: '#fff', fontWeight: 600, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '0.5rem'
+              padding: '0.65rem 1.25rem', borderRadius: 10, border: 'none',
+              background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`,
+              color: '#fff', fontWeight: 700, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              boxShadow: isDark ? '0 4px 14px rgba(16,185,129,0.3)' : '0 4px 14px rgba(0,102,51,0.25)'
             }}
           >
-            <span>+</span> New Session
+            <span>+</span> Phiên hội thoại mới
           </button>
         </div>
       </div>
@@ -410,14 +411,14 @@ export default function SpeakingCoachPage() {
           <div key={msg.id} style={{ display: 'flex', justifyContent: msg.senderRole === 'USER' ? 'flex-end' : 'flex-start', position: 'relative' }}>
             {msg.senderRole === 'MODEL' && (
               <div style={{ display: 'flex', gap: '0.75rem', maxWidth: '85%', alignItems: 'flex-start' }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg,${t.gold},${t.goldDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0, marginTop: 4 }}>✦</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <div className="bubble-ai" style={{ background: t.msgAiBg, border: `1px solid ${t.msgAiBorder}`, borderRadius: '6px 20px 20px 20px', padding: '1rem 1.25rem', fontSize: '0.95rem', color: t.text, lineHeight: 1.6, boxShadow: `0 4px 16px ${t.shadow}`, whiteSpace: 'pre-wrap' }}>
+                <div style={{ width: 38, height: 38, borderRadius: '50%', background: `linear-gradient(135deg, #10B981, #059669)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#fff', flexShrink: 0, marginTop: 4, boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}>✦</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <div className="bubble-ai" style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: '6px 20px 20px 20px', padding: '1.1rem 1.35rem', fontSize: '0.95rem', color: t.text, lineHeight: 1.6, boxShadow: `0 4px 20px ${t.shadow}`, whiteSpace: 'pre-wrap' }}>
                     {msg.content}
                   </div>
                   <button 
                     onClick={() => speakText(msg.content)}
-                    style={{ background: 'transparent', border: 'none', color: t.textSub, display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: '0.75rem', padding: '0.25rem 0', alignSelf: 'flex-start' }}
+                    style={{ background: 'transparent', border: 'none', color: isDark ? '#34D399' : t.green, display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, padding: '0.2rem 0', alignSelf: 'flex-start' }}
                     title="Đọc lại"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
@@ -427,7 +428,17 @@ export default function SpeakingCoachPage() {
               </div>
             )}
             {msg.senderRole === 'USER' && (
-              <div style={{ background: `linear-gradient(135deg, rgba(234,179,8,0.18), rgba(234,179,8,0.1))`, border: `1.5px solid rgba(234,179,8,0.3)`, borderRadius: '20px 6px 20px 20px', padding: '1rem 1.25rem', maxWidth: '80%', fontSize: '0.95rem', color: t.text, lineHeight: 1.6 }}>
+              <div style={{ 
+                background: isDark ? 'linear-gradient(135deg, rgba(16,185,129,0.22), rgba(16,185,129,0.12))' : 'linear-gradient(135deg, rgba(0,102,51,0.12), rgba(0,102,51,0.06))', 
+                border: `1.5px solid ${isDark ? 'rgba(16,185,129,0.35)' : 'rgba(0,102,51,0.2)'}`, 
+                borderRadius: '20px 6px 20px 20px', 
+                padding: '1.1rem 1.35rem', 
+                maxWidth: '80%', 
+                fontSize: '0.95rem', 
+                color: t.text, 
+                lineHeight: 1.6,
+                boxShadow: `0 4px 16px ${t.shadow}`
+              }}>
                 {msg.content}
               </div>
             )}
@@ -437,11 +448,11 @@ export default function SpeakingCoachPage() {
         {/* Typing indicator */}
         {micState === 'thinking' && (
           <div style={{ display: 'flex', gap: '0.625rem', alignItems: 'center' }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg,${t.gold},${t.goldDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>✦</div>
-            <div className="bubble-ai" style={{ background: t.msgAiBg, border: `1px solid ${t.msgAiBorder}`, borderRadius: '6px 20px 20px 20px', padding: '1rem 1.25rem', display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <div className="dot" style={{ background: t.textMuted }} />
-              <div className="dot" style={{ background: t.textMuted }} />
-              <div className="dot" style={{ background: t.textMuted }} />
+            <div style={{ width: 38, height: 38, borderRadius: '50%', background: `linear-gradient(135deg, #10B981, #059669)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#fff', flexShrink: 0 }}>✦</div>
+            <div className="bubble-ai" style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: '6px 20px 20px 20px', padding: '1rem 1.25rem', display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <div className="dot" style={{ background: isDark ? '#34D399' : t.green }} />
+              <div className="dot" style={{ background: isDark ? '#34D399' : t.green }} />
+              <div className="dot" style={{ background: isDark ? '#34D399' : t.green }} />
             </div>
           </div>
         )}
@@ -449,10 +460,10 @@ export default function SpeakingCoachPage() {
       </div>
 
       {/* Mic status */}
-      <div style={{ textAlign: 'center', paddingBottom: '0.625rem', opacity: micState === 'idle' ? 0.6 : 1, transition: 'opacity 0.3s' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 1rem', borderRadius: 100, background: t.goldBg, border: `1px solid ${t.cardBorder}` }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: micColor, transition: 'background 0.3s', boxShadow: micState === 'recording' ? '0 0 8px #EF4444' : 'none' }} />
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: t.textSub }}>{micLabel}</span>
+      <div style={{ textAlign: 'center', paddingBottom: '0.625rem', opacity: micState === 'idle' ? 0.7 : 1, transition: 'opacity 0.3s' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 1rem', borderRadius: 100, background: isDark ? 'rgba(16,185,129,0.12)' : 'rgba(0,102,51,0.06)', border: `1px solid ${isDark ? 'rgba(16,185,129,0.25)' : 'rgba(0,102,51,0.15)'}` }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: micState === 'idle' ? (isDark ? '#34D399' : t.green) : micColor, transition: 'background 0.3s', boxShadow: micState === 'recording' ? '0 0 8px #EF4444' : 'none' }} />
+          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: t.textSub }}>{micLabel}</span>
         </div>
       </div>
 
@@ -463,8 +474,8 @@ export default function SpeakingCoachPage() {
           placeholder={rateLimitCountdown > 0 ? `Vui lòng chờ ${rateLimitCountdown}s để nhắn tiếp...` : "Nhập câu hoặc hỏi AI Coach..."}
           style={{ flex: 1, background: rateLimitCountdown > 0 ? 'rgba(255,0,0,0.05)' : t.inputBg, border: `1.5px solid ${rateLimitCountdown > 0 ? '#ef4444' : t.inputBorder}`, borderRadius: 14, padding: '0.75rem 1.25rem', fontSize: '0.95rem', color: rateLimitCountdown > 0 ? '#ef4444' : t.text, outline: 'none', transition: 'border-color 0.2s' }} />
 
-        <button onClick={sendText} disabled={micState === 'thinking' || rateLimitCountdown > 0} style={{ width: 44, height: 44, borderRadius: 12, border: 'none', background: t.goldBg, cursor: (micState === 'thinking' || rateLimitCountdown > 0) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (micState === 'thinking' || rateLimitCountdown > 0) ? 0.5 : 1 }}>
-          {Icon.send(t.gold)}
+        <button onClick={sendText} disabled={micState === 'thinking' || rateLimitCountdown > 0} style={{ width: 46, height: 46, borderRadius: 12, border: 'none', background: isDark ? 'rgba(16,185,129,0.15)' : 'rgba(0,102,51,0.08)', cursor: (micState === 'thinking' || rateLimitCountdown > 0) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (micState === 'thinking' || rateLimitCountdown > 0) ? 0.5 : 1 }}>
+          {Icon.send(isDark ? '#34D399' : t.green)}
         </button>
 
         {/* Mic button */}
@@ -475,10 +486,11 @@ export default function SpeakingCoachPage() {
           </>}
           <button onClick={toggleMic} disabled={micState === 'thinking' || rateLimitCountdown > 0} style={{
             width: 52, height: 52, borderRadius: '50%', border: 'none', cursor: (micState === 'thinking' || rateLimitCountdown > 0) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: micState === 'idle' ? `linear-gradient(135deg, ${t.gold}, ${t.goldDark})` : micState === 'recording' ? 'linear-gradient(135deg,#EF4444,#DC2626)' : micState === 'speaking' ? 'linear-gradient(135deg,#10B981,#059669)' : 'linear-gradient(135deg,#8B5CF6,#6D28D9)',
+            background: micState === 'idle' ? `linear-gradient(135deg, ${t.green}, ${t.greenDark})` : micState === 'recording' ? 'linear-gradient(135deg,#EF4444,#DC2626)' : micState === 'speaking' ? 'linear-gradient(135deg,#10B981,#059669)' : 'linear-gradient(135deg,#8B5CF6,#6D28D9)',
             animation: micState === 'idle' ? 'mic-breathe 2.5s ease-in-out infinite' : 'none',
             transition: 'background 0.3s',
             opacity: (micState === 'thinking' || rateLimitCountdown > 0) ? 0.5 : 1,
+            boxShadow: isDark ? '0 4px 16px rgba(16,185,129,0.35)' : '0 4px 16px rgba(0,102,51,0.25)'
           }}>
             {micState === 'recording' ? <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> : Icon.mic('#fff')}
           </button>
@@ -540,49 +552,49 @@ function CreateSessionModal({ t, isDark, onClose, onCreate }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }} onClick={onClose} />
-      <div className="scale-up" style={{ ...card(t, { background: isDark ? 'rgba(30,30,35,0.85)' : 'rgba(255,255,255,0.95)' }), width: '100%', maxWidth: 480, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)' }} onClick={onClose} />
+      <div className="scale-up" style={{ ...card(t, { background: t.card }), width: '100%', maxWidth: 480, position: 'relative', overflow: 'hidden', border: `1.5px solid ${t.cardBorder}` }}>
         <div style={{ padding: '1.5rem', borderBottom: `1px solid ${t.cardBorder}` }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: t.text, margin: 0 }}>Create New Session</h2>
-          <p style={{ fontSize: '0.875rem', color: t.textSub, marginTop: '0.25rem' }}>Chọn chủ đề để bắt đầu luyện hội thoại</p>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: t.text, margin: 0 }}>Tạo phiên hội thoại mới</h2>
+          <p style={{ fontSize: '0.85rem', color: t.textSub, marginTop: '0.25rem' }}>Chọn chủ đề để bắt đầu luyện hội thoại cùng AI Coach</p>
         </div>
         
         <form onSubmit={handleSubmit} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: t.text, marginBottom: '0.75rem' }}>Target Level</label>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: t.text, marginBottom: '0.65rem' }}>Trình độ mục tiêu</label>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {LEVELS.map(l => (
-                <button type="button" key={l} onClick={() => setLevel(l)} style={{ padding: '0.5rem 1rem', borderRadius: 8, border: `1px solid ${level === l ? t.gold : t.cardBorder}`, background: level === l ? t.goldBg : 'transparent', color: level === l ? t.gold : t.textSub, cursor: 'pointer', fontWeight: 600 }}>{l}</button>
+                <button type="button" key={l} onClick={() => setLevel(l)} style={{ padding: '0.5rem 1rem', borderRadius: 8, border: `1.5px solid ${level === l ? (isDark ? '#34D399' : t.green) : t.cardBorder}`, background: level === l ? (isDark ? 'rgba(16,185,129,0.18)' : 'rgba(0,102,51,0.08)') : 'transparent', color: level === l ? (isDark ? '#34D399' : t.green) : t.textSub, cursor: 'pointer', fontWeight: 700 }}>{l}</button>
               ))}
             </div>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: t.text, marginBottom: '0.75rem' }}>Topic</label>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: t.text, marginBottom: '0.65rem' }}>Chủ đề hội thoại</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {SUGGESTED_TOPICS.map(tOption => (
-                <label key={tOption} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: 8, border: `1px solid ${!isCustom && topic === tOption ? t.gold : t.cardBorder}`, background: !isCustom && topic === tOption ? t.goldBg : 'transparent', cursor: 'pointer' }}>
-                  <input type="radio" name="topicMode" checked={!isCustom && topic === tOption} onChange={() => { setIsCustom(false); setTopic(tOption); }} style={{ accentColor: t.gold }} />
-                  <span style={{ fontSize: '0.95rem', color: t.text }}>{tOption}</span>
+                <label key={tOption} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: 10, border: `1.5px solid ${!isCustom && topic === tOption ? (isDark ? '#34D399' : t.green) : t.cardBorder}`, background: !isCustom && topic === tOption ? (isDark ? 'rgba(16,185,129,0.14)' : 'rgba(0,102,51,0.06)') : 'transparent', cursor: 'pointer' }}>
+                  <input type="radio" name="topicMode" checked={!isCustom && topic === tOption} onChange={() => { setIsCustom(false); setTopic(tOption); }} style={{ accentColor: isDark ? '#34D399' : t.green }} />
+                  <span style={{ fontSize: '0.92rem', fontWeight: 600, color: t.text }}>{tOption}</span>
                 </label>
               ))}
               
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: 8, border: `1px solid ${isCustom ? t.gold : t.cardBorder}`, background: isCustom ? t.goldBg : 'transparent', cursor: 'pointer' }}>
-                <input type="radio" name="topicMode" checked={isCustom} onChange={() => setIsCustom(true)} style={{ accentColor: t.gold }} />
-                <span style={{ fontSize: '0.95rem', color: t.text }}>Free Talk (Custom)</span>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: 10, border: `1.5px solid ${isCustom ? (isDark ? '#34D399' : t.green) : t.cardBorder}`, background: isCustom ? (isDark ? 'rgba(16,185,129,0.14)' : 'rgba(0,102,51,0.06)') : 'transparent', cursor: 'pointer' }}>
+                <input type="radio" name="topicMode" checked={isCustom} onChange={() => setIsCustom(true)} style={{ accentColor: isDark ? '#34D399' : t.green }} />
+                <span style={{ fontSize: '0.92rem', fontWeight: 600, color: t.text }}>Chủ đề tự do (Tự nhập)</span>
               </label>
             </div>
           </div>
 
           {isCustom && (
             <div>
-              <input type="text" value={customTopic} onChange={e => setCustomTopic(e.target.value)} placeholder="e.g., Let's talk about AI in healthcare" required style={{ width: '100%', background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, borderRadius: 8, padding: '0.75rem 1rem', color: t.text, outline: 'none' }} />
+              <input type="text" value={customTopic} onChange={e => setCustomTopic(e.target.value)} placeholder="Ví dụ: Let's talk about AI in healthcare" required style={{ width: '100%', background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, borderRadius: 10, padding: '0.75rem 1rem', color: t.text, outline: 'none', boxSizing: 'border-box' }} />
             </div>
           )}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
-            <button type="button" onClick={onClose} style={{ padding: '0.75rem 1.25rem', borderRadius: 8, border: 'none', background: t.cardBorder, color: t.text, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-            <button type="submit" style={{ padding: '0.75rem 1.5rem', borderRadius: 8, border: 'none', background: `linear-gradient(135deg, ${t.gold}, ${t.goldDark})`, color: '#fff', fontWeight: 600, cursor: 'pointer', opacity: (isCustom && !customTopic.trim()) ? 0.5 : 1 }}>Start Session</button>
+            <button type="button" onClick={onClose} style={{ padding: '0.75rem 1.25rem', borderRadius: 10, border: `1.5px solid ${t.cardBorder}`, background: 'transparent', color: t.text, fontWeight: 700, cursor: 'pointer' }}>Hủy</button>
+            <button type="submit" style={{ padding: '0.75rem 1.5rem', borderRadius: 10, border: 'none', background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, color: '#fff', fontWeight: 700, cursor: 'pointer', opacity: (isCustom && !customTopic.trim()) ? 0.5 : 1, boxShadow: isDark ? '0 4px 14px rgba(16,185,129,0.3)' : '0 4px 14px rgba(0,102,51,0.25)' }}>Bắt đầu</button>
           </div>
         </form>
       </div>

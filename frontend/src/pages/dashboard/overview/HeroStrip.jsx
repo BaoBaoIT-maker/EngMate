@@ -15,7 +15,7 @@ export default function HeroStrip({ t, isDark, username }) {
         Chào {getGreeting()},{' '}
         <span style={{ color: t.green }}>{username}</span>!
       </h1>
-      <p className="mt-2 text-base font-medium" style={{ color: t.textMuted }}>
+      <p className="mt-2 text-base font-semibold" style={{ color: isDark ? '#A7F3D0' : t.textMuted }}>
         Ready to expand your vocabulary today?
       </p>
     </div>
