@@ -1,105 +1,128 @@
+import React from 'react';
+
 function Sk({ w = '100%', h = 16, r = 8, style = {} }) {
   return (
-    <div style={{
-      width: w, height: h, borderRadius: r,
-      background: 'linear-gradient(90deg, var(--sk-from) 25%, var(--sk-to) 50%, var(--sk-from) 75%)',
-      backgroundSize: '200% 100%',
-      animation: 'sk-shimmer 1.6s ease-in-out infinite',
-      flexShrink: 0,
-      ...style,
-    }} />
+    <div
+      style={{
+        width: w,
+        height: h,
+        borderRadius: r,
+        background: 'linear-gradient(90deg, var(--sk-from) 25%, var(--sk-to) 50%, var(--sk-from) 75%)',
+        backgroundSize: '200% 100%',
+        animation: 'sk-shimmer 1.6s ease-in-out infinite',
+        flexShrink: 0,
+        ...style,
+      }}
+    />
   );
 }
 
-export default function DashboardSkeleton({ t, isDark }) {
-  const skFrom = isDark ? 'rgba(16,185,129,0.06)' : '#EAF2EC';
-  const skTo   = isDark ? 'rgba(16,185,129,0.14)' : '#D5E6DB';
+export default function DashboardSkeleton({ isDark }) {
+  const skFrom = isDark ? 'rgba(240, 180, 41, 0.05)' : '#F0ECE1';
+  const skTo = isDark ? 'rgba(240, 180, 41, 0.12)' : '#E2DACE';
 
   const cardStyle = {
-    background: t.card,
-    border: `1px solid ${t.cardBorder}`,
+    background: 'var(--card-bg)',
+    border: '1.5px solid var(--card-border)',
     borderRadius: '24px',
-    padding: '1.5rem',
+    boxShadow: 'var(--card-shadow)',
+    padding: '28px',
+    position: 'relative',
+    overflow: 'hidden',
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto screen-enter"
-      style={{ '--sk-from': skFrom, '--sk-to': skTo }}>
-
-      {/* Hero skeleton */}
-      <div className="mb-8">
-        <Sk w="45%" h={36} r={10} />
-        <Sk w="25%" h={16} r={6} style={{ marginTop: 12 }} />
-      </div>
-
-      {/* Grid: GoalCard | Memory + Heatmap */}
-      <div className="grid grid-cols-1 lg:grid-cols-[330px_1fr] gap-6 mb-6 items-start">
-        {/* GoalCard skeleton */}
-        <div style={{ ...cardStyle, height: 420, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div className="w-full"><Sk w="50%" h={16} r={6} /></div>
-          {/* Circular progress loader */}
-          <div className="w-[180px] h-[180px] rounded-full flex items-center justify-center" style={{ border: `12px solid ${skFrom}` }}>
-            <div className="flex flex-col items-center">
-              <Sk w={36} h={24} r={4} />
-              <Sk w={50} h={10} r={2} style={{ marginTop: 6 }} />
+    <div
+      style={{
+        maxWidth: '1140px',
+        margin: '0 auto',
+        padding: '0 20px 48px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        width: '100%',
+        '--sk-from': skFrom,
+        '--sk-to': skTo,
+      }}
+    >
+      {/* 1. HeroBanner skeleton */}
+      <div style={{ ...cardStyle, padding: '32px 36px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', marginBottom: '24px' }}>
+          <div style={{ flex: 1, minWidth: '260px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <Sk w={36} h={36} r={10} />
+              <Sk w="45%" h={28} r={8} />
             </div>
+            <Sk w="70%" h={16} r={6} />
           </div>
-          <Sk w="80%" h={12} r={4} />
-          <Sk w="100%" h={44} r={100} />
+          <Sk w={160} h={44} r={999} />
         </div>
-
-        {/* Right column skeleton */}
-        <div className="flex flex-col gap-6">
-          {/* Memory skeleton */}
-          <div style={cardStyle}>
-            <Sk w="30%" h={16} r={6} style={{ marginBottom: 20 }} />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[0, 1, 2].map(i => (
-                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl border" style={{ borderColor: t.cardBorder }}>
-                  <Sk w={40} h={40} r={20} />
-                  <div className="flex-1">
-                    <Sk w="50%" h={10} r={3} />
-                    <Sk w="30%" h={18} r={4} style={{ marginTop: 6 }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Heatmap skeleton */}
-          <div style={cardStyle}>
-            <div className="flex justify-between items-center mb-6">
-              <Sk w="35%" h={16} r={6} />
-              <Sk w="15%" h={10} r={4} />
-            </div>
-            <Sk w="100%" h={90} r={8} />
-          </div>
+        <div style={{ display: 'flex', gap: '24px', paddingTop: '20px', borderTop: '1px solid var(--card-border)' }}>
+          <Sk w="20%" h={32} r={8} />
+          <Sk w="20%" h={32} r={8} />
+          <Sk w="20%" h={32} r={8} />
+          <Sk w="20%" h={32} r={8} />
         </div>
       </div>
 
-      {/* Recent skeleton */}
-      <div style={cardStyle}>
-        <div className="flex justify-between items-center mb-5">
-          <Sk w="30%" h={16} r={6} />
-          <Sk w="10%" h={12} r={4} />
+      {/* 2. ActivityHeatmap skeleton */}
+      <div style={{ ...cardStyle, height: '220px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <Sk w={90} h={12} r={4} style={{ marginBottom: 8 }} />
+            <Sk w={160} h={20} r={6} />
+          </div>
+          <Sk w={120} h={14} r={4} />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {[0, 1, 2, 3].map(i => (
-            <div key={i} className="flex items-center justify-between p-4.5 rounded-2xl border" style={{ borderColor: t.cardBorder }}>
-              <div className="flex-1 pr-2">
-                <Sk w="60%" h={16} r={4} />
-                <Sk w="85%" h={12} r={3} style={{ marginTop: 8 }} />
-              </div>
-              <Sk w={24} h={24} r={12} />
+        <Sk w="100%" h={100} r={8} />
+      </div>
+
+      {/* 3. Bento Grid skeleton */}
+      <div className="bento-grid">
+        {/* DailyGoal */}
+        <div style={{ ...cardStyle, height: '380px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ width: '100%' }}>
+            <Sk w={60} h={12} r={4} style={{ marginBottom: 8 }} />
+            <Sk w={120} h={18} r={6} />
+          </div>
+          <div style={{ width: 140, height: 140, borderRadius: '50%', border: `10px solid ${skFrom}` }} />
+          <Sk w="100%" h={48} r={16} />
+        </div>
+
+        {/* MemoryMatrix */}
+        <div style={{ ...cardStyle, height: '380px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Sk w={130} h={18} r={6} />
+            <Sk w={60} h={24} r={999} />
+          </div>
+          <Sk w="100%" h={8} r={4} />
+          <Sk w="100%" h={64} r={16} />
+          <Sk w="100%" h={64} r={16} />
+          <Sk w="100%" h={64} r={16} />
+        </div>
+
+        {/* FlashcardCarousel */}
+        <div style={{ ...cardStyle, height: '380px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Sk w={130} h={18} r={6} />
+            <div style={{ display: 'flex', gap: 6 }}>
+              <Sk w={32} h={32} r={10} />
+              <Sk w={32} h={32} r={10} />
             </div>
-          ))}
+          </div>
+          <Sk w="100%" h={180} r={18} />
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
+            <Sk w={20} h={6} r={999} />
+            <Sk w={6} h={6} r={999} />
+            <Sk w={6} h={6} r={999} />
+          </div>
         </div>
       </div>
 
       <style>{`
         @keyframes sk-shimmer {
-          0%   { background-position: 200% center; }
-          100% { background-position: -200% center; }
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
         }
       `}</style>
     </div>

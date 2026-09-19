@@ -14,6 +14,7 @@
   --card-border: rgba(240, 180, 41, 0.18);
   --card-highlight: rgba(255, 255, 255, 0.9);
   --nav-shadow: 0 8px 40px rgba(28, 20, 7, 0.10), 0 2px 8px rgba(240, 180, 41, 0.08);
+  --card-shadow: 0 4px 24px rgba(28, 20, 7, 0.06);
 
   /* Nav height offsets so body never hides under the fixed nav */
   --nav-h: 64px;
@@ -31,6 +32,7 @@ html.dark {
   --card-border: rgba(240, 180, 41, 0.20);
   --card-highlight: rgba(255, 255, 255, 0.05);
   --nav-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(240, 180, 41, 0.12);
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
 }
 
 /* ── Mobile: bottom tab bar offset ── */
@@ -38,6 +40,19 @@ html.dark {
   :root {
     --nav-offset: 68px;   /* top bar height */
     --bottom-offset: 96px; /* bottom tab bar + gap */
+  }
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 991px) {
+  .bento-grid {
+    grid-template-columns: 1fr;
   }
 }
 

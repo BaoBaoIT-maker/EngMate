@@ -1,65 +1,52 @@
-import { useOutletContext } from 'react-router-dom';
+import React from 'react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import useThemeStore from '../../store/useThemeStore';
 import useAuthStore from '../../store/useAuthStore';
 
-import HeroStrip from './overview/HeroStrip';
-import GoalCard from './overview/GoalCard';
-import HeatmapCard from './overview/HeatmapCard';
-import MemoryCard from './overview/MemoryCard';
-import RecentWordsCard from './overview/RecentWordsCard';
+import HeroBanner from './overview/HeroBanner';
+import ActivityHeatmap from './overview/ActivityHeatmap';
+import DailyGoalCard from './overview/DailyGoalCard';
+import MemoryMatrixCard from './overview/MemoryMatrixCard';
+import FlashcardCarousel from './overview/FlashcardCarousel';
 import DashboardSkeleton from './overview/DashboardSkeleton';
 
 export default function DashboardOverview() {
-  const { isDark, getTheme } = useThemeStore();
-  const t = getTheme();
-  const user = useAuthStore(s => s.user);
+  const { isDark } = useThemeStore();
+  const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
 
-  // Lấy stats và loading trực tiếp từ layout context
+  // Lấy stats và loading trực tiếp từ DashboardLayout context
   const { stats, loading } = useOutletContext();
 
   if (loading || !stats) {
-    return <DashboardSkeleton t={t} isDark={isDark} />;
+    return <DashboardSkeleton isDark={isDark} />;
   }
 
-  const { streak, dailyGoal, memory, heatmap, recent } = stats;
-  const goalPerc = Math.min(Math.round((dailyGoal.completed / dailyGoal.target) * 100), 100);
-  const isGoalReached = dailyGoal.completed >= dailyGoal.target;
-  const memoryTotal = memory.needReview + memory.learning + memory.mastered;
-  const username = user?.profile?.username || 'bạn';
-
   return (
-    <div className="w-full max-w-5xl mx-auto screen-enter" style={{ color: t.text }}>
-      {/* Lời chào: Greeting */}
-      <HeroStrip
-        t={t}
-        isDark={isDark}
-        username={username}
-        streak={streak}
-        totalExp={stats.totalExp}
-        isGoalReached={isGoalReached}
-      />
+    <div
+      style={{
+        maxWidth: '1140px',
+        margin: '0 auto',
+        padding: '0 20px 48px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        width: '100%',
+        animation: 'slide-up 0.4s ease both',
+      }}
+    >
+      {/* 1. Hero Greeting Banner */}
+      <HeroBanner user={user} stats={stats} navigate={navigate} />
 
-      {/* Grid: GoalCard (cột trái) | Memory + Heatmap (cột phải) */}
-      <div className="grid grid-cols-1 lg:grid-cols-[330px_1fr] gap-6 mb-6 items-start">
-        {/* Cột trái: GoalCard */}
-        <GoalCard
-          t={t}
-          isDark={isDark}
-          dailyGoal={dailyGoal}
-          isGoalReached={isGoalReached}
-          goalPerc={goalPerc}
-          memoryTotal={memoryTotal}
-        />
+      {/* 2. Activity Heatmap (Bản đồ kiên trì) */}
+      <ActivityHeatmap heatmap={stats.heatmap} />
 
-        {/* Cột phải: MemoryCard + HeatmapCard */}
-        <div className="flex flex-col gap-6">
-          <MemoryCard t={t} memory={memory} isDark={isDark} />
-          <HeatmapCard t={t} isDark={isDark} heatmap={heatmap} />
-        </div>
+      {/* 3. Bento Grid (Mục tiêu ngày, Kho từ vựng, Thẻ lật từ vựng) */}
+      <div className="bento-grid">
+        <DailyGoalCard dailyGoal={stats.dailyGoal} />
+        <MemoryMatrixCard memory={stats.memory} />
+        <FlashcardCarousel recent={stats.recent} />
       </div>
-
-      {/* Hàng dưới: RecentWordsCard */}
-      <RecentWordsCard t={t} recent={recent} />
     </div>
   );
 }
