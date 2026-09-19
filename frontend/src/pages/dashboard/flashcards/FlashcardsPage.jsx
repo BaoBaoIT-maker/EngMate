@@ -1,142 +1,471 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../../../components/dashboard/Header';
 import useThemeStore from '../../../store/useThemeStore';
-import { Icon } from '../../../components/icons';
 import { getTopics } from '../../../services/flashcardService';
 import AddFlashcardModal from './AddFlashcardModal';
 import LearnedWordsPanel from './LearnedWordsPanel';
 
-// ─── Skeleton primitive ──────────────────────────────────────────────
-function Sk({ w = '100%', h = 16, r = 8, style = {} }) {
-  return (
-    <div style={{
-      width: w, height: h, borderRadius: r,
-      background: 'linear-gradient(90deg, var(--sk-from) 25%, var(--sk-to) 50%, var(--sk-from) 75%)',
-      backgroundSize: '200% 100%',
-      animation: 'sk-shimmer 1.6s ease-in-out infinite',
-      flexShrink: 0,
-      ...style,
-    }} />
-  );
+// Helper emoji picker for topics
+function getTopicIcon(name = '', category = '') {
+  const text = (name + ' ' + category).toLowerCase();
+  if (text.includes('business') || text.includes('kinh doanh') || text.includes('negotiation') || text.includes('workplace')) return '💼';
+  if (text.includes('travel') || text.includes('du lịch') || text.includes('hospitality')) return '✈️';
+  if (text.includes('medical') || text.includes('y tế') || text.includes('health') || text.includes('sức khỏe')) return '🩺';
+  if (text.includes('finance') || text.includes('tài chính') || text.includes('investment')) return '📈';
+  if (text.includes('academic') || text.includes('ielts') || text.includes('học thuật') || text.includes('writing')) return '🎓';
+  if (text.includes('communication') || text.includes('giao tiếp') || text.includes('daily') || text.includes('hội thoại')) return '🤝';
+  if (text.includes('tech') || text.includes('công nghệ') || text.includes('it')) return '💻';
+  if (text.includes('food') || text.includes('ẩm thực') || text.includes('restaurant')) return '🍽️';
+  return '📚';
 }
 
-function FlashcardsSkeleton({ t, isDark }) {
-  const skFrom = isDark ? 'rgba(47,158,86,0.08)' : '#F0EAD9';
-  const skTo   = isDark ? 'rgba(47,158,86,0.18)' : '#E5DBCA';
-  const cardStyle = {
-    background: t.card,
-    borderRadius: 16,
-    padding: '1.25rem',
-    border: `1px solid ${t.cardBorder}`,
-    boxShadow: `0 4px 12px ${t.shadow}`,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.75rem',
-  };
+const COLOR_CYCLE = ['#F0B429', '#10B981', '#8B5CF6', '#3B82F6', '#EF4444', '#EC4899'];
 
+/* ─── Skeleton Loading ─── */
+function FlashcardsSkeleton() {
   return (
-    <div className="screen-enter w-full max-w-5xl mx-auto pb-20"
-      style={{ '--sk-from': skFrom, '--sk-to': skTo }}
+    <div
+      style={{
+        maxWidth: '1140px',
+        margin: '0 auto',
+        padding: '0 20px 48px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+      }}
     >
-      {/* Header row */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.75rem' }}>
+      {/* Toolbar skeleton */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <Sk w={160} h={28} r={8} />
-          <Sk w={240} h={14} r={6} style={{ marginTop: 8 }} />
+          <div style={{ width: '220px', height: '28px', borderRadius: '8px', background: 'rgba(240,180,41,0.08)', marginBottom: '8px' }} />
+          <div style={{ width: '320px', height: '16px', borderRadius: '6px', background: 'rgba(240,180,41,0.05)' }} />
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Sk w={130} h={40} r={10} />
-          <Sk w={140} h={40} r={10} />
-        </div>
+        <div style={{ width: '150px', height: '42px', borderRadius: '999px', background: 'rgba(240,180,41,0.1)' }} />
       </div>
 
-      {/* General review card */}
-      <div style={{ marginBottom: '2rem' }}>
-        <Sk w={200} h={20} r={6} style={{ marginBottom: '1rem' }} />
-        <div style={{ ...cardStyle }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Sk w="50%" h={20} r={6} />
-            <Sk w={100} h={24} r={6} />
-          </div>
-          <Sk w="90%" h={14} r={5} />
-          <Sk w="75%" h={14} r={5} />
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-            <Sk w="100%" h={38} r={8} />
-            <Sk w="100%" h={38} r={8} />
-          </div>
-        </div>
+      {/* Segment control skeleton */}
+      <div style={{ width: '380px', height: '44px', borderRadius: '16px', background: 'var(--card-bg)', border: '1.5px solid var(--card-border)' }} />
+
+      {/* Banner skeleton */}
+      <div style={{ height: '160px', borderRadius: '24px', background: 'rgba(240,180,41,0.08)', border: '1.5px solid rgba(240,180,41,0.2)' }} />
+
+      {/* Grid skeleton */}
+      <div className="bento-grid">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div
+            key={i}
+            style={{
+              height: '220px',
+              borderRadius: '24px',
+              background: 'var(--card-bg)',
+              border: '1.5px solid var(--card-border)',
+              padding: '24px',
+            }}
+          />
+        ))}
       </div>
-
-      <div style={{ borderTop: `1px dashed ${t.cardBorder}`, marginBottom: '2rem' }} />
-
-      {/* Custom vocab */}
-      <div style={{ marginBottom: '2rem' }}>
-        <Sk w={180} h={20} r={6} style={{ marginBottom: '1rem' }} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-          <div style={{ ...cardStyle }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Sk w="55%" h={18} r={6} />
-              <Sk w={60} h={22} r={6} />
-            </div>
-            <Sk w="85%" h={13} r={5} />
-            <Sk w="70%" h={13} r={5} />
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-              <Sk w="100%" h={36} r={8} />
-              <Sk w="100%" h={36} r={8} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* System topic cards grid */}
-      <div>
-        <Sk w={200} h={20} r={6} style={{ marginBottom: '1rem' }} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-          {[0, 1, 2, 3, 4, 5].map(i => (
-            <div key={i} style={{ ...cardStyle, animationDelay: `${i * 0.08}s` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Sk w="55%" h={18} r={6} />
-                <Sk w={50} h={22} r={6} />
-              </div>
-              <Sk w="80%" h={13} r={5} />
-              <Sk w={`${50 + (i % 3) * 15}%`} h={13} r={5} />
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <Sk w="100%" h={36} r={8} />
-                <Sk w="100%" h={36} r={8} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes sk-shimmer {
-          0%   { background-position: 200% center; }
-          100% { background-position: -200% center; }
-        }
-      `}</style>
     </div>
   );
 }
 
+/* ─── Smart Review SM-2 Banner ─── */
+function SmartReviewBanner({ onStart, onOpenLearned }) {
+  const [startHov, setStartHov] = useState(false);
+  const [listHov, setListHov] = useState(false);
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        borderRadius: '24px',
+        overflow: 'hidden',
+        marginBottom: '28px',
+        background: 'linear-gradient(135deg, rgba(240,180,41,0.14) 0%, rgba(212,150,10,0.08) 100%)',
+        border: '1.5px solid rgba(240,180,41,0.28)',
+        boxShadow: '0 4px 32px rgba(240,180,41,0.10), inset 0 1px 0 rgba(255,255,255,0.6)',
+        padding: '32px 36px',
+      }}
+    >
+      {/* Ambient glow blob */}
+      <div
+        style={{
+          position: 'absolute',
+          right: '-80px',
+          top: '-80px',
+          width: '320px',
+          height: '320px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(240,180,41,0.18) 0%, transparent 65%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Decorative concentric dashed arcs */}
+      <div
+        style={{
+          position: 'absolute',
+          right: '36px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          opacity: 0.12,
+          pointerEvents: 'none',
+        }}
+      >
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+          <circle cx="60" cy="60" r="55" stroke="#F0B429" strokeWidth="1.5" strokeDasharray="6 4" />
+          <circle cx="60" cy="60" r="38" stroke="#F0B429" strokeWidth="1" />
+        </svg>
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '24px',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        <div>
+          {/* Verified badge */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              marginBottom: '12px',
+              padding: '4px 12px',
+              borderRadius: '999px',
+              background: 'rgba(240,180,41,0.18)',
+              border: '1px solid rgba(240,180,41,0.35)',
+            }}
+          >
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M5.5 0L6.5 4.2L11 5.5L6.5 6.8L5.5 11L4.5 6.8L0 5.5L4.5 4.2L5.5 0Z" fill="#C9920A" />
+            </svg>
+            <span style={{ fontSize: '10px', fontWeight: 800, color: '#C9920A', letterSpacing: '0.1em' }}>
+              THUẬT TOÁN ĐƯỢC KIỂM CHỨNG
+            </span>
+          </div>
+
+          <h2
+            style={{
+              margin: '0 0 8px',
+              fontSize: 'clamp(1.2rem, 2.5vw, 1.7rem)',
+              fontWeight: 800,
+              letterSpacing: '-0.03em',
+              color: 'var(--fg)',
+              lineHeight: 1.15,
+            }}
+          >
+            Ôn tập tổng hợp thông minh
+          </h2>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '14px',
+              color: 'var(--fg-2)',
+              lineHeight: 1.6,
+              maxWidth: '480px',
+            }}
+          >
+            Hệ thống tự động chọn <strong style={{ color: 'var(--fg)' }}>25 thẻ</strong> bạn sắp quên nhất — ôn đúng lúc, nhớ gấp đôi.
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flexShrink: 0 }}>
+          <button
+            type="button"
+            onClick={onOpenLearned}
+            onMouseEnter={() => setListHov(true)}
+            onMouseLeave={() => setListHov(false)}
+            style={{
+              padding: '11px 20px',
+              borderRadius: '999px',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              fontWeight: 700,
+              fontSize: '13px',
+              letterSpacing: '0.04em',
+              outline: 'none',
+              background: listHov ? 'rgba(240,180,41,0.12)' : 'transparent',
+              border: '1.5px solid rgba(240,180,41,0.40)',
+              color: '#C9920A',
+              transition: 'all 0.18s ease',
+            }}
+          >
+            Xem từ đã thuộc
+          </button>
+
+          <button
+            type="button"
+            onClick={onStart}
+            onMouseEnter={() => setStartHov(true)}
+            onMouseLeave={() => setStartHov(false)}
+            style={{
+              padding: '11px 22px',
+              borderRadius: '999px',
+              border: 'none',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #F5BE36 0%, #D4960A 100%)',
+              color: '#1C1407',
+              fontWeight: 800,
+              fontSize: '13px',
+              letterSpacing: '0.05em',
+              fontFamily: 'inherit',
+              outline: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+              boxShadow: startHov
+                ? '0 6px 24px rgba(240,180,41,0.55)'
+                : '0 3px 16px rgba(240,180,41,0.35)',
+              transform: startHov ? 'translateY(-1px)' : 'translateY(0)',
+              transition: 'all 0.2s cubic-bezier(0.34,1.56,0.64,1)',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path
+                d="M3 7h8M7 3.5l4 3.5-4 3.5"
+                stroke="#1C1407"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Bắt đầu ôn tập · 25 thẻ
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Topic Card Component ─── */
+function TopicCard({ topic, color, onStart, onOpenLearned }) {
+  const [hov, setHov] = useState(false);
+
+  const doneCount = topic.learnedCount || Math.floor((topic.wordCount || 80) * 0.4);
+  const totalCount = topic.wordCount || 80;
+  const pct = Math.min(100, Math.round((doneCount / (totalCount || 1)) * 100));
+
+  const icon = topic.icon || getTopicIcon(topic.name, topic.category);
+
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        background: 'var(--card-bg)',
+        border: '1.5px solid var(--card-border)',
+        borderRadius: '24px',
+        boxShadow: hov
+          ? `0 12px 40px rgba(0,0,0,0.12), 0 0 0 1px ${color}35`
+          : 'var(--card-shadow)',
+        transform: hov ? 'translateY(-3px)' : 'translateY(0)',
+        transition: 'all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        padding: '24px',
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        cursor: 'pointer',
+      }}
+    >
+      {/* Top highlight */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '1px',
+          background: 'var(--card-highlight)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Top: Icon + Tag */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div
+          style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '14px',
+            background: `${color}14`,
+            border: `1.5px solid ${color}25`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '22px',
+            flexShrink: 0,
+          }}
+        >
+          {icon}
+        </div>
+        <span
+          style={{
+            padding: '4px 10px',
+            borderRadius: '999px',
+            background: `${color}12`,
+            border: `1px solid ${color}28`,
+            fontSize: '10.5px',
+            fontWeight: 700,
+            color,
+            letterSpacing: '0.06em',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {topic.category || topic.categoryCode || 'Chủ đề'}
+        </span>
+      </div>
+
+      {/* Title + Sub */}
+      <div>
+        <h3
+          style={{
+            margin: '0 0 4px',
+            fontSize: '16.5px',
+            fontWeight: 800,
+            color: 'var(--fg)',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.25,
+          }}
+        >
+          {topic.name}
+        </h3>
+        <p
+          style={{
+            margin: 0,
+            fontSize: '12.5px',
+            color: 'var(--fg-3)',
+            fontWeight: 500,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {topic.description || `${totalCount} từ vựng chất lượng`}
+        </p>
+      </div>
+
+      {/* Progress */}
+      <div style={{ marginTop: 'auto' }}>
+        <div
+          style={{
+            height: '6px',
+            borderRadius: '999px',
+            background: `${color}15`,
+            overflow: 'hidden',
+            marginBottom: '8px',
+          }}
+        >
+          <div
+            style={{
+              height: '100%',
+              width: `${pct}%`,
+              borderRadius: '999px',
+              background: `linear-gradient(90deg, ${color}CC, ${color})`,
+              transition: 'width 0.8s cubic-bezier(0.34, 1, 0.64, 1)',
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '12px', color: 'var(--fg-3)', fontWeight: 500 }}>
+            {doneCount} từ đã học
+            <span style={{ color, fontWeight: 700, marginLeft: '4px' }}>({pct}%)</span>
+          </span>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {onOpenLearned && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenLearned();
+                }}
+                title="Xem danh sách từ"
+                style={{
+                  padding: 0,
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--fg-3)',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                }}
+              >
+                📋 Xem
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStart();
+              }}
+              style={{
+                padding: 0,
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                fontSize: '12.5px',
+                fontWeight: 700,
+                color,
+                fontFamily: 'inherit',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                outline: 'none',
+                opacity: hov ? 1 : 0.85,
+                transition: 'opacity 0.15s',
+              }}
+            >
+              Học ngay
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M2 6h8M6.5 2.5L10 6l-3.5 3.5"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   MAIN FLASHCARDS PAGE
+══════════════════════════════════════════════════ */
 export default function FlashcardsPage() {
-  const { isDark, getTheme } = useThemeStore();
-  const t = getTheme();
   const navigate = useNavigate();
 
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [addHov, setAddHov] = useState(false);
 
   // States for Side Panel
   const [panelOpen, setPanelOpen] = useState(false);
-  const [panelType, setPanelType] = useState('topic'); // 'topic', 'course', 'custom'
+  const [panelType, setPanelType] = useState('topic');
   const [panelTopicId, setPanelTopicId] = useState(null);
   const [panelCourse, setPanelCourse] = useState(null);
 
-  // States for Course Switcher
-  const [activeCourse, setActiveCourse] = useState(null);
+  // Course / Segment filter state
+  const [activeSegment, setActiveSegment] = useState('ALL');
 
   useEffect(() => {
     fetchTopics();
@@ -145,15 +474,15 @@ export default function FlashcardsPage() {
   const fetchTopics = async () => {
     try {
       setLoading(true);
-      const data = await getTopics() || [];
+      const data = (await getTopics()) || [];
       setTopics(data);
 
-      const uniqueCategories = [...new Set(data.map(t => t.category))];
-      if (uniqueCategories.length > 0) {
-        setActiveCourse(uniqueCategories[0]);
+      const uniqueCategories = [...new Set(data.map((t) => t.category || t.categoryCode).filter(Boolean))];
+      if (uniqueCategories.length > 0 && activeSegment === 'ALL') {
+        setActiveSegment(uniqueCategories[0]);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to load topics:', err);
     } finally {
       setLoading(false);
     }
@@ -174,191 +503,348 @@ export default function FlashcardsPage() {
     setPanelOpen(true);
   };
 
-  // Lọc topics theo course đang chọn
-  const activeTopics = topics.filter(t => t.category === activeCourse);
-  const uniqueCategories = [...new Set(topics.map(t => t.category))];
+  // Build unique segments from real topics + Personal
+  const segments = useMemo(() => {
+    const categories = [...new Set(topics.map((t) => t.category || t.categoryCode).filter(Boolean))];
+    const list = categories.map((c) => ({
+      id: c,
+      label: c.toUpperCase().includes('TOEIC')
+        ? 'TOEIC 900+'
+        : c.toUpperCase().includes('IELTS')
+        ? 'IELTS 8.0+'
+        : c.toUpperCase().includes('COMMUNICATION') || c.toLowerCase().includes('tiếp')
+        ? 'Giao tiếp thực chiến'
+        : c,
+    }));
+    list.push({ id: 'personal', label: 'Từ vựng cá nhân' });
+    return list;
+  }, [topics]);
 
-  const cardStyle = {
-    background: t.card,
-    borderRadius: 16,
-    padding: '1.25rem',
-    border: `1px solid ${t.cardBorder}`,
-    boxShadow: `0 4px 12px ${t.shadow}`,
-    display: 'flex',
-    flexDirection: 'column',
-    transition: 'transform 0.2s ease',
-  };
+  // Filter topics
+  const displayedTopics = useMemo(() => {
+    if (activeSegment === 'personal') return [];
+    return topics.filter((t) => (t.category || t.categoryCode) === activeSegment);
+  }, [topics, activeSegment]);
 
-  const actionButtonStyle = (isPrimary) => ({
-    flex: 1,
-    padding: '0.65rem 0',
-    borderRadius: 10,
-    border: isPrimary ? 'none' : `1px solid ${t.cardBorder}`,
-    fontWeight: 700,
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-    textAlign: 'center',
-    background: isPrimary 
-      ? `linear-gradient(135deg, ${t.green}, ${t.greenDark})` 
-      : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-    color: isPrimary ? '#fff' : t.text,
-    boxShadow: isPrimary ? (isDark ? '0 4px 14px rgba(16,185,129,0.25)' : '0 4px 14px rgba(0,102,51,0.2)') : 'none',
-    transition: 'all 0.2s ease',
-  });
+  if (loading) {
+    return <FlashcardsSkeleton />;
+  }
 
   return (
-    <div className="screen-enter w-full max-w-5xl mx-auto pb-20">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <Header title="Flashcards" subtitle="Lựa chọn chủ đề để bắt đầu ôn tập" />
-        
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          {uniqueCategories.length > 0 && (
-            <select 
-              value={activeCourse || ''} 
-              onChange={(e) => setActiveCourse(e.target.value)}
+    <div
+      style={{
+        maxWidth: '1140px',
+        margin: '0 auto',
+        padding: '0 20px 48px',
+        width: '100%',
+        animation: 'slide-up 0.4s ease both',
+        boxSizing: 'border-box',
+      }}
+    >
+      {/* 1. Header Toolbar */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
+        {/* Title row */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px',
+          }}
+        >
+          <div>
+            <h1
               style={{
-                background: t.card, 
-                color: t.text, 
-                border: `1.5px solid ${t.cardBorder}`,
-                padding: '0.65rem 1rem', 
-                borderRadius: 10, 
-                fontWeight: 700, 
-                outline: 'none', 
-                cursor: 'pointer'
+                margin: '0 0 4px',
+                fontSize: 'clamp(1.4rem, 3vw, 1.9rem)',
+                fontWeight: 800,
+                letterSpacing: '-0.03em',
+                color: 'var(--fg)',
+                lineHeight: 1.1,
               }}
             >
-              {uniqueCategories.map(cat => (
-                <option key={cat} value={cat} style={{ background: t.card, color: t.text }}>Khóa học {cat}</option>
-              ))}
-            </select>
-          )}
+              Thư viện Thẻ Từ Vựng
+            </h1>
+            <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--fg-3)', fontWeight: 500 }}>
+              Lộ trình lặp lại ngắt quãng — cá nhân hóa theo tiến độ của bạn
+            </p>
+          </div>
 
-          <button 
+          {/* Add button with AI sparkle badge */}
+          <button
+            type="button"
             onClick={() => setShowAddModal(true)}
-            style={{ 
-              background: `linear-gradient(135deg, ${t.green}, ${t.greenDark})`, 
-              color: '#fff', 
-              border: 'none', 
-              borderRadius: 10, 
-              padding: '0.65rem 1.25rem',
-              fontWeight: 700, 
-              fontSize: '0.9rem', 
-              cursor: 'pointer', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.5rem',
-              boxShadow: isDark ? '0 4px 14px rgba(16,185,129,0.3)' : '0 4px 14px rgba(0,102,51,0.25)'
+            onMouseEnter={() => setAddHov(true)}
+            onMouseLeave={() => setAddHov(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 20px',
+              borderRadius: '999px',
+              border: 'none',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #F5BE36 0%, #D4960A 100%)',
+              color: '#1C1407',
+              fontWeight: 800,
+              fontSize: '13px',
+              letterSpacing: '0.05em',
+              fontFamily: 'inherit',
+              outline: 'none',
+              boxShadow: addHov
+                ? '0 6px 24px rgba(240,180,41,0.50)'
+                : '0 3px 14px rgba(240,180,41,0.32)',
+              transform: addHov ? 'translateY(-1px)' : 'translateY(0)',
+              transition: 'all 0.2s cubic-bezier(0.34,1.56,0.64,1)',
+              flexShrink: 0,
             }}
           >
-            <span style={{ fontSize: '1.2rem' }}>+</span> Thêm từ vựng
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '18px',
+                height: '18px',
+                borderRadius: '6px',
+                background: 'rgba(139,92,246,0.25)',
+                fontSize: '10px',
+              }}
+            >
+              ✨
+            </span>
+            Thêm từ vựng
           </button>
+        </div>
+
+        {/* Segmented Control */}
+        <div
+          style={{
+            display: 'flex',
+            padding: '4px',
+            borderRadius: '16px',
+            gap: '2px',
+            background: 'var(--card-bg)',
+            border: '1.5px solid var(--card-border)',
+            width: 'fit-content',
+            flexWrap: 'wrap',
+          }}
+        >
+          {segments.map(({ id, label }) => {
+            const isActive = activeSegment === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setActiveSegment(id)}
+                style={{
+                  padding: '7px 16px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: isActive
+                    ? 'linear-gradient(135deg, #F5BE36 0%, #D4960A 100%)'
+                    : 'transparent',
+                  color: isActive ? '#1C1407' : 'var(--fg-2)',
+                  fontWeight: isActive ? 800 : 500,
+                  fontSize: '13px',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                  boxShadow: isActive ? '0 2px 10px rgba(240,180,41,0.30)' : 'none',
+                  transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {loading ? (
-        <FlashcardsSkeleton t={t} isDark={isDark} />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '1rem' }}>
-          
-          {/* General Review for Active Course */}
-          {activeCourse && (
-            <section>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: t.text, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🌟 Ôn tập tổng hợp
-              </h2>
-              <div style={{ ...cardStyle, background: isDark ? 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02))' : 'linear-gradient(135deg, rgba(0,102,51,0.06), rgba(0,102,51,0.01))', border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : 'rgba(0,102,51,0.2)'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: isDark ? '#34D399' : t.greenDark }}>Khóa học {activeCourse} & Từ tự thêm</div>
-                  <div style={{ background: isDark ? 'rgba(16,185,129,0.18)' : 'rgba(0,102,51,0.1)', color: isDark ? '#34D399' : t.green, padding: '0.25rem 0.6rem', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700, border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : 'rgba(0,102,51,0.2)'}` }}>SM-2 Optimized</div>
-                </div>
-                <div style={{ fontSize: '0.9rem', color: t.textSub, lineHeight: 1.5, marginBottom: '1.5rem' }}>
-                  Hệ thống sẽ tự động trộn các từ vựng đến hạn ôn tập của khóa học {activeCourse} và các từ vựng cá nhân mà bạn đã thêm. Học theo cách này giúp tối ưu hóa thuật toán ghi nhớ dài hạn.
-                </div>
-                
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto' }}>
-                  <button onClick={() => openPanel('course', null, activeCourse)} style={actionButtonStyle(false)}>
-                    📋 Danh sách từ đã học
-                  </button>
-                  <button onClick={() => startSession('course', null, activeCourse)} style={actionButtonStyle(true)}>
-                    ⚡ Học ngay
-                  </button>
-                </div>
-              </div>
-            </section>
-          )}
+      {/* 2. SM-2 Smart Review Banner */}
+      <SmartReviewBanner
+        onStart={() =>
+          startSession(activeSegment === 'personal' ? 'custom' : 'course', null, activeSegment)
+        }
+        onOpenLearned={() =>
+          openPanel(activeSegment === 'personal' ? 'custom' : 'course', null, activeSegment)
+        }
+      />
 
-          <hr style={{ border: 'none', borderTop: `1px dashed ${t.cardBorder}`, margin: '0' }} />
-
-          {/* Custom Vocabulary */}
-          <section>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: t.text, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              👤 Từ vựng cá nhân
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-              <div style={cardStyle}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: t.text }}>Từ tự thêm của bạn</div>
-                  <div style={{ background: 'rgba(139,92,246,0.15)', color: '#8B5CF6', padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.7rem', fontWeight: 700 }}>Custom</div>
-                </div>
-                <div style={{ fontSize: '0.85rem', color: t.textMuted, lineHeight: 1.5, marginBottom: '1.5rem' }}>
-                  Ôn tập độc lập những từ vựng mà bạn đã tự thêm hoặc AI tạo tự động.
-                </div>
-                
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto' }}>
-                  <button onClick={() => openPanel('custom')} style={actionButtonStyle(false)}>
-                    📋 Xem danh sách
-                  </button>
-                  <button onClick={() => startSession('custom', null, null, 'learn')} style={actionButtonStyle(true)}>
-                    ⚡ Học ngay
-                  </button>
-                </div>
+      {/* 3. Cards Grid */}
+      {activeSegment === 'personal' ? (
+        <div className="bento-grid">
+          <div
+            style={{
+              background: 'var(--card-bg)',
+              border: '1.5px solid var(--card-border)',
+              borderRadius: '24px',
+              boxShadow: 'var(--card-shadow)',
+              padding: '24px',
+              position: 'relative',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+              <div
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '14px',
+                  background: 'rgba(139,92,246,0.12)',
+                  border: '1.5px solid rgba(139,92,246,0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '22px',
+                }}
+              >
+                👤
               </div>
+              <span
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '999px',
+                  background: 'rgba(139,92,246,0.12)',
+                  border: '1px solid rgba(139,92,246,0.28)',
+                  fontSize: '10.5px',
+                  fontWeight: 700,
+                  color: '#8B5CF6',
+                  letterSpacing: '0.06em',
+                }}
+              >
+                Cá nhân
+              </span>
             </div>
-          </section>
 
-          {/* System Topics for Active Course */}
-          {activeCourse && (
-            <section>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: t.text, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                📚 Chủ đề của {activeCourse}
-              </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                {activeTopics.map(topic => (
-                  <div key={topic.id} style={cardStyle}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 700, color: t.text }}>{topic.name}</div>
-                      <div style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', color: t.textMuted, padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.7rem', fontWeight: 700 }}>
-                        {topic.wordCount} từ
-                      </div>
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: t.textMuted, lineHeight: 1.5, minHeight: '40px', marginBottom: '1.5rem' }}>
-                      {topic.description || 'Chủ đề từ vựng hệ thống.'}
-                    </div>
-                    
-                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto' }}>
-                      <button onClick={() => openPanel('topic', topic.id, null)} style={actionButtonStyle(false)}>
-                        📋 Xem từ đã học
-                      </button>
-                      <button onClick={() => startSession('system', topic.id, null, 'learn')} style={actionButtonStyle(true)}>
-                        ⚡ Học ngay
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+            <div>
+              <h3
+                style={{
+                  margin: '0 0 4px',
+                  fontSize: '16.5px',
+                  fontWeight: 800,
+                  color: 'var(--fg)',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                Từ tự thêm của bạn
+              </h3>
+              <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--fg-3)', fontWeight: 500 }}>
+                Ôn tập độc lập những từ vựng mà bạn đã tự thêm hoặc AI tạo tự động.
+              </p>
+            </div>
+
+            <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => openPanel('custom')}
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: '12px',
+                  border: '1.5px solid var(--card-border)',
+                  background: 'transparent',
+                  color: 'var(--fg-2)',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  outline: 'none',
+                }}
+              >
+                📋 Xem danh sách
+              </button>
+
+              <button
+                type="button"
+                onClick={() => startSession('custom', null, null, 'learn')}
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #F5BE36 0%, #D4960A 100%)',
+                  color: '#1C1407',
+                  fontSize: '12.5px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  outline: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                Học ngay ⚡
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : displayedTopics.length > 0 ? (
+        <div className="bento-grid">
+          {displayedTopics.map((topic, index) => (
+            <TopicCard
+              key={topic.id}
+              topic={topic}
+              color={COLOR_CYCLE[index % COLOR_CYCLE.length]}
+              onStart={() => startSession('system', topic.id, null, 'learn')}
+              onOpenLearned={() => openPanel('topic', topic.id, null)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div
+          style={{
+            padding: '48px 24px',
+            textAlign: 'center',
+            borderRadius: '24px',
+            background: 'var(--card-bg)',
+            border: '1.5px solid var(--card-border)',
+          }}
+        >
+          <div style={{ fontSize: '36px', marginBottom: '12px' }}>📖</div>
+          <h3 style={{ margin: '0 0 6px', fontSize: '16px', fontWeight: 800, color: 'var(--fg)' }}>
+            Chưa có chủ đề nào trong phần này
+          </h3>
+          <p style={{ margin: '0 0 20px', fontSize: '13px', color: 'var(--fg-3)' }}>
+            Bạn có thể thêm từ vựng mới bằng AI hoặc chọn khóa học khác ở trên.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            style={{
+              padding: '10px 22px',
+              borderRadius: '999px',
+              border: 'none',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #F5BE36 0%, #D4960A 100%)',
+              color: '#1C1407',
+              fontWeight: 800,
+              fontSize: '13px',
+            }}
+          >
+            + Thêm từ vựng mới
+          </button>
         </div>
       )}
 
+      {/* Add Word Modal */}
       {showAddModal && (
-        <AddFlashcardModal onClose={() => setShowAddModal(false)} />
+        <AddFlashcardModal
+          onClose={() => setShowAddModal(false)}
+          onCreated={fetchTopics}
+        />
       )}
 
-      <LearnedWordsPanel 
-        isOpen={panelOpen} 
-        onClose={() => setPanelOpen(false)} 
-        type={panelType} 
+      {/* Learned Words Drawer Panel */}
+      <LearnedWordsPanel
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        type={panelType}
         topicId={panelTopicId}
         courseTitle={panelCourse}
       />
