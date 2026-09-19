@@ -502,7 +502,16 @@ function LogoBadge() {
 
 function AvatarDropdown({ user, logout, navigate, isPremium, dark, size = 38 }) {
   const [open, setOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const ref = useRef(null);
+
+  const avatarUrl = user?.profile?.avatarUrl || user?.avatar_url || user?.avatar || null;
+  const displayName = user?.profile?.username || user?.profile?.fullName || user?.name || user?.email?.split('@')[0] || 'Học viên';
+  const displayEmail = user?.email || '';
+
+  useEffect(() => {
+    setImgError(false);
+  }, [avatarUrl]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -514,9 +523,6 @@ function AvatarDropdown({ user, logout, navigate, isPremium, dark, size = 38 }) 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const displayName = user?.name || user?.email?.split('@')[0] || 'Học viên';
-  const displayEmail = user?.email || '';
-
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button
@@ -526,9 +532,6 @@ function AvatarDropdown({ user, logout, navigate, isPremium, dark, size = 38 }) 
           width: size,
           height: size,
           borderRadius: '50%',
-          background: user?.avatar_url
-            ? `url(${user.avatar_url}) center/cover no-repeat`
-            : 'linear-gradient(135deg, #E8DCC8, #C4A97A)',
           border: isPremium
             ? '2px solid #F0B429'
             : '2px solid rgba(240, 180, 41, 0.4)',
@@ -540,10 +543,19 @@ function AvatarDropdown({ user, logout, navigate, isPremium, dark, size = 38 }) 
           cursor: 'pointer',
           outline: 'none',
           padding: 0,
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #E8DCC8, #C4A97A)',
         }}
         title={displayName}
       >
-        {!user?.avatar_url && (
+        {avatarUrl && !imgError ? (
+          <img
+            src={avatarUrl}
+            alt={displayName}
+            onError={() => setImgError(true)}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
           <svg width={size * 0.52} height={size * 0.52} viewBox="0 0 20 20" fill="none">
             <circle cx="10" cy="8" r="3.5" fill="#6B6047" opacity="0.65" />
             <path
