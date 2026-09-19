@@ -3,6 +3,7 @@ import { useSocket } from '../../hooks/useSocket';
 import useAuthStore from '../../store/useAuthStore';
 import useThemeStore from '../../store/useThemeStore';
 import api from '../../services/api';
+import { useDraggableBubble } from '../../hooks/useDraggableBubble';
 
 export default function SupportChatWidget() {
   const { user } = useAuthStore();
@@ -11,6 +12,21 @@ export default function SupportChatWidget() {
   const { socket } = useSocket();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [activeZ, setActiveZ] = useState(1000);
+  const {
+    position,
+    isDragging,
+    popupPosition,
+    dragProps,
+    headerDragProps,
+  } = useDraggableBubble({
+    storageKey: 'engmate_support_bubble_pos',
+    defaultOffset: { right: 28, bottom: 28 },
+    buttonSize: 58,
+    popupWidth: 360,
+    popupHeight: 520,
+  });
+
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState(() => {
     try {
@@ -128,154 +144,310 @@ export default function SupportChatWidget() {
 
   return (
     <>
-      {/* Floating button */}
-      <div
-        style={{
-          position: 'fixed', bottom: 28, right: 28, zIndex: 1000,
-          display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12,
-        }}
-      >
-        {/* Chat window */}
-        {isOpen && (
+      {/* Chat window */}
+      {isOpen && (
+        <div
+          onMouseDown={() => setActiveZ(1005)}
+          style={{
+            position: 'fixed',
+            left: popupPosition.x,
+            top: popupPosition.y,
+            width: popupPosition.width,
+            height: popupPosition.height,
+            zIndex: activeZ,
+            background: isDark ? 'rgba(18,18,24,0.97)' : 'rgba(255,255,255,0.98)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderRadius: 20,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+            border: `1px solid ${t.cardBorder}`,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            animation: 'scale-up 0.2s ease',
+          }}
+        >
+          {/* Header (Kéo để di chuyển) */}
           <div
+            {...headerDragProps}
+            title="Kéo để di chuyển cửa sổ"
             style={{
-              width: 360, height: 520,
-              background: isDark ? 'rgba(18,18,24,0.97)' : 'rgba(255,255,255,0.98)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: 20,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-              border: `1px solid ${t.cardBorder}`,
-              display: 'flex', flexDirection: 'column', overflow: 'hidden',
-              animation: 'scale-up 0.2s ease',
-            }}
-          >
-            {/* Header */}
-            <div style={{
+              ...headerDragProps.style,
               padding: '14px 18px',
               background: `linear-gradient(135deg, #F0B429, #D97706)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
                   background: 'rgba(255,255,255,0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem'
-                }}>🎧</div>
-                <div>
-                  <div style={{ fontWeight: 700, color: '#fff', fontSize: '0.95rem' }}>Hỗ trợ EngMate</div>
-                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.85)' }}>
-                    <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#86efac', marginRight: 5 }} />
-                    Đội ngũ hỗ trợ
-                  </div>
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.1rem',
+                }}
+              >
+                🎧
+              </div>
+              <div>
+                <div
+                  style={{
+                    fontWeight: 700,
+                    color: '#fff',
+                    fontSize: '0.95rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  Hỗ trợ EngMate
+                  <span
+                    style={{ fontSize: '0.75rem', opacity: 0.6 }}
+                    title="Kéo để di chuyển"
+                  >
+                    ⠿
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.85)' }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: '#86efac',
+                      marginRight: 5,
+                    }}
+                  />
+                  Đội ngũ hỗ trợ
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >✕</button>
             </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                border: 'none',
+                color: '#fff',
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              ✕
+            </button>
+          </div>
 
-            {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {messages.length === 0 && (
-                <div style={{ textAlign: 'center', color: t.textSub, fontSize: '0.875rem', marginTop: 40 }}>
-                  <div style={{ fontSize: '2rem', marginBottom: 8 }}>👋</div>
-                  <div>Xin chào! Bạn cần hỗ trợ gì?</div>
-                  <div style={{ fontSize: '0.8rem', marginTop: 4 }}>Nhóm hỗ trợ sẽ trả lời sớm nhất có thể.</div>
+          {/* Messages */}
+          <div
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+            }}
+          >
+            {messages.length === 0 && (
+              <div
+                style={{
+                  textAlign: 'center',
+                  color: t.textSub,
+                  fontSize: '0.875rem',
+                  marginTop: 40,
+                }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: 8 }}>👋</div>
+                <div>Xin chào! Bạn cần hỗ trợ gì?</div>
+                <div style={{ fontSize: '0.8rem', marginTop: 4 }}>
+                  Nhóm hỗ trợ sẽ trả lời sớm nhất có thể.
                 </div>
-              )}
-              {messages.map(msg => {
-                const isMe = msg.senderRole === 'USER';
-                return (
-                  <div key={msg.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                    <div style={{ maxWidth: '80%' }}>
-                      <div style={{
+              </div>
+            )}
+            {messages.map((msg) => {
+              const isMe = msg.senderRole === 'USER';
+              return (
+                <div
+                  key={msg.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: isMe ? 'flex-end' : 'flex-start',
+                  }}
+                >
+                  <div style={{ maxWidth: '80%' }}>
+                    <div
+                      style={{
                         padding: '9px 13px',
                         borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                         background: isMe
                           ? `linear-gradient(135deg, #F0B429, #D97706)`
-                          : (isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'),
+                          : isDark
+                          ? 'rgba(255,255,255,0.08)'
+                          : '#f0f0f0',
                         color: isMe ? '#fff' : t.text,
-                        fontSize: '0.9rem', lineHeight: 1.5,
-                      }}>
-                        {msg.content}
-                      </div>
-                      <div style={{ fontSize: '0.7rem', color: t.textSub, marginTop: 3, textAlign: isMe ? 'right' : 'left', paddingInline: 4 }}>
-                        {formatTime(msg.createdAt)}
-                      </div>
+                        fontSize: '0.9rem',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {msg.content}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.7rem',
+                        color: t.textSub,
+                        marginTop: 3,
+                        textAlign: isMe ? 'right' : 'left',
+                        paddingInline: 4,
+                      }}
+                    >
+                      {formatTime(msg.createdAt)}
                     </div>
                   </div>
-                );
-              })}
-              <div ref={bottomRef} />
-            </div>
+                </div>
+              );
+            })}
+            <div ref={bottomRef} />
+          </div>
 
-            {/* Input */}
-            <div style={{
+          {/* Input */}
+          <div
+            style={{
               padding: '10px 12px',
               borderTop: `1px solid ${t.cardBorder}`,
-              display: 'flex', gap: 8, alignItems: 'flex-end',
-            }}>
-              <textarea
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Nhập tin nhắn..."
-                rows={1}
-                style={{
-                  flex: 1, resize: 'none', border: `1.5px solid ${t.inputBorder}`,
-                  borderRadius: 12, padding: '8px 12px', fontSize: '0.9rem',
-                  background: t.inputBg, color: t.text, outline: 'none',
-                  lineHeight: 1.5, maxHeight: 80, overflowY: 'auto',
-                }}
-              />
-              <button
-                onClick={sendMessage}
-                disabled={!input.trim() || isSending}
-                style={{
-                  width: 38, height: 38, borderRadius: '50%', border: 'none',
-                  background: input.trim() ? `linear-gradient(135deg, #F0B429, #D97706)` : t.cardBorder,
-                  color: '#fff', cursor: input.trim() ? 'pointer' : 'not-allowed',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0, transition: 'all 0.2s', fontSize: '1.1rem',
-                }}
-              >
-                ➤
-              </button>
-            </div>
+              display: 'flex',
+              gap: 8,
+              alignItems: 'flex-end',
+            }}
+          >
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Nhập tin nhắn..."
+              rows={1}
+              style={{
+                flex: 1,
+                resize: 'none',
+                border: `1.5px solid ${t.inputBorder}`,
+                borderRadius: 12,
+                padding: '8px 12px',
+                fontSize: '0.9rem',
+                background: t.inputBg,
+                color: t.text,
+                outline: 'none',
+                lineHeight: 1.5,
+                maxHeight: 80,
+                overflowY: 'auto',
+              }}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || isSending}
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: '50%',
+                border: 'none',
+                background: input.trim()
+                  ? `linear-gradient(135deg, #F0B429, #D97706)`
+                  : t.cardBorder,
+                color: '#fff',
+                cursor: input.trim() ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                transition: 'all 0.2s',
+                fontSize: '1.1rem',
+              }}
+            >
+              ➤
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Floating button (Kéo di chuyển tự do) */}
+      <button
+        {...dragProps}
+        onClick={handleOpen}
+        onMouseDown={(e) => {
+          setActiveZ(1005);
+          dragProps.onMouseDown(e);
+        }}
+        onTouchStart={(e) => {
+          setActiveZ(1005);
+          dragProps.onTouchStart(e);
+        }}
+        style={{
+          ...dragProps.style,
+          position: 'fixed',
+          left: position.x,
+          top: position.y,
+          zIndex: activeZ,
+          width: 58,
+          height: 58,
+          borderRadius: '50%',
+          border: 'none',
+          background: `linear-gradient(135deg, #F0B429, #D97706)`,
+          color: '#fff',
+          fontSize: isOpen ? '1.8rem' : '1.5rem',
+          boxShadow: isDragging
+            ? '0 14px 32px rgba(240,180,41,0.7)'
+            : '0 8px 24px rgba(240,180,41,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          animation: isOpen || isDragging ? 'none' : 'mic-breathe 2.5s ease-in-out infinite',
+          transition: isDragging
+            ? 'none'
+            : 'transform 0.3s ease, background 0.3s, box-shadow 0.2s',
+          transform: isOpen
+            ? isDragging
+              ? 'rotate(90deg) scale(1.08)'
+              : 'rotate(90deg)'
+            : isDragging
+            ? 'scale(1.08)'
+            : 'rotate(0deg)',
+        }}
+        title={isOpen ? 'Đóng' : 'Liên hệ hỗ trợ (Kéo để di chuyển)'}
+      >
+        {isOpen ? '✕' : '💬'}
+        {unread > 0 && !isOpen && (
+          <div
+            style={{
+              position: 'absolute',
+              top: -4,
+              right: -4,
+              background: '#ef4444',
+              color: '#fff',
+              width: 20,
+              height: 20,
+              borderRadius: '50%',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '2px solid #fff',
+            }}
+          >
+            {unread > 9 ? '9+' : unread}
           </div>
         )}
-
-        <button
-          onClick={handleOpen}
-          style={{
-            width: 58, height: 58, borderRadius: '50%', border: 'none',
-            background: `linear-gradient(135deg, #F0B429, #D97706)`,
-            color: '#fff', cursor: 'pointer', fontSize: isOpen ? '1.8rem' : '1.5rem',
-            boxShadow: '0 8px 24px rgba(240,180,41,0.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            animation: isOpen ? 'none' : 'mic-breathe 2.5s ease-in-out infinite',
-            position: 'relative',
-            transition: 'transform 0.3s ease, background 0.3s',
-            transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
-          }}
-          title={isOpen ? "Đóng" : "Liên hệ hỗ trợ"}
-        >
-          {isOpen ? '✕' : '💬'}
-          {unread > 0 && !isOpen && (
-            <div style={{
-              position: 'absolute', top: -4, right: -4,
-              background: '#ef4444', color: '#fff',
-              width: 20, height: 20, borderRadius: '50%',
-              fontSize: '0.7rem', fontWeight: 700,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '2px solid #fff',
-            }}>
-              {unread > 9 ? '9+' : unread}
-            </div>
-          )}
-        </button>
-      </div>
+      </button>
     </>
   );
 }

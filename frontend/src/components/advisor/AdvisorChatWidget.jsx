@@ -3,6 +3,7 @@ import useAuthStore from '../../store/useAuthStore';
 import useThemeStore from '../../store/useThemeStore';
 import api from '../../services/api';
 import ReactMarkdown from 'react-markdown';
+import { useDraggableBubble } from '../../hooks/useDraggableBubble';
 
 // ─── Suggested questions để gợi ý cho user ────────────────────────────────
 const SUGGESTED_QUESTIONS = [
@@ -18,6 +19,20 @@ export default function AdvisorChatWidget() {
   const t = getTheme();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [activeZ, setActiveZ] = useState(999);
+  const {
+    position,
+    isDragging,
+    popupPosition,
+    dragProps,
+    headerDragProps,
+  } = useDraggableBubble({
+    storageKey: 'engmate_advisor_bubble_pos',
+    defaultOffset: { right: 98, bottom: 28 },
+    buttonSize: 54,
+    popupWidth: 370,
+    popupHeight: 540,
+  });
   // Load messages từ localStorage khi component mount
   const [messages, setMessages] = useState(() => {
     try {
@@ -215,56 +230,98 @@ export default function AdvisorChatWidget() {
 
   return (
     <>
-      {/* Container nằm bên trái SupportChatWidget (bottom 28, right 100) */}
-      <div style={{
-        position: 'fixed',
-        bottom: 28,
-        right: 100, // Để không che SupportChatWidget
-        zIndex: 999,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-end',
-        gap: 12,
-      }}>
-        {/* Chat Window */}
-        {isOpen && (
-          <div style={{
-            width: 370,
-            height: 540,
+      {/* Chat Window */}
+      {isOpen && (
+        <div
+          onMouseDown={() => setActiveZ(1005)}
+          style={{
+            position: 'fixed',
+            left: popupPosition.x,
+            top: popupPosition.y,
+            width: popupPosition.width,
+            height: popupPosition.height,
+            zIndex: activeZ,
             background: isDark ? 'rgba(15,15,20,0.97)' : 'rgba(255,255,255,0.98)',
             backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
             borderRadius: 20,
             boxShadow: `0 24px 64px rgba(0,0,0,0.3), 0 0 0 1px ${t.cardBorder}`,
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
             animation: 'scale-up 0.2s ease',
-          }}>
-
-            {/* Header */}
-            <div style={{
+          }}
+        >
+          {/* Header */}
+          <div
+            {...headerDragProps}
+            title="Kéo để di chuyển cửa sổ"
+            style={{
+              ...headerDragProps.style,
               padding: '14px 16px',
               background: 'linear-gradient(135deg, #6C63FF, #4F46E5)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexShrink: 0,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{
-                  width: 38, height: 38, borderRadius: '50%',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: '50%',
                   background: 'rgba(255,255,255,0.15)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   fontSize: '1.2rem',
-                }}>✦</div>
-                <div>
-                  <div style={{ fontWeight: 700, color: '#fff', fontSize: '0.95rem' }}>AI Tư vấn EngMate</div>
-                  <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#86efac' }} />
-                    Hỏi gì cũng biết · Trả lời bằng AI
-                  </div>
+                }}
+              >
+                ✦
+              </div>
+              <div>
+                <div
+                  style={{
+                    fontWeight: 700,
+                    color: '#fff',
+                    fontSize: '0.95rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  AI Tư vấn EngMate
+                  <span
+                    style={{ fontSize: '0.75rem', opacity: 0.6 }}
+                    title="Kéo để di chuyển"
+                  >
+                    ⠿
+                  </span>
+                </div>
+                <div
+                  style={{
+                    fontSize: '0.72rem',
+                    color: 'rgba(255,255,255,0.8)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: '#86efac',
+                    }}
+                  />
+                  Hỏi gì cũng biết · Trả lời bằng AI
                 </div>
               </div>
+            </div>
               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                 {/* Nút xóa lịch sử */}
                 <button
@@ -443,25 +500,47 @@ export default function AdvisorChatWidget() {
           </div>
         )}
 
-        {/* Floating bubble button */}
+        {/* Floating bubble button (Kéo di chuyển tự do) */}
         <button
-          onClick={() => setIsOpen(o => !o)}
+          {...dragProps}
+          onClick={() => setIsOpen((o) => !o)}
+          onMouseDown={(e) => {
+            setActiveZ(1005);
+            dragProps.onMouseDown(e);
+          }}
+          onTouchStart={(e) => {
+            setActiveZ(1005);
+            dragProps.onTouchStart(e);
+          }}
           style={{
-            width: 54, height: 54, borderRadius: '50%', border: 'none',
+            ...dragProps.style,
+            position: 'fixed',
+            left: position.x,
+            top: position.y,
+            zIndex: activeZ,
+            width: 54,
+            height: 54,
+            borderRadius: '50%',
+            border: 'none',
             background: isOpen
               ? 'linear-gradient(135deg, #4F46E5, #6C63FF)'
               : 'linear-gradient(135deg, #6C63FF, #4F46E5)',
-            color: '#fff', cursor: 'pointer', fontSize: '1.4rem',
-            boxShadow: '0 8px 24px rgba(108,99,255,0.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            animation: 'mic-breathe 3s ease-in-out infinite',
-            transition: 'all 0.2s',
+            color: '#fff',
+            fontSize: '1.4rem',
+            boxShadow: isDragging
+              ? '0 14px 32px rgba(108,99,255,0.7)'
+              : '0 8px 24px rgba(108,99,255,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: isOpen || isDragging ? 'none' : 'mic-breathe 3s ease-in-out infinite',
+            transition: isDragging ? 'none' : 'all 0.2s',
+            transform: isDragging ? 'scale(1.08)' : 'scale(1)',
           }}
-          title="AI Tư vấn EngMate"
+          title={isOpen ? 'Đóng' : 'AI Tư vấn EngMate (Kéo để di chuyển)'}
         >
           {isOpen ? '✕' : '✦'}
         </button>
-      </div>
 
       {/* Inline CSS cho blink cursor và spin */}
       <style>{`
