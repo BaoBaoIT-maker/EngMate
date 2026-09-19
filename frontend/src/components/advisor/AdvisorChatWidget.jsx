@@ -110,10 +110,19 @@ export default function AdvisorChatWidget() {
     setIsStreaming(true);
 
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+      };
+      const token = useAuthStore.getState().accessToken;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       // Gọi SSE stream từ backend
       const response = await fetch(`${api.defaults.baseURL}/advisor/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           message: messageText,
           history: historyRef.current // Truyền lịch sử multi-turn
@@ -131,7 +140,13 @@ export default function AdvisorChatWidget() {
       }
 
       if (!response.ok) {
-        throw new Error('Server error');
+        let errDetail = `Lỗi kết nối máy chủ (${response.status})`;
+        try {
+          const errData = await response.json();
+          if (errData.message) errDetail = errData.message;
+          else if (errData.error) errDetail = errData.error;
+        } catch {}
+        throw new Error(errDetail);
       }
 
       // Đọc SSE stream
@@ -201,7 +216,7 @@ export default function AdvisorChatWidget() {
       console.error('[AdvisorWidget] Error:', err);
       setMessages(prev => prev.map(m =>
         m.id === aiMsgId
-          ? { ...m, content: '⚠️ Đã xảy ra lỗi, vui lòng thử lại.', isStreaming: false }
+          ? { ...m, content: `⚠️ ${err.message || 'Đã xảy ra lỗi, vui lòng thử lại.'}`, isStreaming: false }
           : m
       ));
     } finally {
