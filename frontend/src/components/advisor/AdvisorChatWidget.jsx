@@ -46,6 +46,7 @@ export default function AdvisorChatWidget() {
   const [rateLimitError, setRateLimitError] = useState(null);
 
   const bottomRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   // Load history từ localStorage (multi-turn context cho Gemini)
   const historyRef = useRef((() => {
@@ -54,6 +55,17 @@ export default function AdvisorChatWidget() {
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   })());
+
+  const scrollToBottom = (smooth = false) => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+    } else if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    }
+  };
 
   // Lưu messages vào localStorage mỗi khi có thay đổi
   useEffect(() => {
@@ -64,15 +76,22 @@ export default function AdvisorChatWidget() {
     } catch { /* ignore quota errors */ }
   }, [messages]);
 
-  // Scroll to bottom khi có tin nhắn mới
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Focus vào input khi mở widget
+  // Scroll to bottom khi có tin nhắn mới hoặc đang stream
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 200);
+      scrollToBottom(true);
+    }
+  }, [messages, isOpen]);
+
+  // Cuộn ngay xuống tin nhắn mới nhất và focus vào input khi mở widget
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => scrollToBottom(false));
+      const timer = setTimeout(() => {
+        scrollToBottom(false);
+        inputRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -370,7 +389,7 @@ export default function AdvisorChatWidget() {
             </div>
 
             {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '14px 14px 8px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '14px 14px 8px', display: 'flex', flexDirection: 'column', gap: 12 }}>
               {/* Welcome / Suggested questions */}
               {messages.length === 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

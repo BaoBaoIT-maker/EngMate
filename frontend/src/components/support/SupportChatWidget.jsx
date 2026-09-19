@@ -38,7 +38,20 @@ export default function SupportChatWidget() {
   const [isSending, setIsSending] = useState(false);
   const [unread, setUnread] = useState(0);
   const bottomRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const inputRef = useRef(null);
   const conversationRef = useRef(null); // Dùng ref để tránh stale closure trong sendMessage
+
+  const scrollToBottom = (smooth = false) => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+    } else if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    }
+  };
 
   // Khởi tạo conversation khi mở widget lần đầu
   useEffect(() => {
@@ -84,10 +97,24 @@ export default function SupportChatWidget() {
     return () => socket.off('SUPPORT_NEW_MESSAGE', handler);
   }, [socket, conversation, isOpen, user]);
 
-  // Scroll to bottom
+  // Scroll to bottom khi có tin nhắn mới
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (isOpen) {
+      scrollToBottom(true);
+    }
+  }, [messages, isOpen]);
+
+  // Cuộn ngay xuống tin nhắn mới nhất và focus vào input khi mở widget
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => scrollToBottom(false));
+      const timer = setTimeout(() => {
+        scrollToBottom(false);
+        inputRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   // Khi mở widget → reset unread
   const handleOpen = () => {
@@ -251,6 +278,7 @@ export default function SupportChatWidget() {
 
           {/* Messages */}
           <div
+            ref={messagesContainerRef}
             style={{
               flex: 1,
               overflowY: 'auto',
@@ -332,6 +360,7 @@ export default function SupportChatWidget() {
             }}
           >
             <textarea
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
