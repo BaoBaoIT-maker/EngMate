@@ -93,6 +93,51 @@ NGUYÊN TẮC BẮT BUỘC:
 - Khi có dữ liệu tool, hãy tổng hợp thành câu trả lời rõ ràng, có thể dùng emoji và bullet points cho dễ đọc.
 - Nếu không có đủ thông tin để trả lời, hãy thừa nhận và hướng dẫn user liên hệ CSKH qua Live Chat.`;
 
+// ─── Danh sách các model theo thứ tự ưu tiên fallback khi Google gặp lỗi 503 / 429 ──
+const CANDIDATE_MODELS = [
+  'gemini-flash-latest',
+  'gemini-flash-lite-latest',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-3.5-flash'
+];
+
+async function generateContentWithFailover(genai, contents, tools) {
+  let lastError = null;
+
+  // Lấy model ưu tiên từ biến môi trường (nếu hợp lệ)
+  const envModel = process.env.GEMINI_MODEL;
+  const preferredModel = (envModel && !envModel.includes('2.5-flash') && !envModel.includes('3.6-flash'))
+    ? envModel
+    : null;
+
+  const modelList = preferredModel
+    ? [preferredModel, ...CANDIDATE_MODELS.filter((m) => m !== preferredModel)]
+    : CANDIDATE_MODELS;
+
+  for (const modelName of modelList) {
+    try {
+      const model = genai.getGenerativeModel({
+        model: modelName,
+        systemInstruction: SYSTEM_PROMPT,
+        tools,
+      });
+      const result = await model.generateContent({ contents });
+      return { result, modelName };
+    } catch (err) {
+      console.warn(`[AdvisorAgent] Model ${modelName} encountered error (status: ${err.status}): ${err.message}. Trying next fallback model...`);
+      lastError = err;
+      // Nếu là lỗi 503 (High demand / Service Unavailable), 429 (Quota / Rate Limit), hoặc 404
+      if (err.status === 503 || err.status === 429 || err.status === 404 || err.status === 500) {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError;
+}
+
 /**
  * Orchestrator chính: Nhận câu hỏi của user, chạy vòng lặp agentic với Gemini + Tool Calling
  * và stream kết quả về cho client.
@@ -107,18 +152,7 @@ export async function runAdvisorAgent(userMessage, userId, res, history = []) {
     throw new Error('Chưa cấu hình GEMINI_API_KEY trên máy chủ (Render Environment).');
   }
 
-  const rawModel = process.env.GEMINI_MODEL || 'gemini-flash-latest';
-  // Dùng gemini-flash-latest (bản stable production có quota 1500 req/ngày thay vì bản preview bị giới hạn 20 req)
-  const modelName = (!rawModel || rawModel.includes('2.5-flash') || rawModel.includes('3.6-flash'))
-    ? 'gemini-flash-latest'
-    : rawModel;
-
   const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genai.getGenerativeModel({
-    model: modelName,
-    systemInstruction: SYSTEM_PROMPT,
-    tools: [{ functionDeclarations: TOOL_DEFINITIONS }]
-  });
 
   // Làm sạch và chuẩn hoá lịch sử hội thoại từ client
   const cleanHistory = [];
@@ -150,7 +184,11 @@ export async function runAdvisorAgent(userMessage, userId, res, history = []) {
   while (iteration < MAX_ITERATIONS) {
     iteration++;
 
-    const result = await model.generateContent({ contents });
+    const { result } = await generateContentWithFailover(
+      genai,
+      contents,
+      [{ functionDeclarations: TOOL_DEFINITIONS }]
+    );
     const candidate = result.response.candidates?.[0];
 
     if (!candidate) {
