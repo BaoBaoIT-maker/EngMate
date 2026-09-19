@@ -103,9 +103,19 @@ NGUYÊN TẮC BẮT BUỘC:
  * @param {Array} history - Lịch sử hội thoại multi-turn từ client
  */
 export async function runAdvisorAgent(userMessage, userId, res, history = []) {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('Chưa cấu hình GEMINI_API_KEY trên máy chủ (Render Environment).');
+  }
+
+  const rawModel = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+  // Dùng gemini-flash-latest (bản stable production có quota 1500 req/ngày thay vì bản preview bị giới hạn 20 req)
+  const modelName = (!rawModel || rawModel.includes('2.5-flash') || rawModel.includes('3.6-flash'))
+    ? 'gemini-flash-latest'
+    : rawModel;
+
   const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genai.getGenerativeModel({
-    model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
+    model: modelName,
     systemInstruction: SYSTEM_PROMPT,
     tools: [{ functionDeclarations: TOOL_DEFINITIONS }]
   });

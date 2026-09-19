@@ -77,10 +77,17 @@ KHÔNG gọi tool này cho các câu hỏi về dữ liệu cá nhân của user
    * @returns {Promise<string>} Các đoạn văn bản liên quan nhất
    */
   execute: async (query) => {
-    // 1. Ưu tiên tìm kiếm từ Qdrant Vector Store
+    // 1. Ưu tiên tìm kiếm từ Qdrant Vector Store (với timeout 1.5s để không bị treo)
     try {
-      const vectorStore = await getQdrantVectorStore();
-      const results = await vectorStore.similaritySearch(query, 4);
+      const qdrantPromise = (async () => {
+        const vectorStore = await getQdrantVectorStore();
+        return await vectorStore.similaritySearch(query, 4);
+      })();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Qdrant timeout')), 1500)
+      );
+
+      const results = await Promise.race([qdrantPromise, timeoutPromise]);
 
       if (results && results.length > 0) {
         return results
@@ -88,7 +95,7 @@ KHÔNG gọi tool này cho các câu hỏi về dữ liệu cá nhân của user
           .join('\n\n---\n\n');
       }
     } catch (err) {
-      console.warn('[searchKnowledgeBaseTool] Qdrant unavailable, falling back to local files:', err.message);
+      console.warn('[searchKnowledgeBaseTool] Qdrant unavailable/timeout, falling back to local files:', err.message);
     }
 
     // 2. Dự phòng: Tìm kiếm trực tiếp trong kho tài liệu Markdown cục bộ

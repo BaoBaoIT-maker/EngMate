@@ -22,6 +22,7 @@ export const advisorChat = async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
 
   // Truyền thông tin rate limit cho FE qua header
   if (req.rateLimit) {
@@ -38,12 +39,13 @@ export const advisorChat = async (req, res) => {
     await runAdvisorAgent(message.trim(), userId, res, history || []);
   } catch (error) {
     console.error('[AdvisorController] Error:', error);
-    // Nếu headers chưa được gửi, trả lỗi JSON bình thường
+    // Nếu headers chưa được gửi, trả lỗi JSON kèm thông điệp cụ thể
     if (!res.headersSent) {
-      return sendError(res, 'Hệ thống AI đang gặp sự cố, vui lòng thử lại sau.', 500);
+      return sendError(res, `Hệ thống AI đang gặp sự cố: ${error.message || 'vui lòng thử lại sau.'}`, 500);
     }
     // Nếu đang stream, gửi event lỗi cuối cùng
-    res.write(`data: ${JSON.stringify({ error: 'Đã xảy ra lỗi trong quá trình xử lý.' })}\n\n`);
+    res.write(`data: ${JSON.stringify({ error: error.message || 'Đã xảy ra lỗi trong quá trình xử lý.' })}\n\n`);
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
     res.end();
   }
 };

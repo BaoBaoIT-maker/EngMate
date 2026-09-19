@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Khởi tạo instance Gemini AI dùng chung cho toàn bộ app
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const defaultModel = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+const defaultModel = process.env.GEMINI_MODEL || "gemini-flash-latest";
 
 export const generateFlashcardContent = async (words) => {
   const model = genAI.getGenerativeModel({ model: defaultModel });
