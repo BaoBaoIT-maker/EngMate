@@ -105,29 +105,43 @@ NGUYÊN TẮC BẮT BUỘC:
 export async function runAdvisorAgent(userMessage, userId, res, history = []) {
   const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genai.getGenerativeModel({
-    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+    model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
     systemInstruction: SYSTEM_PROMPT,
     tools: [{ functionDeclarations: TOOL_DEFINITIONS }]
   });
 
-  // Dùng lịch sử hội thoại từ client để tạo multi-turn context
-  const conversationHistory = Array.isArray(history) ? history : [];
-  let currentMessage = userMessage;
-  // internalHistory chỉ dùng trong vòng lặp tool calling của request này
-  const internalHistory = [...conversationHistory];
+  // Làm sạch và chuẩn hoá lịch sử hội thoại từ client
+  const cleanHistory = [];
+  if (Array.isArray(history)) {
+    for (const turn of history) {
+      if (turn?.role && Array.isArray(turn.parts) && turn.parts.length > 0) {
+        const textParts = turn.parts
+          .filter((p) => p && typeof p.text === 'string' && p.text.trim())
+          .map((p) => ({ text: p.text }));
+        if (textParts.length > 0) {
+          cleanHistory.push({
+            role: turn.role === 'model' ? 'model' : 'user',
+            parts: textParts
+          });
+        }
+      }
+    }
+  }
 
-  // Giới hạn vòng lặp để tránh vòng lặp vô tận
+  // Danh sách hội thoại truyền vào generateContent
+  const contents = [
+    ...cleanHistory,
+    { role: 'user', parts: [{ text: userMessage }] }
+  ];
+
   const MAX_ITERATIONS = 5;
   let iteration = 0;
 
   while (iteration < MAX_ITERATIONS) {
     iteration++;
 
-    // Gửi request tới Gemini, khởi tạo chat với toàn bộ lịch sử hội thoại
-    const chat = model.startChat({ history: internalHistory });
-    const result = await chat.sendMessage(currentMessage);
-    const response = result.response;
-    const candidate = response.candidates?.[0];
+    const result = await model.generateContent({ contents });
+    const candidate = result.response.candidates?.[0];
 
     if (!candidate) {
       res.write(`data: ${JSON.stringify({ error: 'Không có phản hồi từ AI.' })}\n\n`);
@@ -135,15 +149,15 @@ export async function runAdvisorAgent(userMessage, userId, res, history = []) {
     }
 
     const parts = candidate.content?.parts || [];
-    const toolCallParts = parts.filter(p => p.functionCall);
-    const textParts = parts.filter(p => p.text);
+    const toolCallParts = parts.filter((p) => p.functionCall);
+    const textParts = parts.filter((p) => p.text);
 
-    // ─── Nếu Gemini muốn gọi tools ─────────────────────────────────────────
+    // ─── Nếu Gemini yêu cầu gọi tools ────────────────────────────────────────
     if (toolCallParts.length > 0) {
-      // Thêm turn của model (chứa tool calls) vào internalHistory
-      internalHistory.push({ role: 'model', parts });
+      // Lưu turn phản hồi của model chứa tool calls vào contents
+      contents.push({ role: 'model', parts });
 
-      // Thực thi TẤT CẢ tools được yêu cầu song song (Promise.all)
+      // Thực thi các tools song song
       const toolResults = await Promise.all(
         toolCallParts.map(async (part) => {
           const { name, args } = part.functionCall;
@@ -152,7 +166,7 @@ export async function runAdvisorAgent(userMessage, userId, res, history = []) {
           let toolResult;
           if (executor) {
             try {
-              toolResult = await executor(args, userId);
+              toolResult = await executor(args || {}, userId);
             } catch (err) {
               console.error(`[Advisor] Tool ${name} error:`, err);
               toolResult = `Lỗi khi lấy dữ liệu từ tool ${name}: ${err.message}`;
@@ -170,48 +184,22 @@ export async function runAdvisorAgent(userMessage, userId, res, history = []) {
         })
       );
 
-      // Thêm kết quả tools vào internalHistory
-      internalHistory.push({ role: 'user', parts: toolResults });
-      currentMessage = ''; // Gemini sẽ tiếp tục từ context history
-
-      // Sau khi có tool results, gửi lại ngay (không cần user message mới)
-      const followUp = await chat.sendMessage(toolResults);
-      const followUpResponse = followUp.response;
-      const followUpParts = followUpResponse.candidates?.[0]?.content?.parts || [];
-      const followUpText = followUpParts.filter(p => p.text).map(p => p.text).join('');
-      const followUpToolCalls = followUpParts.filter(p => p.functionCall);
-
-      if (followUpToolCalls.length > 0) {
-        // Vẫn còn tool calls nữa, tiếp tục vòng lặp
-        history.push({ role: 'model', parts: followUpParts });
-        currentMessage = '';
-        continue;
-      }
-
-      // Gemini đã có câu trả lời cuối, stream về client
-      if (followUpText) {
-        // Stream từng từ
-        const words = followUpText.split(' ');
-        for (const word of words) {
-          res.write(`data: ${JSON.stringify({ text: word + ' ' })}\n\n`);
-          await new Promise(r => setTimeout(r, 10)); // Nhỏ delay để mượt hơn
-        }
-      }
-      break;
+      // Lưu kết quả tool vào contents với role 'user' (chuẩn Gemini v1beta API)
+      contents.push({ role: 'user', parts: toolResults });
+      continue;
     }
 
-    // ─── Nếu Gemini trả lời thẳng không cần tool ────────────────────────────
+    // ─── Nếu Gemini trả lời text kết quả ────────────────────────────────────
     if (textParts.length > 0) {
-      const fullText = textParts.map(p => p.text).join('');
+      const fullText = textParts.map((p) => p.text).join('');
       const words = fullText.split(' ');
       for (const word of words) {
         res.write(`data: ${JSON.stringify({ text: word + ' ' })}\n\n`);
-        await new Promise(r => setTimeout(r, 10));
+        await new Promise((r) => setTimeout(r, 10));
       }
       break;
     }
 
-    // Trường hợp không có gì
     break;
   }
 

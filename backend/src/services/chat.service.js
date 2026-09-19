@@ -3,7 +3,7 @@ import { cacheGetJson, cacheSetJson } from '../config/redis.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const defaultModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const defaultModel = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
 export const checkAndUpdateAiLimit = async (userId) => {
   const user = await prisma.user.findUnique({
