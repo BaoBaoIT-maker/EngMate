@@ -141,6 +141,44 @@ function EditDrawer({ word, onClose, onSaved, t }) {
   );
 }
 
+// ─── Helper hiển thị cấp độ ghi nhớ và chu kỳ ôn tập thân thiện ──────────────
+function getMemoryBadge(boxLevel = 1) {
+  if (boxLevel <= 1) {
+    return {
+      text: 'Cần ôn thường xuyên',
+      color: '#EF4444',
+      bg: 'rgba(239, 68, 68, 0.1)',
+      border: '1px solid rgba(239, 68, 68, 0.25)',
+      icon: '🔴',
+    };
+  }
+  if (boxLevel === 2) {
+    return {
+      text: 'Đang làm quen',
+      color: '#F59E0B',
+      bg: 'rgba(245, 158, 11, 0.1)',
+      border: '1px solid rgba(245, 158, 11, 0.25)',
+      icon: '🟡',
+    };
+  }
+  if (boxLevel === 3 || boxLevel === 4) {
+    return {
+      text: `Đang ghi nhớ · Cấp ${boxLevel}`,
+      color: '#10B981',
+      bg: 'rgba(16, 185, 129, 0.1)',
+      border: '1px solid rgba(16, 185, 129, 0.25)',
+      icon: '🟢',
+    };
+  }
+  return {
+    text: 'Đã khắc sâu',
+    color: '#C9920A',
+    bg: 'rgba(240, 180, 41, 0.16)',
+    border: '1px solid rgba(240, 180, 41, 0.35)',
+    icon: '🌟',
+  };
+}
+
 // ─── Main LearnedWordsPanel ───────────────────────────────────────────────────
 export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, courseTitle }) {
   const { getTheme } = useThemeStore();
@@ -322,16 +360,66 @@ export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, cour
                   )}
 
                   {/* Progress badges */}
-                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.68rem', padding: '0.18rem 0.45rem', borderRadius: 5, background: 'rgba(16,185,129,0.1)', color: '#10B981', fontWeight: 700 }}>
-                      Box {w.progress?.boxLevel || 1}
+                  <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {/* Cấp độ ghi nhớ */}
+                    {(() => {
+                      const b = getMemoryBadge(w.progress?.boxLevel || 1);
+                      return (
+                        <span
+                          title={`Cấp độ ghi nhớ hộp Leitner: ${w.progress?.boxLevel || 1}`}
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '0.2rem 0.55rem',
+                            borderRadius: 6,
+                            background: b.bg,
+                            border: b.border,
+                            color: b.color,
+                            fontWeight: 700,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          <span>{b.icon}</span>
+                          {b.text}
+                        </span>
+                      );
+                    })()}
+
+                    {/* Chu kỳ ôn tập */}
+                    <span
+                      title={`Thuật toán SM-2: Hệ thống sẽ nhắc lại sau ${w.progress?.interval || 0} ngày kể từ lần ôn gần nhất`}
+                      style={{
+                        fontSize: '0.72rem',
+                        padding: '0.2rem 0.55rem',
+                        borderRadius: 6,
+                        background: 'rgba(240, 180, 41, 0.08)',
+                        border: '1px solid rgba(240, 180, 41, 0.22)',
+                        color: '#D4960A',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <span>⏱️</span>
+                      Chu kỳ ôn tập: {w.progress?.interval || 0} ngày
                     </span>
-                    <span style={{ fontSize: '0.68rem', padding: '0.18rem 0.45rem', borderRadius: 5, background: t.goldBg, color: t.gold, fontWeight: 700 }}>
-                      Int: {w.progress?.interval || 0}d
-                    </span>
+
+                    {/* Từ tự thêm */}
                     {w.type === 'custom' && (
-                      <span style={{ fontSize: '0.68rem', padding: '0.18rem 0.45rem', borderRadius: 5, background: 'rgba(139,92,246,0.1)', color: '#8B5CF6', fontWeight: 700 }}>
-                        Custom
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          padding: '0.2rem 0.55rem',
+                          borderRadius: 6,
+                          background: 'rgba(139, 92, 246, 0.1)',
+                          border: '1px solid rgba(139, 92, 246, 0.25)',
+                          color: '#8B5CF6',
+                          fontWeight: 700,
+                        }}
+                      >
+                        ✨ Tự thêm
                       </span>
                     )}
                   </div>
