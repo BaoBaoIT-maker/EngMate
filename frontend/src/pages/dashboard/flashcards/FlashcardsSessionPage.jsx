@@ -80,7 +80,39 @@ export default function FlashcardsSessionPage() {
   };
 
   if (loading) {
-    return <div className="screen-enter w-full max-w-4xl mx-auto"><Header title="Đang tải dữ liệu..." /></div>;
+    return (
+      <div className="screen-enter w-full max-w-4xl mx-auto flex flex-col gap-6">
+        <Header title="Chuẩn bị bài học..." onBack={() => navigate('/dashboard/flashcards')} />
+        <div
+          style={{
+            ...card(t),
+            minHeight: '380px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '16px',
+            padding: '3rem 2rem',
+            background: isDark
+              ? 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))'
+              : 'linear-gradient(135deg, rgba(0,0,0,0.02), rgba(0,0,0,0.04))',
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }}
+        >
+          <div style={{ fontSize: '2.5rem', animation: 'spin 1.2s linear infinite' }}>🎴</div>
+          <div style={{ fontSize: '1rem', fontWeight: 700, color: t.text }}>
+            Đang tải thẻ từ vựng...
+          </div>
+          <div style={{ fontSize: '0.85rem', color: t.textMuted }}>
+            Hệ thống đang chuẩn bị lộ trình lặp lại ngắt quãng (SM-2)
+          </div>
+          <style>{`
+            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          `}</style>
+        </div>
+      </div>
+    );
   }
 
   const total = cards.length;

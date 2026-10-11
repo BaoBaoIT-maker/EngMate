@@ -20,7 +20,9 @@ export const getTopics = async (userId) => {
       FROM flashcards f
       INNER JOIN system_vocabulary sv ON f.system_vocabulary_id = sv.id
       INNER JOIN study_progresses sp ON sp.flashcard_id = f.id
-      WHERE f.user_id = ${userId} AND sv.topic_id IS NOT NULL
+      WHERE f.user_id = ${userId} 
+        AND sv.topic_id IS NOT NULL 
+        AND sp.repetitions > 0
       GROUP BY sv.topic_id
     `
   ]);
@@ -180,24 +182,27 @@ export const getFlashcardSession = async (userId, query) => {
       take: dailyGoal
     });
 
-    // Tạo flashcard + progress cho từ mới
-    const newCards = [];
-    for (const word of newWords) {
-      const fc = await prisma.flashcard.create({
-        data: {
-          userId,
-          systemVocabularyId: word.id,
-          progress: {
-            create: {
-              boxLevel: 1, easinessFactor: 2.5, interval: 0,
-              repetitions: 0, nextReviewDate: now
-            }
-          }
-        },
-        include: { systemVocabulary: true, progress: true }
-      });
-      newCards.push(fc);
-    }
+    // Tạo flashcard + progress cho từ mới đồng thời (Parallel Batching)
+    const newCards = await Promise.all(
+      newWords.map((word) =>
+        prisma.flashcard.create({
+          data: {
+            userId,
+            systemVocabularyId: word.id,
+            progress: {
+              create: {
+                boxLevel: 1,
+                easinessFactor: 2.5,
+                interval: 0,
+                repetitions: 0,
+                nextReviewDate: now,
+              },
+            },
+          },
+          include: { systemVocabulary: true, progress: true },
+        })
+      )
+    );
 
     // 2. Nếu chưa đủ chỉ tiêu, lấy thêm từ đã học (bất kể ngày hạn, ưu tiên quá hạn trước)
     const remaining = dailyGoal - newCards.length;
@@ -246,22 +251,28 @@ export const getFlashcardSession = async (userId, query) => {
       take: needed
     });
 
-    for (const word of newWords) {
-      const newFc = await prisma.flashcard.create({
-        data: {
-          userId,
-          systemVocabularyId: word.id,
-          progress: {
-            create: {
-              boxLevel: 1, easinessFactor: 2.5, interval: 0,
-              repetitions: 0, nextReviewDate: now
-            }
-          }
-        },
-        include: { systemVocabulary: true, progress: true }
-      });
-      cardsToLearn.push(newFc);
-    }
+    // Tạo flashcard + progress cho từ mới đồng thời (Parallel Batching)
+    const newCards = await Promise.all(
+      newWords.map((word) =>
+        prisma.flashcard.create({
+          data: {
+            userId,
+            systemVocabularyId: word.id,
+            progress: {
+              create: {
+                boxLevel: 1,
+                easinessFactor: 2.5,
+                interval: 0,
+                repetitions: 0,
+                nextReviewDate: now,
+              },
+            },
+          },
+          include: { systemVocabulary: true, progress: true },
+        })
+      )
+    );
+    cardsToLearn.push(...newCards);
   }
 
   return cardsToLearn.map(formatSystemCard);
@@ -272,9 +283,13 @@ export const getLearnedWords = async (userId, query) => {
 
   if (type === 'custom') {
     const cards = await prisma.flashcard.findMany({
-      where: { userId, systemVocabularyId: null },
+      where: {
+        userId,
+        systemVocabularyId: null,
+        progress: { repetitions: { gt: 0 } },
+      },
       include: { progress: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
     return cards.map(fc => ({
       id: fc.id,
@@ -291,7 +306,11 @@ export const getLearnedWords = async (userId, query) => {
   if (type === 'topic') {
     const topicIdNum = parseInt(topicId);
     const cards = await prisma.flashcard.findMany({
-      where: { userId, systemVocabulary: { topicId: topicIdNum } },
+      where: {
+        userId,
+        systemVocabulary: { topicId: topicIdNum },
+        progress: { repetitions: { gt: 0 } },
+      },
       include: { systemVocabulary: true, progress: true },
       orderBy: { createdAt: 'desc' }
     });
@@ -308,12 +327,20 @@ export const getLearnedWords = async (userId, query) => {
   if (type === 'course') {
     const [systemCards, customCards] = await Promise.all([
       prisma.flashcard.findMany({
-        where: { userId, systemVocabulary: { categoryCode: course } },
+        where: {
+          userId,
+          systemVocabulary: { categoryCode: course },
+          progress: { repetitions: { gt: 0 } },
+        },
         include: { systemVocabulary: true, progress: true },
         orderBy: { createdAt: 'desc' }
       }),
       prisma.flashcard.findMany({
-        where: { userId, systemVocabularyId: null },
+        where: {
+          userId,
+          systemVocabularyId: null,
+          progress: { repetitions: { gt: 0 } },
+        },
         include: { progress: true },
         orderBy: { createdAt: 'desc' }
       })
