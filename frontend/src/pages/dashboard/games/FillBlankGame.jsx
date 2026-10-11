@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useThemeStore from '../../../store/useThemeStore';
+import useStatsStore from '../../../store/useStatsStore';
 import api from '../../../services/api';
 
 export default function FillBlankGame() {
@@ -119,6 +120,7 @@ export default function FillBlankGame() {
         results
       });
       setFinalResult(res.data);
+      useStatsStore.getState().fetchStats();
     } catch (err) {
       console.error('Submit failed:', err);
     }

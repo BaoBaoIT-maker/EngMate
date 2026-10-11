@@ -5,26 +5,21 @@ import useSplashStore from '../store/useSplashStore';
 import Nav from '../components/navigation/Nav';
 import SupportChatWidget from '../components/support/SupportChatWidget';
 import AdvisorChatWidget from '../components/advisor/AdvisorChatWidget';
-import { getOverviewStats } from '../services/statService';
+import useStatsStore from '../store/useStatsStore';
 
 export default function DashboardLayout() {
   const { isDark } = useThemeStore();
   const pulseSplash = useSplashStore((s) => s.pulse);
   const location = useLocation();
 
-  const [stats, setStats] = useState(null);
-  const [loadingStats, setLoadingStats] = useState(true);
+  const { stats, loading: loadingStats, fetchStats } = useStatsStore();
 
-  const fetchStats = () => {
-    getOverviewStats()
-      .then((data) => setStats(data))
-      .catch((err) => console.error('Failed to load stats in layout', err))
-      .finally(() => setLoadingStats(false));
-  };
-
+  // Nạp stats lần đầu và tự động làm mới mỗi khi người dùng điều hướng quay lại Dashboard
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (location.pathname === '/dashboard' || !stats) {
+      fetchStats();
+    }
+  }, [location.pathname]);
 
   // Đồng bộ biến isDark sang thẻ html để kích hoạt class .dark toàn cục
   useEffect(() => {

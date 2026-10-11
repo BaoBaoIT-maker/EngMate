@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Header from '../../../components/dashboard/Header';
 import useThemeStore from '../../../store/useThemeStore';
 import useAuthStore from '../../../store/useAuthStore';
+import useStatsStore from '../../../store/useStatsStore';
 import api from '../../../services/api';
 
 const card = (t, extra) => ({
@@ -77,6 +78,8 @@ export default function SettingsPage() {
       await api.patch('/users/me/settings', { receiveEmails: notif, dailyWordGoal: parseInt(goal) || 20 });
       const res = await api.get('/users/me');
       useAuthStore.getState().setUser(res.data);
+      useStatsStore.getState().updateDailyGoal(parseInt(goal) || 20);
+      useStatsStore.getState().fetchStats();
     } catch (err) {
       console.error('Save settings error', err);
     }

@@ -70,9 +70,9 @@ export const getOverviewStats = async (userId) => {
     prisma.userSkill.findUnique({ where: { userId } }),
     prisma.userSetting.findUnique({ where: { userId } }),
     prisma.reviewLog.count({ where: { flashcard: { userId }, createdAt: { gte: startOfDay } } }),
-    prisma.studyProgress.count({ where: { flashcard: { userId }, nextReviewDate: { lte: now } } }),
-    prisma.studyProgress.count({ where: { flashcard: { userId }, nextReviewDate: { gt: now }, interval: { lt: 21 } } }),
-    prisma.studyProgress.count({ where: { flashcard: { userId }, nextReviewDate: { gt: now }, interval: { gte: 21 } } }),
+    prisma.studyProgress.count({ where: { flashcard: { userId }, nextReviewDate: { lte: now }, repetitions: { gt: 0 } } }),
+    prisma.studyProgress.count({ where: { flashcard: { userId }, nextReviewDate: { gt: now }, interval: { lt: 21 }, repetitions: { gt: 0 } } }),
+    prisma.studyProgress.count({ where: { flashcard: { userId }, nextReviewDate: { gt: now }, interval: { gte: 21 }, repetitions: { gt: 0 } } }),
     prisma.reviewLog.findMany({
       where: { flashcard: { userId } },
       orderBy: { createdAt: 'desc' },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useThemeStore from '../../../store/useThemeStore';
+import useStatsStore from '../../../store/useStatsStore';
 import api from '../../../services/api';
 
 const cardStyle = (t) => ({
@@ -115,6 +116,7 @@ export default function MatchingGame() {
       // Interceptor trả về response.data, nên submit result nằm ở res.data
       const res = await api.post('/games/submit', { results });
       setResultData(res.data);
+      useStatsStore.getState().fetchStats();
     } catch (err) {
       console.error('Failed to submit game result', err);
     }

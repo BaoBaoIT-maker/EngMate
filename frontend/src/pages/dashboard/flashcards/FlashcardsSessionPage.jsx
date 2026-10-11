@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Header from '../../../components/dashboard/Header';
 import useThemeStore from '../../../store/useThemeStore';
+import useStatsStore from '../../../store/useStatsStore';
 import { Icon } from '../../../components/icons';
 import { getSessionCards, reviewCard } from '../../../services/flashcardService';
 
@@ -69,6 +70,7 @@ export default function FlashcardsSessionPage() {
     // Gọi API nền
     try {
       await reviewCard(currentCard.id, quality);
+      useStatsStore.getState().fetchStats();
     } catch (err) {
       console.error("Lỗi lưu kết quả", err);
     }
