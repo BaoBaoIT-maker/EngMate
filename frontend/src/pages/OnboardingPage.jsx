@@ -77,7 +77,7 @@ const hasTargetConfig = (category, config) => (
     : Boolean(config?.targetLevel)
 );
 
-function StepCourses({ courses, selected, setSelected }) {
+function StepCourses({ courses = [], selected, setSelected }) {
   const toggle = (cat) =>
     setSelected((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
@@ -131,7 +131,7 @@ function StepCourses({ courses, selected, setSelected }) {
   );
 }
 
-function StepLevel({ courses, pathConfig, setPathConfig, selectedCourses }) {
+function StepLevel({ courses = [], pathConfig, setPathConfig, selectedCourses = [] }) {
   return (
     <div>
       <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', marginBottom: '1.25rem' }}>
@@ -319,7 +319,8 @@ export default function OnboardingPage() {
       try {
         const categories = await listCategories();
         if (!mounted) return;
-        const mapped = categories.map(toLearningCategory).filter((category) => category.category);
+        const rawCategories = Array.isArray(categories) ? categories : (categories?.data || []);
+        const mapped = rawCategories.map(toLearningCategory).filter((category) => category.category);
         if (mapped.length > 0) setCourses(mapped);
       } catch (err) {
         console.error('Load learning categories failed:', err);
@@ -423,8 +424,8 @@ export default function OnboardingPage() {
           </div>
 
           {/* Step content */}
-          {step === 0 && <StepCourses selected={selectedCourses} setSelected={setSelectedCourses} />}
-          {step === 1 && <StepLevel pathConfig={pathConfig} setPathConfig={setPathConfig} selectedCourses={selectedCourses} />}
+          {step === 0 && <StepCourses courses={courses} selected={selectedCourses} setSelected={setSelectedCourses} />}
+          {step === 1 && <StepLevel courses={courses} pathConfig={pathConfig} setPathConfig={setPathConfig} selectedCourses={selectedCourses} />}
           {step === 2 && <StepGoal dailyGoal={dailyGoal} setDailyGoal={setDailyGoal} />}
 
           {/* Error */}

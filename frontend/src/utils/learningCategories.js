@@ -83,8 +83,8 @@ export const getTargetOptions = (category) => category?.targetConfig?.options ||
 export const getDefaultTargetValue = (category) =>
   String(category?.targetConfig?.defaultTarget || getTargetOptions(category)[0]?.value || 'B1');
 
-export const getCategoryByCode = (categories, code) =>
-  categories.find((category) => category.category === code || category.code === code);
+export const getCategoryByCode = (categories = [], code) =>
+  (categories || []).find((category) => category?.category === code || category?.code === code);
 
 export const getPathTargetValue = (path, categories = []) => {
   const category = getCategoryByCode(categories, path?.category || path?.categoryCode || 'GENERAL');
