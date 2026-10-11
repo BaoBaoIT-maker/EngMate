@@ -94,7 +94,7 @@ export default function HeroBanner({ user, stats, navigate }) {
   const learning = stats?.memory?.learning || 0;
   const mastered = stats?.memory?.mastered || 0;
   const totalWords = needReview + learning + mastered;
-  const dueWords = needReview > 0 ? needReview : (stats?.dailyGoal?.target || 15);
+  const dailyTarget = stats?.dailyGoal?.target || 15;
 
   const currentStreak = stats?.streak?.current || 0;
   const longestStreak = stats?.streak?.max || currentStreak;
@@ -191,7 +191,13 @@ export default function HeroBanner({ user, stats, navigate }) {
               maxWidth: '520px',
             }}
           >
-            Hôm nay bạn có <strong style={{ color: 'var(--fg)' }}>{dueWords} từ vựng</strong> cần kích hoạt trí nhớ dài hạn — sẵn sàng chinh phục chưa?
+            {totalWords === 0 ? (
+              <>Chào mừng bạn! Hãy bắt đầu mục tiêu học <strong style={{ color: 'var(--fg)' }}>{dailyTarget} từ</strong> hôm nay để kích hoạt chuỗi học tập nhé!</>
+            ) : needReview > 0 ? (
+              <>Hôm nay bạn có <strong style={{ color: 'var(--fg)' }}>{needReview} từ vựng</strong> cần kích hoạt trí nhớ dài hạn — sẵn sàng chinh phục chưa?</>
+            ) : (
+              <>Tuyệt vời! Bạn đã hoàn thành tất cả từ cần ôn. Hãy tiếp tục học thêm từ mới để đạt mục tiêu <strong style={{ color: 'var(--fg)' }}>{dailyTarget} từ</strong> nhé!</>
+            )}
           </p>
         </div>
 

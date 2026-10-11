@@ -290,11 +290,10 @@ const ACTIVE_STEPS = STEPS.filter((item) => item.id !== 'target');
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { setUser, fetchMe } = useAuthStore();
+  const { setUser } = useAuthStore();
   const { isDark } = useThemeStore();
 
   const [step, setStep] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [error, setError] = useState('');
 
@@ -330,6 +329,11 @@ export default function OnboardingPage() {
     };
 
     loadCourses();
+
+    // Prefetch trước các module của Dashboard để khi bấm chuyển trang là tức thì
+    import('./dashboard/DashboardOverview').catch(() => {});
+    import('../layouts/DashboardLayout').catch(() => {});
+
     return () => {
       mounted = false;
     };
@@ -349,7 +353,7 @@ export default function OnboardingPage() {
     return true;
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     setError('');
     if (step < ACTIVE_STEPS.length - 1) {
       setStep((s) => s + 1);
@@ -357,22 +361,38 @@ export default function OnboardingPage() {
     }
 
     // Final step → submit
-    setLoading(true);
-    try {
-      const paths = selectedCourses.map((cat) => {
-        const category = getCategoryByCode(courses, cat);
-        return buildPathPayload(category, pathConfig[cat]);
-      });
+    const paths = selectedCourses.map((cat) => {
+      const category = getCategoryByCode(courses, cat);
+      return buildPathPayload(category, pathConfig[cat]);
+    });
 
-      await axiosInstance.post('/users/me/onboarding', { paths, dailyWordGoal: dailyGoal });
-      // Dùng fetchMe để lấy lại user mới nhất từ server (có onboardingDone = true)
-      await fetchMe();
-      navigate('/dashboard', { replace: true });
-    } catch (err) {
-      setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
-    } finally {
-      setLoading(false);
-    }
+    // 1. Optimistic Update: Cập nhật ngay store để ProtectedRoute cho phép vào Dashboard
+    const currentUser = useAuthStore.getState().user;
+    const optimisticUser = {
+      ...currentUser,
+      setting: {
+        ...currentUser?.setting,
+        onboardingDone: true,
+        dailyWordGoal: dailyGoal,
+      },
+    };
+    setUser(optimisticUser);
+
+    // 2. Chuyển trang NGAY LẬP TỨC (0ms delay) - Trải nghiệm tức thì không khựng loading
+    navigate('/dashboard', { replace: true });
+
+    // 3. Đồng bộ ngầm với server trong nền (Silent Background Sync)
+    axiosInstance
+      .post('/users/me/onboarding', { paths, dailyWordGoal: dailyGoal })
+      .then((res) => {
+        const freshUser = res?.data || res;
+        if (freshUser && (freshUser.id || freshUser.email)) {
+          setUser(freshUser);
+        }
+      })
+      .catch((err) => {
+        console.error('Background onboarding sync error:', err);
+      });
   };
 
   const progress = ((step + 1) / ACTIVE_STEPS.length) * 100;
@@ -449,7 +469,7 @@ export default function OnboardingPage() {
             )}
             <button
               onClick={handleNext}
-              disabled={!isStepValid() || loading}
+              disabled={!isStepValid()}
               style={{
                 flex: 2, padding: '0.875rem', borderRadius: 12, border: 'none',
                 background: isStepValid() ? `linear-gradient(135deg, ${GOLD}, ${GOLD_DARK})` : 'rgba(255,255,255,0.08)',
@@ -459,7 +479,7 @@ export default function OnboardingPage() {
                 boxShadow: isStepValid() ? '0 6px 20px rgba(240,180,41,0.3)' : 'none',
               }}
             >
-              {loading ? 'Đang lưu…' : step === ACTIVE_STEPS.length - 1 ? 'Bắt đầu học ✦' : 'Tiếp theo →'}
+              {step === ACTIVE_STEPS.length - 1 ? 'Bắt đầu học ✦' : 'Tiếp theo →'}
             </button>
           </div>
         </div>
@@ -467,17 +487,30 @@ export default function OnboardingPage() {
         {/* Skip */}
         <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
           <button
-            onClick={async () => {
-              setLoading(true);
-              try {
-                // Đánh dấu đã xong Onboarding dù chưa chọn gì
-                await axiosInstance.patch('/users/me/settings', { onboardingDone: true });
-                await fetchMe();
-                navigate('/dashboard', { replace: true });
-              } catch (err) {
-                console.error('Skip onboarding failed:', err);
-                navigate('/dashboard', { replace: true });
-              }
+            onClick={() => {
+              // 1. Optimistic Update & Điều hướng ngay lập tức
+              const currentUser = useAuthStore.getState().user;
+              setUser({
+                ...currentUser,
+                setting: {
+                  ...currentUser?.setting,
+                  onboardingDone: true,
+                },
+              });
+              navigate('/dashboard', { replace: true });
+
+              // 2. Đồng bộ ngầm với backend
+              axiosInstance
+                .patch('/users/me/settings', { onboardingDone: true })
+                .then((res) => {
+                  const freshUser = res?.data || res;
+                  if (freshUser && (freshUser.id || freshUser.email)) {
+                    setUser(freshUser);
+                  }
+                })
+                .catch((err) => {
+                  console.error('Skip onboarding background sync failed:', err);
+                });
             }}
             style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem', cursor: 'pointer', }}
             onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}

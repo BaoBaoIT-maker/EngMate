@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generateContentWithFailover } from '../../config/gemini.js';
 
 // Import tất cả tools
 import { searchKnowledgeBaseTool } from './tools/searchKnowledgeTool.js';
@@ -93,50 +93,6 @@ NGUYÊN TẮC BẮT BUỘC:
 - Khi có dữ liệu tool, hãy tổng hợp thành câu trả lời rõ ràng, có thể dùng emoji và bullet points cho dễ đọc.
 - Nếu không có đủ thông tin để trả lời, hãy thừa nhận và hướng dẫn user liên hệ CSKH qua Live Chat.`;
 
-// ─── Danh sách các model theo thứ tự ưu tiên fallback khi Google gặp lỗi 503 / 429 ──
-const CANDIDATE_MODELS = [
-  'gemini-flash-latest',
-  'gemini-flash-lite-latest',
-  'gemini-3.5-flash-lite',
-  'gemini-3.1-flash-lite',
-  'gemini-3.5-flash'
-];
-
-async function generateContentWithFailover(genai, contents, tools) {
-  let lastError = null;
-
-  // Lấy model ưu tiên từ biến môi trường (nếu hợp lệ)
-  const envModel = process.env.GEMINI_MODEL;
-  const preferredModel = (envModel && !envModel.includes('2.5-flash') && !envModel.includes('3.6-flash'))
-    ? envModel
-    : null;
-
-  const modelList = preferredModel
-    ? [preferredModel, ...CANDIDATE_MODELS.filter((m) => m !== preferredModel)]
-    : CANDIDATE_MODELS;
-
-  for (const modelName of modelList) {
-    try {
-      const model = genai.getGenerativeModel({
-        model: modelName,
-        systemInstruction: SYSTEM_PROMPT,
-        tools,
-      });
-      const result = await model.generateContent({ contents });
-      return { result, modelName };
-    } catch (err) {
-      console.warn(`[AdvisorAgent] Model ${modelName} encountered error (status: ${err.status}): ${err.message}. Trying next fallback model...`);
-      lastError = err;
-      // Nếu là lỗi 503 (High demand / Service Unavailable), 429 (Quota / Rate Limit), hoặc 404
-      if (err.status === 503 || err.status === 429 || err.status === 404 || err.status === 500) {
-        continue;
-      }
-      throw err;
-    }
-  }
-
-  throw lastError;
-}
 
 /**
  * Orchestrator chính: Nhận câu hỏi của user, chạy vòng lặp agentic với Gemini + Tool Calling
@@ -148,12 +104,6 @@ async function generateContentWithFailover(genai, contents, tools) {
  * @param {Array} history - Lịch sử hội thoại multi-turn từ client
  */
 export async function runAdvisorAgent(userMessage, userId, res, history = []) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error('Chưa cấu hình GEMINI_API_KEY trên máy chủ (Render Environment).');
-  }
-
-  const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
   // Làm sạch và chuẩn hoá lịch sử hội thoại từ client
   const cleanHistory = [];
   if (Array.isArray(history)) {
@@ -165,7 +115,7 @@ export async function runAdvisorAgent(userMessage, userId, res, history = []) {
         if (textParts.length > 0) {
           cleanHistory.push({
             role: turn.role === 'model' ? 'model' : 'user',
-            parts: textParts
+            parts: textParts,
           });
         }
       }
@@ -175,7 +125,7 @@ export async function runAdvisorAgent(userMessage, userId, res, history = []) {
   // Danh sách hội thoại truyền vào generateContent
   const contents = [
     ...cleanHistory,
-    { role: 'user', parts: [{ text: userMessage }] }
+    { role: 'user', parts: [{ text: userMessage }] },
   ];
 
   const MAX_ITERATIONS = 5;
@@ -184,11 +134,11 @@ export async function runAdvisorAgent(userMessage, userId, res, history = []) {
   while (iteration < MAX_ITERATIONS) {
     iteration++;
 
-    const { result } = await generateContentWithFailover(
-      genai,
+    const { result } = await generateContentWithFailover({
       contents,
-      [{ functionDeclarations: TOOL_DEFINITIONS }]
-    );
+      systemInstruction: SYSTEM_PROMPT,
+      tools: [{ functionDeclarations: TOOL_DEFINITIONS }],
+    });
     const candidate = result.response.candidates?.[0];
 
     if (!candidate) {

@@ -1,28 +1,5 @@
 import React, { useState } from 'react';
-
-const DEFAULT_CARDS = [
-  {
-    word: 'Meticulous',
-    ipa: '/məˈtɪk.jʊ.ləs/',
-    meaning: 'Tỉ mỉ, cẩn thận',
-    color: '#8B5CF6',
-    bg: 'rgba(139, 92, 246, 0.08)',
-  },
-  {
-    word: 'Eloquent',
-    ipa: '/ˈel.ə.kwənt/',
-    meaning: 'Hùng hồn, lưu loát',
-    color: '#10B981',
-    bg: 'rgba(16, 185, 129, 0.08)',
-  },
-  {
-    word: 'Resilient',
-    ipa: '/rɪˈzɪl.i.ənt/',
-    meaning: 'Kiên cường, bền bỉ',
-    color: '#F0B429',
-    bg: 'rgba(240, 180, 41, 0.10)',
-  },
-];
+import { useNavigate } from 'react-router-dom';
 
 const PALETTE = ['#8B5CF6', '#10B981', '#F0B429', '#3B82F6', '#EC4899'];
 
@@ -123,19 +100,100 @@ function SpeakerBtn({ onSpeak }) {
 }
 
 export default function FlashcardCarousel({ recent }) {
+  const navigate = useNavigate();
   const [active, setActive] = useState(0);
   const [flipped, setFlipped] = useState(false);
 
-  // Normalize recent words or fallback to DEFAULT_CARDS
-  const cards = recent && recent.length > 0
-    ? recent.map((item, idx) => ({
-        word: item.word || 'Vocabulary',
-        ipa: item.ipa || item.phonetic || '',
-        meaning: item.meaning || item.vietnameseMeaning || 'Nghĩa từ vựng',
-        color: PALETTE[idx % PALETTE.length],
-        bg: `${PALETTE[idx % PALETTE.length]}12`,
-      }))
-    : DEFAULT_CARDS;
+  // Neu chua on tap tu nao -> Hien thi Empty State co nut dieu huong hoc ngay
+  if (!recent || recent.length === 0) {
+    return (
+      <div
+        style={{
+          background: 'var(--card-bg)',
+          border: '1.5px solid var(--card-border)',
+          borderRadius: '24px',
+          boxShadow: 'var(--card-shadow)',
+          padding: '28px',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'var(--card-highlight)',
+            pointerEvents: 'none',
+          }}
+        />
+        <div>
+          <Eyebrow>Ôn tập gần đây</Eyebrow>
+          <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: 'var(--fg)', letterSpacing: '-0.02em' }}>
+            Thẻ từ vựng
+          </h3>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '24px 12px',
+            background: 'rgba(240,180,41,0.03)',
+            border: '1px dashed var(--card-border)',
+            borderRadius: '18px',
+            margin: '16px 0',
+            gap: '8px',
+          }}
+        >
+          <span style={{ fontSize: '32px' }}>🌱</span>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--fg)' }}>
+            Chưa có từ ôn tập gần đây
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--fg-3)', maxWidth: '240px', lineHeight: 1.5 }}>
+            Hãy bắt đầu lật thẻ để hệ thống theo dõi tiến độ ghi nhớ của bạn!
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard/flashcards')}
+          style={{
+            width: '100%',
+            padding: '11px 16px',
+            borderRadius: '12px',
+            border: 'none',
+            background: 'linear-gradient(135deg, #F5BE36 0%, #D4960A 100%)',
+            color: '#1C1407',
+            fontWeight: 800,
+            fontSize: '13px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(240,180,41,0.25)',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          Bắt đầu học từ vựng →
+        </button>
+      </div>
+    );
+  }
+
+  const cards = recent.map((item, idx) => ({
+    word: item.word || 'Vocabulary',
+    ipa: item.ipa || item.phonetic || '',
+    meaning: item.meaning || item.vietnameseMeaning || 'Nghĩa từ vựng',
+    color: PALETTE[idx % PALETTE.length],
+    bg: `${PALETTE[idx % PALETTE.length]}12`,
+  }));
 
   const card = cards[active] || cards[0];
 

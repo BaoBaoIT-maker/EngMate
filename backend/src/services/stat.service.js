@@ -52,8 +52,9 @@ export const getOverviewStats = async (userId) => {
   const startOfDay = new Date(now);
   startOfDay.setHours(0, 0, 0, 0);
 
-  const threeMonthsAgo = new Date();
-  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+  // Lấy dữ liệu 26 tuần gần nhất (~6 tháng) khớp 100% với lưới hiển thị của ActivityHeatmap
+  const twentySixWeeksAgo = new Date(now);
+  twentySixWeeksAgo.setDate(now.getDate() - (26 * 7));
 
   // Gộp tất cả các truy vấn độc lập vào Promise.all để chạy song song (Tiết kiệm >60% thời gian)
   const [
@@ -79,7 +80,7 @@ export const getOverviewStats = async (userId) => {
       include: { flashcard: { include: { systemVocabulary: true } } }
     }),
     prisma.reviewLog.findMany({
-      where: { flashcard: { userId }, createdAt: { gte: threeMonthsAgo } },
+      where: { flashcard: { userId }, createdAt: { gte: twentySixWeeksAgo } },
       select: { createdAt: true }
     })
   ]);

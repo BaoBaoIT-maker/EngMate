@@ -1,9 +1,6 @@
 import prisma from '../config/prisma.js';
 import { cacheGetJson, cacheSetJson } from '../config/redis.js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const defaultModel = process.env.GEMINI_MODEL || "gemini-flash-latest";
+import { generateContentStreamWithFailover } from '../config/gemini.js';
 
 export const checkAndUpdateAiLimit = async (userId) => {
   const user = await prisma.user.findUnique({
@@ -109,8 +106,6 @@ export const streamAIResponse = async (sessionId, res) => {
       orderBy: { createdAt: 'asc' }
     });
 
-    const model = genAI.getGenerativeModel({ model: defaultModel });
-
     const contents = history.map(msg => ({
       role: msg.senderRole === 'USER' ? 'user' : 'model',
       parts: [{ text: msg.content }]
@@ -135,7 +130,7 @@ Quy tắc BẮT BUỘC:
       parts: [{ text: "Đã hiểu, tôi sẽ đóng vai trò AI Speaking Coach theo yêu cầu của bạn." }]
     });
 
-    const resultStream = await model.generateContentStream({ contents });
+    const { resultStream } = await generateContentStreamWithFailover({ contents });
     
     let fullResponse = '';
 

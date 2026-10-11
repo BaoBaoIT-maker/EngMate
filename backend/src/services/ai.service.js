@@ -1,11 +1,6 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Khởi tạo instance Gemini AI dùng chung cho toàn bộ app
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const defaultModel = process.env.GEMINI_MODEL || "gemini-flash-latest";
+import { generateContentWithFailover } from '../config/gemini.js';
 
 export const generateFlashcardContent = async (words) => {
-  const model = genAI.getGenerativeModel({ model: defaultModel });
   const isArray = Array.isArray(words);
   const wordsList = isArray ? words.join(', ') : words;
   
@@ -19,7 +14,7 @@ Hãy trả về DUY NHẤT một MẢNG JSON (JSON Array) chứa dữ liệu cho
 [
   {
     "word": "từ tiếng Anh đúng chính tả (sửa nếu sai)",
-    "type": "loại từ bằng tiếng Anh, ví dụ: noun, verb, adjective, adverb, pronoun, 
+    "type": "loại từ bằng tiếng Anh, ví dụ: noun, verb, adjective, adverb, pronoun",
     "phonetic": "phiên âm IPA, ví dụ /həˈləʊ/",
     "meaning": "nghĩa tiếng Việt ngắn gọn, ví dụ: kế hoạch, toàn diện, yêu thương",
     "definition": "giải thích nghĩa bằng tiếng Việt, một câu rõ ràng, dễ hiểu",
@@ -37,15 +32,11 @@ YÊU CẦU BẮT BUỘC:
 - Chỉ trả về JSON thuần, không có \`\`\`json hay bất kỳ ký tự nào khác.
   `;
 
-  const result = await model.generateContent(prompt);
+  const { result } = await generateContentWithFailover({ prompt });
   const responseText = result.response.text();
   
-  try {
-    const cleaned = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    const parsed = JSON.parse(cleaned);
-    // Nếu đầu vào là 1 chuỗi, trả về object đầu tiên; nếu là mảng, trả về toàn bộ mảng
-    return isArray ? parsed : (parsed[0] || {});
-  } catch (err) {
-    throw new Error("Failed to parse AI response: " + err.message);
-  }
+  const cleaned = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  const parsed = JSON.parse(cleaned);
+  // Nếu đầu vào là 1 chuỗi, trả về object đầu tiên; nếu là mảng, trả về toàn bộ mảng
+  return isArray ? parsed : (parsed[0] || {});
 };

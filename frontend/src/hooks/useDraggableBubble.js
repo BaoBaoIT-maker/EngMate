@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
  * Custom hook quản lý trạng thái kéo thả (drag & drop) cho các bubble widget nổi
@@ -14,27 +14,24 @@ export function useDraggableBubble({
 }) {
   const clamp = useCallback((val, min, max) => Math.max(min, Math.min(max, val)), []);
 
+  const hasUserMovedRef = useRef(false);
+
   const [position, setPosition] = useState(() => {
     if (typeof window === 'undefined') return { x: 0, y: 0 };
-    if (storageKey) {
-      try {
-        const saved = localStorage.getItem(storageKey);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
-            return {
-              x: Math.max(12, Math.min(window.innerWidth - buttonSize - 12, parsed.x)),
-              y: Math.max(12, Math.min(window.innerHeight - buttonSize - 12, parsed.y)),
-            };
-          }
-        }
-      } catch {}
-    }
     return {
       x: Math.max(12, window.innerWidth - buttonSize - defaultOffset.right),
       y: Math.max(12, window.innerHeight - buttonSize - defaultOffset.bottom),
     };
   });
+
+  // Dọn dẹp localStorage để tránh lưu lệch tọa độ cũ
+  useEffect(() => {
+    if (storageKey) {
+      try {
+        localStorage.removeItem(storageKey);
+      } catch {}
+    }
+  }, [storageKey]);
 
   const positionRef = useRef(position);
   useEffect(() => {
@@ -57,6 +54,14 @@ export function useDraggableBubble({
   useEffect(() => {
     const handleResize = () => {
       setPosition((prev) => {
+        if (!hasUserMovedRef.current) {
+          const defaultPos = {
+            x: Math.max(12, window.innerWidth - buttonSize - defaultOffset.right),
+            y: Math.max(12, window.innerHeight - buttonSize - defaultOffset.bottom),
+          };
+          positionRef.current = defaultPos;
+          return defaultPos;
+        }
         const clamped = {
           x: clamp(prev.x, 12, window.innerWidth - buttonSize - 12),
           y: clamp(prev.y, 12, window.innerHeight - buttonSize - 12),
@@ -67,7 +72,7 @@ export function useDraggableBubble({
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [buttonSize, clamp]);
+  }, [buttonSize, clamp, defaultOffset.bottom, defaultOffset.right]);
 
   const startDrag = useCallback(
     (clientX, clientY) => {
@@ -132,15 +137,7 @@ export function useDraggableBubble({
         window.removeEventListener('touchcancel', onTouchEnd);
 
         if (dragInfoRef.current.hasMoved) {
-          const finalPos = {
-            x: dragInfoRef.current.currentX,
-            y: dragInfoRef.current.currentY,
-          };
-          if (storageKey) {
-            try {
-              localStorage.setItem(storageKey, JSON.stringify(finalPos));
-            } catch {}
-          }
+          hasUserMovedRef.current = true;
           setTimeout(() => {
             didDragRef.current = false;
           }, 120);
@@ -156,7 +153,7 @@ export function useDraggableBubble({
       window.addEventListener('touchend', onTouchEnd);
       window.addEventListener('touchcancel', onTouchEnd);
     },
-    [buttonSize, clamp, storageKey]
+    [buttonSize, clamp]
   );
 
   const handleMouseDown = useCallback(

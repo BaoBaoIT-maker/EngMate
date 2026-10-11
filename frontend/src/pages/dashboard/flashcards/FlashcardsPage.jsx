@@ -1,22 +1,27 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useThemeStore from '../../../store/useThemeStore';
+import useAuthStore from '../../../store/useAuthStore';
 import { getTopics } from '../../../services/flashcardService';
 import AddFlashcardModal from './AddFlashcardModal';
 import LearnedWordsPanel from './LearnedWordsPanel';
 
-// Helper emoji picker for topics
+// Lookup table cho topic icon, dễ mở rộng mà không sửa code cũ (OCP)
+const TOPIC_ICON_RULES = [
+  { keywords: ['business', 'kinh doanh', 'negotiation', 'workplace'], icon: '💼' },
+  { keywords: ['travel', 'du lịch', 'hospitality'], icon: '✈️' },
+  { keywords: ['medical', 'y tế', 'health', 'sức khỏe'], icon: '🩺' },
+  { keywords: ['finance', 'tài chính', 'investment'], icon: '📈' },
+  { keywords: ['academic', 'ielts', 'học thuật', 'writing'], icon: '🎓' },
+  { keywords: ['communication', 'giao tiếp', 'daily', 'hội thoại'], icon: '🤝' },
+  { keywords: ['tech', 'công nghệ', 'it'], icon: '💻' },
+  { keywords: ['food', 'ẩm thực', 'restaurant'], icon: '🍽️' },
+];
+
 function getTopicIcon(name = '', category = '') {
-  const text = (name + ' ' + category).toLowerCase();
-  if (text.includes('business') || text.includes('kinh doanh') || text.includes('negotiation') || text.includes('workplace')) return '💼';
-  if (text.includes('travel') || text.includes('du lịch') || text.includes('hospitality')) return '✈️';
-  if (text.includes('medical') || text.includes('y tế') || text.includes('health') || text.includes('sức khỏe')) return '🩺';
-  if (text.includes('finance') || text.includes('tài chính') || text.includes('investment')) return '📈';
-  if (text.includes('academic') || text.includes('ielts') || text.includes('học thuật') || text.includes('writing')) return '🎓';
-  if (text.includes('communication') || text.includes('giao tiếp') || text.includes('daily') || text.includes('hội thoại')) return '🤝';
-  if (text.includes('tech') || text.includes('công nghệ') || text.includes('it')) return '💻';
-  if (text.includes('food') || text.includes('ẩm thực') || text.includes('restaurant')) return '🍽️';
-  return '📚';
+  const text = `${name} ${category}`.toLowerCase();
+  const matched = TOPIC_ICON_RULES.find((rule) => rule.keywords.some((kw) => text.includes(kw)));
+  return matched ? matched.icon : '📚';
 }
 
 const COLOR_CYCLE = ['#F0B429', '#10B981', '#8B5CF6', '#3B82F6', '#EF4444', '#EC4899'];
@@ -69,7 +74,7 @@ function FlashcardsSkeleton() {
 }
 
 /* ─── Smart Review SM-2 Banner ─── */
-function SmartReviewBanner({ onStart, onOpenLearned }) {
+function SmartReviewBanner({ onStart, onOpenLearned, dailyGoal = 15 }) {
   const [startHov, setStartHov] = useState(false);
   const [listHov, setListHov] = useState(false);
 
@@ -171,7 +176,7 @@ function SmartReviewBanner({ onStart, onOpenLearned }) {
               maxWidth: '480px',
             }}
           >
-            Hệ thống tự động chọn <strong style={{ color: 'var(--fg)' }}>25 thẻ</strong> bạn sắp quên nhất — ôn đúng lúc, nhớ gấp đôi.
+            Hệ thống tự động chọn <strong style={{ color: 'var(--fg)' }}>{dailyGoal} thẻ</strong> bạn sắp quên nhất — ôn đúng lúc, nhớ gấp đôi.
           </p>
         </div>
 
@@ -236,7 +241,7 @@ function SmartReviewBanner({ onStart, onOpenLearned }) {
                 strokeLinejoin="round"
               />
             </svg>
-            Bắt đầu ôn tập · 25 thẻ
+            Bắt đầu ôn tập · {dailyGoal} thẻ
           </button>
         </div>
       </div>
@@ -248,9 +253,9 @@ function SmartReviewBanner({ onStart, onOpenLearned }) {
 function TopicCard({ topic, color, onStart, onOpenLearned }) {
   const [hov, setHov] = useState(false);
 
-  const doneCount = topic.learnedCount || Math.floor((topic.wordCount || 80) * 0.4);
-  const totalCount = topic.wordCount || 80;
-  const pct = Math.min(100, Math.round((doneCount / (totalCount || 1)) * 100));
+  const doneCount = typeof topic.learnedCount === 'number' ? topic.learnedCount : 0;
+  const totalCount = topic.wordCount || 0;
+  const pct = totalCount > 0 ? Math.min(100, Math.round((doneCount / totalCount) * 100)) : 0;
 
   const icon = topic.icon || getTopicIcon(topic.name, topic.category);
 
@@ -452,6 +457,8 @@ function TopicCard({ topic, color, onStart, onOpenLearned }) {
 ══════════════════════════════════════════════════ */
 export default function FlashcardsPage() {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const dailyGoal = user?.setting?.dailyWordGoal || 15;
 
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -665,6 +672,7 @@ export default function FlashcardsPage() {
 
       {/* 2. SM-2 Smart Review Banner */}
       <SmartReviewBanner
+        dailyGoal={dailyGoal}
         onStart={() =>
           startSession(activeSegment === 'personal' ? 'custom' : 'course', null, activeSegment)
         }

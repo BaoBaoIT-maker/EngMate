@@ -1,24 +1,39 @@
-﻿import prisma from '../config/prisma.js';
+import prisma from '../config/prisma.js';
 import * as statService from './stat.service.js';
 import * as aiService from './ai.service.js';
 import * as learningProgressService from './learningProgress.service.js';
 import { enqueueFlashcardReview } from '../queues/flashcard.queue.js';
 
 export const getTopics = async (userId) => {
-  // Lấy toàn bộ chủ đề và map categoryCode sang category để frontend FlashcardPage đọc được
-  const topics = await prisma.vocabularyTopic.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      _count: {
-        select: { vocabularies: true }
+  // Lấy toàn bộ chủ đề kèm tổng số từ, đồng thời đếm số từ user thực sự đã học trực tiếp tại DB
+  const [topics, learnedRows] = await Promise.all([
+    prisma.vocabularyTopic.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: {
+          select: { vocabularies: true }
+        }
       }
-    }
-  });
+    }),
+    prisma.$queryRaw`
+      SELECT sv.topic_id AS topicId, COUNT(DISTINCT f.id) AS learnedCount
+      FROM flashcards f
+      INNER JOIN system_vocabulary sv ON f.system_vocabulary_id = sv.id
+      INNER JOIN study_progresses sp ON sp.flashcard_id = f.id
+      WHERE f.user_id = ${userId} AND sv.topic_id IS NOT NULL
+      GROUP BY sv.topic_id
+    `
+  ]);
 
-  return topics.map(t => ({
+  const learnedMap = new Map(
+    learnedRows.map((r) => [Number(r.topicId), Number(r.learnedCount)])
+  );
+
+  return topics.map((t) => ({
     ...t,
     category: t.categoryCode,
-    wordCount: t._count.vocabularies
+    wordCount: t._count.vocabularies,
+    learnedCount: learnedMap.get(t.id) || 0,
   }));
 };
 
