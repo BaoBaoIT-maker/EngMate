@@ -12,7 +12,7 @@ export default function DashboardLayout() {
   const pulseSplash = useSplashStore((s) => s.pulse);
   const location = useLocation();
 
-  const { stats, loading: loadingStats, fetchStats } = useStatsStore();
+  const { stats, loading: loadingStats, fetchStats, setStats } = useStatsStore();
 
   // Nạp stats lần đầu và tự động làm mới mỗi khi người dùng điều hướng quay lại Dashboard
   useEffect(() => {

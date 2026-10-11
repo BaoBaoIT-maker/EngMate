@@ -5,6 +5,8 @@ export const useStatsStore = create((set, get) => ({
   stats: null,
   loading: true,
 
+  setStats: (stats) => set({ stats }),
+
   fetchStats: async () => {
     try {
       const data = await getOverviewStats();
