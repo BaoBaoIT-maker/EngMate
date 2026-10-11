@@ -32,7 +32,13 @@ YÊU CẦU BẮT BUỘC:
 - Chỉ trả về JSON thuần, không có \`\`\`json hay bất kỳ ký tự nào khác.
   `;
 
-  const { result } = await generateContentWithFailover({ prompt });
+  const { result } = await generateContentWithFailover({
+    prompt,
+    generationConfig: {
+      responseMimeType: 'application/json',
+      temperature: 0.2,
+    },
+  });
   const responseText = result.response.text();
   
   const cleaned = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
