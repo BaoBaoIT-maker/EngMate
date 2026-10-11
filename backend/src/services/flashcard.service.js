@@ -443,11 +443,11 @@ export const reviewFlashcard = async (userId, flashcardId, quality) => {
 export const createCustomFlashcard = async (userId, data) => {
   const { word, definition, phonetic, meaning, examples } = data;
 
-  // Kiểm tra trùng lặp từ vựng (case-insensitive)
+  // Kiểm tra trùng lặp từ vựng
   const existing = await prisma.flashcard.findFirst({
     where: {
       userId,
-      customWord: { equals: word.trim(), mode: 'insensitive' }
+      customWord: word.trim()
     }
   });
 
@@ -502,7 +502,7 @@ export const updateCustomFlashcard = async (userId, flashcardId, data) => {
     const duplicate = await prisma.flashcard.findFirst({
       where: {
         userId,
-        customWord: { equals: word.trim(), mode: 'insensitive' },
+        customWord: word.trim(),
         NOT: { id: flashcardId }
       }
     });
