@@ -286,7 +286,6 @@ export const getLearnedWords = async (userId, query) => {
       where: {
         userId,
         systemVocabularyId: null,
-        progress: { repetitions: { gt: 0 } },
       },
       include: { progress: true },
       orderBy: { createdAt: 'desc' },

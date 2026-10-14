@@ -142,7 +142,16 @@ function EditDrawer({ word, onClose, onSaved, t }) {
 }
 
 // ─── Helper hiển thị cấp độ ghi nhớ và chu kỳ ôn tập thân thiện ──────────────
-function getMemoryBadge(boxLevel = 1) {
+function getMemoryBadge(boxLevel = 1, repetitions = 1) {
+  if (repetitions === 0) {
+    return {
+      text: 'Chưa học',
+      color: '#8B5CF6',
+      bg: 'rgba(139, 92, 246, 0.1)',
+      border: '1px solid rgba(139, 92, 246, 0.25)',
+      icon: '🌱',
+    };
+  }
   if (boxLevel <= 1) {
     return {
       text: 'Cần ôn thường xuyên',
@@ -266,7 +275,7 @@ export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, cour
         {/* Header */}
         <div style={{ padding: '1.25rem 1.5rem', borderBottom: `1px solid ${t.cardBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: t.text, margin: 0 }}>
-            Danh sách từ đã học
+            {type === 'custom' ? 'Từ vựng cá nhân của bạn' : 'Danh sách từ đã học'}
             {words.length > 0 && (
               <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: t.textMuted, fontWeight: 500 }}>
                 ({words.length} từ)
@@ -281,7 +290,9 @@ export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, cour
           {loading ? (
             <div style={{ color: t.textMuted, textAlign: 'center', marginTop: '2rem' }}>Đang tải...</div>
           ) : words.length === 0 ? (
-            <div style={{ color: t.textMuted, textAlign: 'center', marginTop: '2rem' }}>Chưa có từ vựng nào.</div>
+            <div style={{ color: t.textMuted, textAlign: 'center', marginTop: '2rem' }}>
+              {type === 'custom' ? 'Bạn chưa thêm từ vựng cá nhân nào.' : 'Chưa có từ vựng nào.'}
+            </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
               {words.map((w) => (
@@ -363,7 +374,7 @@ export default function LearnedWordsPanel({ isOpen, onClose, type, topicId, cour
                   <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     {/* Cấp độ ghi nhớ */}
                     {(() => {
-                      const b = getMemoryBadge(w.progress?.boxLevel || 1);
+                      const b = getMemoryBadge(w.progress?.boxLevel || 1, w.progress?.repetitions ?? (w.type === 'custom' ? 0 : 1));
                       return (
                         <span
                           title={`Cấp độ ghi nhớ hộp Leitner: ${w.progress?.boxLevel || 1}`}
